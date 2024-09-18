@@ -21,24 +21,24 @@ import {
 export const description = 'A mixed bar chart'
 
 const chartData = [
-  { currency: 'ETH', volume: 500, fill: 'var(--color-eth)' },
-  { currency: 'BTC', volume: 350, fill: 'var(--color-btc)' },
-  { currency: 'USDT', volume: 275, fill: 'var(--color-usdt)' },
-  { currency: 'BNB', volume: 220, fill: 'var(--color-bnb)' },
-  { currency: 'SOL', volume: 180, fill: 'var(--color-sol)' },
+  { currency: 'ETH', volume: 525.51, fill: 'var(--color-eth)' },
+  { currency: 'BTC', volume: 242.62, fill: 'var(--color-btc)' },
+  { currency: 'USDT', volume: 172.32, fill: 'var(--color-usdt)' },
+  { currency: 'BNB', volume: 120.54, fill: 'var(--color-bnb)' },
+  { currency: 'SOL', volume: 40.23, fill: 'var(--color-sol)' },
 ]
 
 const chartConfig = {
   volume: {
-    label: 'Volume',
+    label: 'Volume $',
   },
   eth: {
     label: 'Ethereum (ETH)',
-    color: 'hsl(var(--chart-1))',
+    color: 'hsl(var(--chart-5))',
   },
   btc: {
     label: 'Bitcoin (BTC)',
-    color: 'hsl(var(--chart-2))',
+    color: 'hsl(var(--chart-4))',
   },
   usdt: {
     label: 'Tether (USDT)',
@@ -46,11 +46,11 @@ const chartConfig = {
   },
   bnb: {
     label: 'Binance Coin (BNB)',
-    color: 'hsl(var(--chart-4))',
+    color: 'hsl(var(--chart-2))',
   },
   sol: {
     label: 'Solana (SOL)',
-    color: 'hsl(var(--chart-5))',
+    color: 'hsl(var(--chart-1))',
   },
 } satisfies ChartConfig
 
@@ -58,7 +58,7 @@ export function FreqBarChart() {
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle>Bar Chart - Most Sent & Received Currencies</CardTitle>
+        <CardTitle>Most Sent & Received Currencies</CardTitle>
         <CardDescription>January - June 2024</CardDescription>
       </CardHeader>
       <CardContent>
