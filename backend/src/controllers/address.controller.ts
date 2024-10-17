@@ -1,19 +1,33 @@
 import { Request, Response } from 'express';
-import CustomError from '../errors/CustomError.errors';
-import codes from '../errors/codes.errors';
-import {
-  getUserBalance as getUserBalanceService,
-  getAddressTransactions as getAddressTransactionService,
-  getAddressERC20Transaction as getAddressERC20TransactionService,
-  getAddressERC721TransactionByERC20 as getAddressERC721TransactionByERC20Service,
-  getAddressERC721TransactionByETH as getAddressERC721TransactionByETHService,
-  getAddressERC721Transaction as getAddressERC721TransactionService,
-  getNFTTransaction as getNFTTransactionService,
-  getAddressTokenBalance as getAddressTokenBalanceService,
-  getUserInformation as getUserInformationService
-} from '../services/address.services';
 import { AssetTransfersCategory, SortingOrder } from 'alchemy-sdk';
-import axios from 'axios';
+
+import CustomError from '../errors/CustomError.errors';
+import codes from '../utils/codes';
+import Service from '../services/address.services'
+
+
+async function getAssetInformation(req: Request, res: Response) {
+  const { address } = req.params;
+  const { chainID, tokenAddresses, limit } = req.query;
+  console.log("Chain ID", chainID)
+  console.log("token Addresses", tokenAddresses)
+  console.log("limit", limit)
+  // const cursor = undefined;
+
+  // if (cursor) {
+  //   if (typeof (cursor) === 'string') query.cursor = cursor
+  //   else {
+  //     throw new CustomError(codes.BAD_REQUEST, "Cursor Param Error");
+  //   }
+  // } else {
+  //   query.cursor = cursor
+  // }
+
+  const result = await Service.getAssetInformation(address, chainID as string, undefined, tokenAddresses as string[], Number(limit as string));
+  
+  return res.status(codes.SUCCESS).json(result);
+
+}
 async function getUserInformation(req: Request, res: Response) {
   try {
     const { address } = req.params;
@@ -21,7 +35,7 @@ async function getUserInformation(req: Request, res: Response) {
 
     const timestampNumber = Number(timestamp)
 
-    const serviceResult = await getUserInformationService(address, currency_address as string, timestampNumber)
+    const serviceResult = await Service.getUserInformation(address, currency_address as string, timestampNumber)
     res.send(serviceResult)
 
   } catch (error) {
@@ -40,7 +54,7 @@ async function getUserBalance(req: Request, res: Response) {
       return res.status(400).json({ error: 'Invalid address' });
 
     }
-    const balance = await getUserBalanceService(address);
+    const balance = await Service.getUserBalance(address);
     res.json({ address, balance });
   } catch (error) {
     console.error('Error fetching user balance:', error);
@@ -83,7 +97,7 @@ async function getAddressTransactions(req: Request, res: Response) {
       }
     }
 
-    const transactions = await getAddressTransactionService(
+    const transactions = await Service.getAddressTransactions(
       address,
       fromBlockString,
       toAddressString,
@@ -132,7 +146,7 @@ async function getAddressERC20Transactions(req: Request, res: Response) {
       }
     }
 
-    const transactions = await getAddressERC20TransactionService(
+    const transactions = await Service.getAddressERC20Transaction(
       address,
       fromBlockString,
       toAddressString,
@@ -181,7 +195,7 @@ async function getAddressERC721Transactions(req: Request, res: Response) {
       }
     }
 
-    const transactions = await getAddressERC721TransactionService(
+    const transactions = await Service.getAddressERC721Transaction(
       address,
       fromBlockString,
       toAddressString,
@@ -230,7 +244,7 @@ async function getAddressERC721TransactionsByETH(req: Request, res: Response) {
       }
     }
 
-    const transactions = await getAddressERC721TransactionByETHService(
+    const transactions = await Service.getAddressERC721TransactionByETH(
       address,
       fromBlockString,
       toAddressString,
@@ -279,7 +293,7 @@ async function getAddressERC721TransactionsByERC20(req: Request, res: Response) 
       }
     }
 
-    const transactions = await getAddressERC721TransactionByERC20Service(
+    const transactions = await Service.getAddressERC721TransactionByERC20(
       address,
       fromBlockString,
       toAddressString,
@@ -319,7 +333,7 @@ async function getNFTTransaction(req: Request, res: Response) {
     }
   }
 
-  const transactions = await getNFTTransactionService(
+  const transactions = await Service.getNFTTransaction(
     [nftaddress],
     parsedNftId,
     pageKey as string || undefined,
@@ -347,7 +361,7 @@ async function getAddressTokenBalance(req: Request, res: Response) {
     if (tokenId.length != 42) {
       return res.status(400).json({ error: 'Invalid address' });
     }
-    const result = await getAddressTokenBalanceService(address, [tokenId] as string[])
+    const result = await Service.getAddressTokenBalance(address, [tokenId] as string[])
     res.json(result);
   } catch (err) {
     throw new Error("Cannot Get Address Token Balance Controller")
@@ -364,5 +378,6 @@ export {
   getAddressERC721Transactions,
   getNFTTransaction,
   getAddressTokenBalance,
-  getUserInformation
+  getUserInformation,
+  getAssetInformation
 };

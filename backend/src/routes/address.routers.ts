@@ -8,8 +8,10 @@ import {
   getAddressERC721Transactions,
   getNFTTransaction,
   getAddressTokenBalance,
-  getUserInformation
+  getUserInformation,
+  getAssetInformation
 } from '../controllers/address.controller'
+import { validateAssetInformationParam } from '~/middleware/validation.middleware';
 
 const router = express.Router();
 
@@ -23,5 +25,5 @@ router.get('/erc721-transactions/:address', getAddressERC721Transactions);
 router.get('/NFT-transactions/:nftaddress', getNFTTransaction);
 router.get('/balance/token/:address', getAddressTokenBalance);
 router.get('/information/:address', getUserInformation);
-
+router.get('/asset/:address', validateAssetInformationParam, getAssetInformation)
 export default router;

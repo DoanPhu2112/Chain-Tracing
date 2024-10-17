@@ -1,4 +1,5 @@
 export enum ProviderType {
   DRPC,
-  ALCHEMY
+  ALCHEMY,
+  MORALIS
 }

@@ -2,7 +2,7 @@ import { JsonRpcProvider } from "@ethersproject/providers";
 import { Alchemy, Network, AssetTransfersCategory, SortingOrder } from 'alchemy-sdk';
 import { ethers } from "ethers";
 
-import { ALCHEMY_URLs, RPC_URLs, BIT_QUERY_URLS } from "../utils/API";
+import { ALCHEMY_URLs, RPC_URLs, BIT_QUERY_URLS, MORALIS_URLS } from "../utils/API";
 import { ProviderType } from "../types/providers.type";
 import { randomIntFromInterval } from "~/utils/randomAPI";
 
@@ -35,5 +35,8 @@ export function getRandomBitQueryAPI() {
   const apiKey = random_API(BIT_QUERY_URLS);
   return apiKey;
 }
-
+export function getRandomMoralisAPI() {
+  const apiKey = random_API(MORALIS_URLS);
+  return apiKey;
+}
 

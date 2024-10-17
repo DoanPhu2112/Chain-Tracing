@@ -1,4 +1,4 @@
-import codes from './codes.errors';
+import codes from '../utils/codes';
 
 export const getErrorMessage = (code: number): string => {
   switch (code) {

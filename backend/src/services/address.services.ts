@@ -2,11 +2,13 @@ import { BigNumber, ethers } from 'ethers';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Alchemy, Network, AssetTransfersCategory, SortingOrder, fromHex, TokenMetadataResponse, TokenBalancesResponse } from 'alchemy-sdk';
 
-import { getRandomDrpcAPI, getRandomAlchemyAPI, getRandomBitQueryAPI } from '../configs/provider.configs';
+import { getRandomDrpcAPI, getRandomAlchemyAPI, getRandomBitQueryAPI, getRandomMoralisAPI } from '../configs/provider.configs';
 import { BigNumbertoEther } from '~/utils/convertEther';
 import { ProviderType } from '~/types/providers.type';
 import axios from 'axios';
 import { timestampToDate } from '~/utils/datetime';
+import { DEFAULT_PAGE_SIZE, DEFAULT_INVALID_PERCENTAGE, DEFAULT_TOKEN_ADDRESS, DEFAULT_INVALID_VALUE, DEFAULT_LIMIT } from '~/utils/const';
+import { ASSET_PORTFOLIO, NewAssetPortfolio } from '~/types/type';
 
 interface BalanceHistory {
   value: string; // assuming value can be a string (e.g., for large numbers)
@@ -38,6 +40,80 @@ interface EthereumResponse {
     };
   }
 }
+
+
+
+async function fetchWalletTokenBalancesPrice(
+  chainID: string,
+  address: string,
+  tokenAddresses: string[],
+  cursor?: string
+) {
+  const Moralis = await import('moralis');
+
+  const API_KEY = getRandomMoralisAPI();
+  await Moralis.default.start({
+    apiKey: API_KEY
+  });
+
+  const params = {
+    chain: chainID,
+    address: address,
+    tokenAddresses: tokenAddresses,
+    limit: DEFAULT_LIMIT,
+    excludeNative: false,
+    excludeSpam: false,
+    excludeUnverifiedContracts: false,
+    ...(cursor && { cursor })
+  };
+
+  return await Moralis.default.EvmApi.wallets.getWalletTokenBalancesPrice(params);
+}
+
+async function getAssetInformation(
+  address: string,
+  chainID: string,
+  cursor?: string,
+  tokenAddresses: string[] = [],
+  limit: number = DEFAULT_PAGE_SIZE,
+  offset: number = 0,
+) {
+  let resultData;
+  let result;
+  // TODO: CHECK IF DB exist address data
+
+  // ELSE:
+  let response = await fetchWalletTokenBalancesPrice(chainID, address, tokenAddresses, cursor);
+  
+  resultData = response.result.map((asset): ASSET_PORTFOLIO => {
+    return NewAssetPortfolio(
+      asset.tokenAddress?.checksum,
+      asset.symbol,
+      asset.name,
+      asset.logo,
+      asset.balanceFormatted,
+      asset.possibleSpam,
+      asset.verifiedContract,
+      asset.usdPrice,
+      asset.usdValue24hrUsdChange,
+      asset.nativeToken,
+      asset.portfolioPercentage,
+      asset.percentageRelativeToTotalSupply,
+    )
+  })
+
+  //TODO: STORE TO DB
+
+   result = {
+    metadata: {
+      "page": response.response.page,
+      "page_size": limit,
+    },
+    result: resultData.slice(0, limit)
+  }
+  return result;
+}
+
 
 async function getUserInformation(address: string, currency_address: string, timestamp: number) {
   try {
@@ -289,7 +365,7 @@ async function getAddressERC721TransactionByERC20(
   return transactionHistory;
 }
 
-export {
+export default {
   getUserBalance,
   getAddressTransactions,
   getAddressERC20Transaction,
@@ -297,5 +373,7 @@ export {
   getAddressERC721TransactionByERC20,
   getAddressERC721Transaction,
   getNFTTransaction,
-  getAddressTokenBalance, getUserInformation
+  getAddressTokenBalance,
+  getUserInformation,
+  getAssetInformation
 };

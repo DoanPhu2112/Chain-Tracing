@@ -1,16 +1,16 @@
 import { Request, Response, NextFunction, ErrorRequestHandler } from 'express';
-import  snakecaseKeys from 'snakecase-keys';
+import snakecaseKeys from 'snakecase-keys';
 
-import codes from '../errors/codes.errors';
+import codes from '../utils/codes';
 
 
-import {getErrorMessage} from '../errors/messages.errors';
+import { getErrorMessage } from '../errors/messages.errors';
 
 interface ErrorHandler {
   code: number;
   status: number;
   message: string;
-  details: string; 
+  details: string;
 }
 // eslint-disable-next-line no-unused-vars
 export const errorHandler = (err: ErrorHandler, req: Request, res: Response, next: NextFunction) => {

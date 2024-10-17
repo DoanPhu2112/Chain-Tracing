@@ -49,6 +49,7 @@
     "ethers": "^5.7.2",
     "express": "^4.19.2",
     "mongoose": "^8.5.3",
+    "moralis": "^2.27.2",
     "node-cron": "^3.0.3",
     "node-schedule": "^2.1.1",
     "pure-rand": "^6.1.0",
