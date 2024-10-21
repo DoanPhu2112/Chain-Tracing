@@ -1,8 +1,8 @@
 import React from 'react'
-import AddressContent from '@/components/address/AddressContent'
+import AddressInfo from '@/components/address/AddressInfo'
 
 const page = () => {
-  return <AddressContent />
+  return <AddressInfo />
 }
 
 export default page
