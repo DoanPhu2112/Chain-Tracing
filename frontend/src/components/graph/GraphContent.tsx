@@ -8,6 +8,7 @@ import GraphTxDataTableCard from './GraphTxDataTableCard'
 import { EdgeData, NodeData } from '@/types/graph.interface'
 import { getAddressBalance, getAddressTransactions } from '@/services/address'
 import { Transaction } from '@/types/wallet.interface'
+import InputCard from '../card/InputCard'
 
 import { useToast } from '@/hooks/use-toast'
 
@@ -92,6 +93,7 @@ const GraphContent = () => {
             <AddressInfoCard nodeData={nodeInfo} balance={balance} loading={loading} />
           </>
         )}
+        <InputCard />
       </div>
     </main>
   )

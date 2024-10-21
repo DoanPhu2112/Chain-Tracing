@@ -1,3 +1,4 @@
+'use client'
 import React from 'react'
 import Image from 'next/image'
 import { EdgeData } from '@/types/graph.interface'
@@ -36,7 +37,7 @@ const TxInfoCard = ({ edgeData }: { edgeData: EdgeData }) => {
   const dispatch = useDispatch<AppDispatch>()
   const transactions = useSelector((state: RootState) => state.transactions.transactions)
 
-  const valueInEth = ethers.utils.formatEther(BigNumber.from(edgeData.details.value)) // Convert value from wei to ETH
+  // const valueInEth = ethers.utils.formatEther(BigNumber.from(edgeData.details.value)) // Convert value from wei to ETH
   const gasPriceInGwei = ethers.utils.formatUnits(
     BigNumber.from(edgeData.details.gasPrice),
     'gwei'
@@ -137,7 +138,7 @@ const TxInfoCard = ({ edgeData }: { edgeData: EdgeData }) => {
             <li className="flex items-center">
               <span className="text-muted-foreground w-1/4 ">Value:</span>
               <span className="flex gap-1">
-                <span>{valueInEth}</span>
+                {/* <span>{valueInEth}</span> */}
                 <span>ETH</span>
               </span>
             </li>

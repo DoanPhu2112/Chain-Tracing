@@ -4,7 +4,7 @@ import Link from 'next/link'
 
 import InputCard from '../card/InputCard'
 import InfoCard from '../card/InfoCard'
-import TxInfoCard from '../card/TxInfoCard'
+// import TxInfoCard from '../card/TxInfoCard'
 import TableCard from '../card/TableCard'
 
 const InvestigateContent = () => {
@@ -14,9 +14,7 @@ const InvestigateContent = () => {
         <InputCard />
         <TableCard />
       </div>
-      <div>
-        <TxInfoCard />
-      </div>
+      <div>{/* <TxInfoCard /> */}</div>
     </main>
   )
 }

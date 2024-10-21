@@ -10,7 +10,9 @@ import {
   Settings,
   ChartNetwork,
   ScrollText,
+  UserRound,
 } from 'lucide-react'
+// import './Sidebar.css'
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
@@ -18,7 +20,7 @@ const selected = ''
 
 const Sidebar: React.FC = () => {
   const paths = usePathname()
-  const pathNames = paths.split('/').filter((path) => path)
+  const pathNames = (paths ?? '').split('/').filter((path) => path)
   const isActive: any = (href: string) => '/' + pathNames[0] === href
   return (
     <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
@@ -109,6 +111,22 @@ const Sidebar: React.FC = () => {
             </Link>
           </TooltipTrigger>
           <TooltipContent side="right">Chart</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Link
+              href="/address"
+              className={`group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full text-lg font-semibold md:h-8 md:w-8 md:text-base ${
+                isActive('/address')
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground'
+              }`}
+            >
+              <UserRound className="h-5 w-5" />
+              <span className="sr-only">Address</span>
+            </Link>
+          </TooltipTrigger>
+          <TooltipContent side="right">Address</TooltipContent>
         </Tooltip>
       </nav>
 
