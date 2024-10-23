@@ -48,11 +48,11 @@ export function validateAssetInformationParam(req: Request, res: Response, next:
 
   req.params.address = validateAddress(address);
 
-  req.query.tokenAddresses = validateTokenAddresses(tokenAddresses);
-
-  req.query.chainID = validateChainID(chainID);
-
-  req.query.limit = validateLimit(limit)
-
+  req.query = {
+    tokenAddresses: validateTokenAddresses(tokenAddresses),
+    chainID: validateChainID(chainID),
+    limit: validateLimit(limit)
+  }
+  
   next()
 }

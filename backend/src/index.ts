@@ -2,11 +2,11 @@ import express, { Request, Response } from 'express';
 import addressRouter from './routes/address.routers';
 import { errorHandler } from './middleware/errorHandler.middleware';
 import 'dotenv/config';
+import cors from 'cors'
+
 const app = express();
 const port: number = 3002;
 
-// const cors = require('cors');
-import cors from 'cors'
 app.use(cors());
 
 app.get('/', (req: Request, res: Response) => {

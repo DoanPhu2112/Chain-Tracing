@@ -1,30 +1,56 @@
 import { Request, Response } from 'express';
 import { AssetTransfersCategory, SortingOrder } from 'alchemy-sdk';
 
-import CustomError from '../errors/CustomError.errors';
 import codes from '../utils/codes';
 import Service from '../services/address.services'
+import { is_contract } from '~/utils/account_classify';
 
-
-async function getAssetInformation(req: Request, res: Response) {
+async function checkExistCode(req: Request, res: Response) {
   const { address } = req.params;
-  const { chainID, tokenAddresses, limit } = req.query;
-  console.log("Chain ID", chainID)
-  console.log("token Addresses", tokenAddresses)
-  console.log("limit", limit)
-  // const cursor = undefined;
+  console.log("Address", address)
+  const result = await is_contract(address);
 
-  // if (cursor) {
-  //   if (typeof (cursor) === 'string') query.cursor = cursor
-  //   else {
-  //     throw new CustomError(codes.BAD_REQUEST, "Cursor Param Error");
-  //   }
-  // } else {
-  //   query.cursor = cursor
-  // }
+  console.log("result", result)
+  return res.status(codes.SUCCESS).json(result);
+}
+async function getWalletTransactionHistory(req: Request, res: Response) {
+  const { address } = req.params;
+  const { chain_id,
+    start_timestamp,
+    end_timestamp,
+    include_nft_metadata,
+    include_erc20_transactions_triggered,
+    include_nft_transactions_triggered,
+    include_native_transactions_triggered,
+    page,
+    page_size } = req.query;  
+  console.log("include_erc20_transactions_triggered", include_erc20_transactions_triggered)
+  const result = await Service.getWalletTransactionHistory(
+    address,
+    chain_id!.toString(),
+    start_timestamp?.toString(),
+    end_timestamp?.toString(),
+    include_nft_metadata === undefined ? true : false,
+    include_erc20_transactions_triggered === undefined ? true : false,
+    include_nft_transactions_triggered === undefined ? true : false,
+    include_native_transactions_triggered === undefined ? true : false,
+    Number(page),
+    Number(page_size)
+  );
+  return res.status(codes.SUCCESS).json(result);
+}
+async function getUserAssetInformation(req: Request, res: Response) {
+  const { address } = req.params;
+  const { chainID, tokenAddresses, page, pageSize } = req.query;
 
-  const result = await Service.getAssetInformation(address, chainID as string, undefined, tokenAddresses as string[], Number(limit as string));
-  
+  const result = await Service.getUserAssetInformation(
+    address,
+    chainID as string,
+    tokenAddresses as string[],
+    Number(page),
+    Number(pageSize)
+  );
+
   return res.status(codes.SUCCESS).json(result);
 
 }
@@ -379,5 +405,7 @@ export {
   getNFTTransaction,
   getAddressTokenBalance,
   getUserInformation,
-  getAssetInformation
+  getUserAssetInformation as getAssetInformation,
+  checkExistCode,
+  getWalletTransactionHistory
 };

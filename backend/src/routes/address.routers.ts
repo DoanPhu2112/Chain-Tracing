@@ -9,7 +9,9 @@ import {
   getNFTTransaction,
   getAddressTokenBalance,
   getUserInformation,
-  getAssetInformation
+  getAssetInformation,
+  checkExistCode,
+  getWalletTransactionHistory
 } from '../controllers/address.controller'
 import { validateAssetInformationParam } from '~/middleware/validation.middleware';
 
@@ -26,4 +28,6 @@ router.get('/NFT-transactions/:nftaddress', getNFTTransaction);
 router.get('/balance/token/:address', getAddressTokenBalance);
 router.get('/information/:address', getUserInformation);
 router.get('/asset/:address', validateAssetInformationParam, getAssetInformation)
+router.get('/check-code-exist/:address', checkExistCode)
+router.get('/v2/transactions/:address', getWalletTransactionHistory)
 export default router;
