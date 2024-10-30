@@ -1,4 +1,4 @@
-import { MoralisTransactionReturn } from './api/MoralisResponse.type';
+import { MoralisTransactionReturn } from './api/moralisResponse';
 
 export type WalletTransactionHistory = {
   size: number;

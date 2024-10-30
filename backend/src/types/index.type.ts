@@ -1,7 +1,7 @@
-export * from './FrontendResponse.type';
+export * from './frontendResponse';
 export * from './WalletTransaction.type';
-export * from './WalletTokenBalancePrice.type';
-export * from './AssetPortfolio.type';
+export * from './balance';
+export * from '../modules/account/balance/account.balance.type';
 
-export * from './api/MoralisResponse.type';
-export * from './api/EtherscanResponse.type';
+export * from './api/moralisResponse';
+export * from './api/etherscanResponse';

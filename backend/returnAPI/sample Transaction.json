@@ -975,8 +975,8 @@
                   },
                   "from_entity": {
                       "address": "0x0000000000000000000000000000000000000000",
-                      "address_entity": "Burn Addresses",
-                      "address_entity_logo": "https://entities-logos.s3.us-east-1.amazonaws.com/burn_addresses.png",
+                      "address_entity": null,
+                      "address_entity_logo": null,
                       "address_entity_label": "Null Address: 0x000...000"
                   },
                   "to_entity": {
@@ -1068,8 +1068,8 @@
                   },
                   "from_entity": {
                       "address": "0x0000000000000000000000000000000000000000",
-                      "address_entity": "Burn Addresses",
-                      "address_entity_logo": "https://entities-logos.s3.us-east-1.amazonaws.com/burn_addresses.png",
+                      "address_entity": null,
+                      "address_entity_logo": null,
                       "address_entity_label": "Null Address: 0x000...000"
                   },
                   "to_entity": {
@@ -1161,8 +1161,8 @@
                   },
                   "from_entity": {
                       "address": "0x0000000000000000000000000000000000000000",
-                      "address_entity": "Burn Addresses",
-                      "address_entity_logo": "https://entities-logos.s3.us-east-1.amazonaws.com/burn_addresses.png",
+                      "address_entity": null,
+                      "address_entity_logo": null,
                       "address_entity_label": "Null Address: 0x000...000"
                   },
                   "to_entity": {
@@ -1254,8 +1254,8 @@
                   },
                   "from_entity": {
                       "address": "0x0000000000000000000000000000000000000000",
-                      "address_entity": "Burn Addresses",
-                      "address_entity_logo": "https://entities-logos.s3.us-east-1.amazonaws.com/burn_addresses.png",
+                      "address_entity": null,
+                      "address_entity_logo": null,
                       "address_entity_label": "Null Address: 0x000...000"
                   },
                   "to_entity": {
@@ -1347,8 +1347,8 @@
                   },
                   "from_entity": {
                       "address": "0x0000000000000000000000000000000000000000",
-                      "address_entity": "Burn Addresses",
-                      "address_entity_logo": "https://entities-logos.s3.us-east-1.amazonaws.com/burn_addresses.png",
+                      "address_entity": null,
+                      "address_entity_logo": null,
                       "address_entity_label": "Null Address: 0x000...000"
                   },
                   "to_entity": {
@@ -1487,8 +1487,8 @@
                   },
                   "from_entity": {
                       "address": "0x0000000000000000000000000000000000000000",
-                      "address_entity": "Burn Addresses",
-                      "address_entity_logo": "https://entities-logos.s3.us-east-1.amazonaws.com/burn_addresses.png",
+                      "address_entity": null,
+                      "address_entity_logo": null,
                       "address_entity_label": "Null Address: 0x000...000"
                   },
                   "to_entity": {
@@ -1580,8 +1580,8 @@
                   },
                   "from_entity": {
                       "address": "0x0000000000000000000000000000000000000000",
-                      "address_entity": "Burn Addresses",
-                      "address_entity_logo": "https://entities-logos.s3.us-east-1.amazonaws.com/burn_addresses.png",
+                      "address_entity": null,
+                      "address_entity_logo": null,
                       "address_entity_label": "Null Address: 0x000...000"
                   },
                   "to_entity": {
@@ -1673,8 +1673,8 @@
                   },
                   "from_entity": {
                       "address": "0x0000000000000000000000000000000000000000",
-                      "address_entity": "Burn Addresses",
-                      "address_entity_logo": "https://entities-logos.s3.us-east-1.amazonaws.com/burn_addresses.png",
+                      "address_entity": null,
+                      "address_entity_logo": null,
                       "address_entity_label": "Null Address: 0x000...000"
                   },
                   "to_entity": {
@@ -1813,8 +1813,8 @@
                   },
                   "from_entity": {
                       "address": "0x0000000000000000000000000000000000000000",
-                      "address_entity": "Burn Addresses",
-                      "address_entity_logo": "https://entities-logos.s3.us-east-1.amazonaws.com/burn_addresses.png",
+                      "address_entity": null,
+                      "address_entity_logo": null,
                       "address_entity_label": "Null Address: 0x000...000"
                   },
                   "to_entity": {
@@ -1859,8 +1859,8 @@
                   },
                   "from_entity": {
                       "address": "0x0000000000000000000000000000000000000000",
-                      "address_entity": "Burn Addresses",
-                      "address_entity_logo": "https://entities-logos.s3.us-east-1.amazonaws.com/burn_addresses.png",
+                      "address_entity": null,
+                      "address_entity_logo": null,
                       "address_entity_label": "Null Address: 0x000...000"
                   },
                   "to_entity": {
@@ -1999,8 +1999,8 @@
                   },
                   "from_entity": {
                       "address": "0x0000000000000000000000000000000000000000",
-                      "address_entity": "Burn Addresses",
-                      "address_entity_logo": "https://entities-logos.s3.us-east-1.amazonaws.com/burn_addresses.png",
+                      "address_entity": null,
+                      "address_entity_logo": null,
                       "address_entity_label": "Null Address: 0x000...000"
                   },
                   "to_entity": {
@@ -2139,8 +2139,8 @@
                   },
                   "from_entity": {
                       "address": "0x0000000000000000000000000000000000000000",
-                      "address_entity": "Burn Addresses",
-                      "address_entity_logo": "https://entities-logos.s3.us-east-1.amazonaws.com/burn_addresses.png",
+                      "address_entity": null,
+                      "address_entity_logo": null,
                       "address_entity_label": "Null Address: 0x000...000"
                   },
                   "to_entity": {
@@ -2279,8 +2279,8 @@
                   },
                   "from_entity": {
                       "address": "0x0000000000000000000000000000000000000000",
-                      "address_entity": "Burn Addresses",
-                      "address_entity_logo": "https://entities-logos.s3.us-east-1.amazonaws.com/burn_addresses.png",
+                      "address_entity": null,
+                      "address_entity_logo": null,
                       "address_entity_label": "Null Address: 0x000...000"
                   },
                   "to_entity": {
@@ -2372,8 +2372,8 @@
                   },
                   "from_entity": {
                       "address": "0x0000000000000000000000000000000000000000",
-                      "address_entity": "Burn Addresses",
-                      "address_entity_logo": "https://entities-logos.s3.us-east-1.amazonaws.com/burn_addresses.png",
+                      "address_entity": null,
+                      "address_entity_logo": null,
                       "address_entity_label": "Null Address: 0x000...000"
                   },
                   "to_entity": {
@@ -2465,8 +2465,8 @@
                   },
                   "from_entity": {
                       "address": "0x0000000000000000000000000000000000000000",
-                      "address_entity": "Burn Addresses",
-                      "address_entity_logo": "https://entities-logos.s3.us-east-1.amazonaws.com/burn_addresses.png",
+                      "address_entity": null,
+                      "address_entity_logo": null,
                       "address_entity_label": "Null Address: 0x000...000"
                   },
                   "to_entity": {
@@ -2558,8 +2558,8 @@
                   },
                   "from_entity": {
                       "address": "0x0000000000000000000000000000000000000000",
-                      "address_entity": "Burn Addresses",
-                      "address_entity_logo": "https://entities-logos.s3.us-east-1.amazonaws.com/burn_addresses.png",
+                      "address_entity": null,
+                      "address_entity_logo": null,
                       "address_entity_label": "Null Address: 0x000...000"
                   },
                   "to_entity": {
@@ -2651,8 +2651,8 @@
                   },
                   "from_entity": {
                       "address": "0x0000000000000000000000000000000000000000",
-                      "address_entity": "Burn Addresses",
-                      "address_entity_logo": "https://entities-logos.s3.us-east-1.amazonaws.com/burn_addresses.png",
+                      "address_entity": null,
+                      "address_entity_logo": null,
                       "address_entity_label": "Null Address: 0x000...000"
                   },
                   "to_entity": {
@@ -2791,8 +2791,8 @@
                   },
                   "from_entity": {
                       "address": "0x0000000000000000000000000000000000000000",
-                      "address_entity": "Burn Addresses",
-                      "address_entity_logo": "https://entities-logos.s3.us-east-1.amazonaws.com/burn_addresses.png",
+                      "address_entity": null,
+                      "address_entity_logo": null,
                       "address_entity_label": "Null Address: 0x000...000"
                   },
                   "to_entity": {
@@ -2884,8 +2884,8 @@
                   },
                   "from_entity": {
                       "address": "0x0000000000000000000000000000000000000000",
-                      "address_entity": "Burn Addresses",
-                      "address_entity_logo": "https://entities-logos.s3.us-east-1.amazonaws.com/burn_addresses.png",
+                      "address_entity": null,
+                      "address_entity_logo": null,
                       "address_entity_label": "Null Address: 0x000...000"
                   },
                   "to_entity": {
@@ -3134,8 +3134,8 @@
                   },
                   "from_entity": {
                       "address": "0x0000000000000000000000000000000000000000",
-                      "address_entity": "Burn Addresses",
-                      "address_entity_logo": "https://entities-logos.s3.us-east-1.amazonaws.com/burn_addresses.png",
+                      "address_entity": null,
+                      "address_entity_logo": null,
                       "address_entity_label": "Null Address: 0x000...000"
                   },
                   "to_entity": {
@@ -3548,8 +3548,8 @@
                   },
                   "from_entity": {
                       "address": "0x0000000000000000000000000000000000000000",
-                      "address_entity": "Burn Addresses",
-                      "address_entity_logo": "https://entities-logos.s3.us-east-1.amazonaws.com/burn_addresses.png",
+                      "address_entity": null,
+                      "address_entity_logo": null,
                       "address_entity_label": "Null Address: 0x000...000"
                   },
                   "to_entity": {

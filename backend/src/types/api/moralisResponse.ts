@@ -15,6 +15,8 @@ export type MoralisTransactionReturn = {
   erc20_transfers: MoralisErc20TransferReturn[];
 
   native_transfers: MoralisNativeTransferReturn[];
+
+  summary: string;
 };
 export type MoralisNativeTransferReturn = {
   from_entity: MoralisEntity,
@@ -30,7 +32,7 @@ export type MoralisErc20TransferReturn = {
   from_entity: MoralisEntity;
   to_entity: MoralisEntity;
   direction: 'send' | 'receive';
-  block_timestamp?: string;
+  block_timestamp: string;
   value_formatted: string;
 };
 
@@ -44,7 +46,7 @@ export type MoralisNFTTransferReturn = {
 
   // Either ERC1155 or ERC721
   contract_type: string;
-  block_timestamp?: string;
+  block_timestamp: string;
 
   //The value that was sent in the transaction (ETH/BNB/etc..)
   value: string;
@@ -83,12 +85,42 @@ export type MoralisNFTToken = {
   image?: string | null;
 
   // value at the buying time or the current time?
-  value: string;
+  value?: string;
   possible_spam?: boolean;
   verified_collection?: boolean;
   collection_logo?: string | null;
   collection_banner_image?: string | null;
+  amount?: string
 };
+export function NewMoralisNFTToken(
+  address: string,
+  id: string,
+  value: string,
+  name?: string,
+  description?: string | null,
+  animation_url?: string | null,
+  image?: string | null,
+  possible_spam?: boolean,
+  verified_collection?: boolean,
+  collection_logo?: string | null,
+  collection_banner_image?: string | null,
+  amount?: string
+): MoralisNFTToken {
+  return {
+    address,
+    id,
+    name,
+    description,
+    animation_url,
+    image,
+    value,
+    possible_spam,
+    verified_collection,
+    collection_logo,
+    collection_banner_image,
+    amount
+  };
+}
 
 export type MoralisEvmWalletHistoryErc20Transfer = {
   tokenName: string;

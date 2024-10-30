@@ -3,7 +3,7 @@ import { Alchemy, Network, AssetTransfersCategory, SortingOrder } from 'alchemy-
 import { ethers } from "ethers";
 
 import { ALCHEMY_URLs, RPC_URLs, BIT_QUERY_URLS, MORALIS_URLS, ETHEREUM_URLS } from "../utils/API";
-import { ProviderType } from "../types/Providers.type";
+import { ProviderType } from "../types/providers";
 import { randomIntFromInterval } from "~/utils/randomAPI";
 
 function random_API(URL: string[]): string {
