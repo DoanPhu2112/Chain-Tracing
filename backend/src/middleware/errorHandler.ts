@@ -14,9 +14,13 @@ interface ErrorHandler {
 }
 // eslint-disable-next-line no-unused-vars
 export const errorHandler = (err: ErrorHandler, req: Request, res: Response, next: NextFunction) => {
+  console.log("Get into Error Handler")
   let statusCode = err.code;
   let { message } = err;
   let details;
+  console.log("statusCode", statusCode)
+  console.log("message", message)
+
   const code = statusCode || codes.INTERNAL_SERVER_ERROR;
   switch (code) {
     case codes.BAD_REQUEST:
@@ -38,6 +42,10 @@ export const errorHandler = (err: ErrorHandler, req: Request, res: Response, nex
     case codes.INTERNAL_SERVER_ERROR:
       statusCode = codes.INTERNAL_SERVER_ERROR;
       message = message || 'Something went wrong';
+      break;
+    case codes.EXTERNAL_API_ERROR:
+      statusCode = codes.EXTERNAL_API_ERROR;
+      message = message || 'External API error';
       break;
     default:
       message = message || getErrorMessage(code);

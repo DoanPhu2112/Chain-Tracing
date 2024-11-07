@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
-
+import camelcaseKeys from 'camelcase-keys';
+// import camelCase from 'camelcase'
 const camelCaseReq = async (req: Request, res: Response, next: NextFunction) => {
-  const camelcaseKeys = (await import('camelcase-keys')).default;
-
-  req.query = camelcaseKeys(req.query, { deep: true });
-  req.body = camelcaseKeys(req.body, { deep: true });
+  req.params = camelcaseKeys(req.params);
+  req.query = camelcaseKeys(req.query);
+  req.body = camelcaseKeys(req.body);
   next();
 };
 

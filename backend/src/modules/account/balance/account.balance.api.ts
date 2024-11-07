@@ -2,22 +2,31 @@ import Moralis from "moralis";
 import { wait } from "src/utils/wait";
 import { DEFAULT_LIMIT, DEFAULT_TOKEN_ADDRESS, DEFAULT_CONTRACT_VERIFICATION, DEFAULT_INVALID_VALUE, DEFAULT_INVALID_PERCENTAGE, DEFAULT_MAX_RESULT_COUNT } from '~/constants/defaultvalue';
 
-import { ERC20Balance, ERC20BalanceReturn, NewERC20Balance, NewNFTBalance, NFTBalance, NFTBalanceReturn } from "./account.balance.type";
+import { ERC20Balance, ERC20BalanceReturn as ERC20APIBalanceReturn, NewERC20Balance } from "./account.balance.type.erc20";
 
-import timestampToBlock from "src/utils/timestampToBlock";
+import { timestampToBlock } from "~/utils/time";
+import { getRandomMoralisAPI } from "~/configs/provider.configs";
+import { NewNFTBalance, NFTBalanceReturn as NFTAPIBalanceReturn } from "./account.balance.type.nft";
+import CustomError from "~/errors/CustomError";
+import codes from "~/errors/codes";
 
 const API = {
-  fetchERC20AndNativeBalance,
+  fetchERC20Balance,
   fetchNFTTokens,
   fetchNativeBalance
 }
 
+const moralisAPI = getRandomMoralisAPI();
+Moralis.start({
+  apiKey: moralisAPI,
+});
+
 async function fetchNativeBalance(
   chainID: string,
   address: string,
-  toTimestamp: string
+  endTimestamp: string
 ) {
-  let toBlock = await timestampToBlock(toTimestamp, chainID)
+  let toBlock = await timestampToBlock(endTimestamp, chainID)
 
   const balance = await Moralis.EvmApi.balance.getNativeBalance({
     "chain": chainID,
@@ -28,19 +37,23 @@ async function fetchNativeBalance(
   return balanceETH;
 }
 
-async function fetchERC20AndNativeBalance(
+async function fetchERC20Balance(
   chainID: string,
   address: string,
   tokenAddresses: string[],
-  toTimestamp: string
-): Promise<ERC20BalanceReturn> {
-
+  endTimestamp: string
+): Promise<ERC20APIBalanceReturn> {
   let cursor: string | null = "";
-  let result: ERC20BalanceReturn = {
+
+  let toBlock = await timestampToBlock(endTimestamp, chainID);
+
+  let result: ERC20APIBalanceReturn = {
     size: 0,
+    toBlock: toBlock,
+    toTimestamp: endTimestamp,
     tokens: [],
   };
-  let toBlock = await timestampToBlock(toTimestamp, chainID)
+
   while (cursor != null) {
     await wait(1000);
     if (result.size > DEFAULT_MAX_RESULT_COUNT) {
@@ -54,16 +67,21 @@ async function fetchERC20AndNativeBalance(
       excludeNative: false,
       excludeSpam: false,
       excludeUnverifiedContracts: false,
-      toBlock: toBlock,
+      toBlock: toBlock !== undefined ? toBlock : undefined,
       ...(cursor && { cursor })
     };
+    let pageResult;
+    try {
+      pageResult = await Moralis.EvmApi.wallets.getWalletTokenBalancesPrice(params);
+    } catch (e: any) {
+      throw new CustomError(codes.EXTERNAL_API_ERROR, `External API error ${e}`)
+    }
 
-    const pageResult = await Moralis.EvmApi.wallets.getWalletTokenBalancesPrice(params);
     cursor = pageResult.hasNext() ? pageResult.response.cursor! : null;
 
-    const page_size: number = pageResult.response.pageSize || 0;
-    result.size += page_size;
-
+    // const page_size: number = pageResult.response.pageSize || 0;
+    // result.size += page_size;
+    // console.log("size", result.size)
     const tokensReturn = pageResult.response.result;
 
     const token = tokensReturn.map((asset): ERC20Balance => {
@@ -71,20 +89,26 @@ async function fetchERC20AndNativeBalance(
         asset.tokenAddress?.checksum || DEFAULT_TOKEN_ADDRESS,
         asset.symbol,
         asset.name,
-        asset.logo,
+        asset.logo || "",
         asset.balanceFormatted,
         asset.possibleSpam,
         asset.verifiedContract || DEFAULT_CONTRACT_VERIFICATION,
-        asset.usdPrice,
+        asset.usdPrice, // Gia tri $ cua token
+        asset.usdPrice24hrUsdChange, // Gia tri chenh lech cua dong tien so voi hom qua (24h truoc)
+        asset.usdPrice24hrPercentChange, // Phan tram thay doi cua dong tien so voi hom qua (24h truoc)
+        String(asset.usdValue) || DEFAULT_INVALID_VALUE, // Gia tri $ cua token * user balance
         asset.usdValue24hrUsdChange || DEFAULT_INVALID_VALUE,
         asset.nativeToken,
         asset.portfolioPercentage,
         asset.percentageRelativeToTotalSupply || DEFAULT_INVALID_PERCENTAGE,
       )
     })
+    result.size = tokensReturn.length
 
-    result.tokens = result.tokens.concat(token);
+    result.tokens = result.tokens!.concat(token);
   }
+  result.toBlock = toBlock;
+  result.toTimestamp = endTimestamp;
   return result;
 }
 
@@ -92,15 +116,18 @@ async function fetchNFTTokens(
   chainID: string,
   address: string,
   tokenAddresses: string[],
-  toTimestamp: string
-): Promise<NFTBalanceReturn> {
+  endTimestamp: string
+): Promise<NFTAPIBalanceReturn> {
 
   let cursor: string | null = "";
-  let result: NFTBalanceReturn = {
+  let toBlock = await timestampToBlock(endTimestamp, chainID)
+
+  let result: NFTAPIBalanceReturn = {
     size: 0,
     tokens: [],
+    toBlock: toBlock,
+    toTimestamp: endTimestamp
   };
-  let toBlock = await timestampToBlock(toTimestamp, chainID)
 
   while (cursor != null) {
     await wait(1000);
@@ -114,42 +141,46 @@ async function fetchNFTTokens(
       limit: DEFAULT_LIMIT,
       excludeSpam: false,
       normalizeMetadata: true,
-      media_items: true,
-      toBlock: toBlock,
+      mediaItems: true,
+      // toBlock: toBlock,
       ...(cursor && { cursor })
     };
+    let pageResult;
+    try {
+      pageResult = await Moralis.EvmApi.nft.getWalletNFTs(params);
+    } catch (e: any) {
+      throw new CustomError(codes.EXTERNAL_API_ERROR, `External API error ${e}`)
+    }
 
-    const pageResult = await Moralis.EvmApi.nft.getWalletNFTs(params);
     cursor = pageResult.hasNext() ? pageResult.pagination.cursor! : null;
 
-    const page_size: number = pageResult.pagination.pageSize || 0;
-    result.size += page_size;
+    // const page_size: number = pageResult.pagination.pageSize || 0;
+    // result.size += page_size;
 
     const tokensReturn = pageResult.raw.result;
 
-    let count = 1;
     const token = tokensReturn.map((asset) => {
-      if (count === 1) {
-        console.log(asset)
-        count += 1;
-      }
       return NewNFTBalance(
         asset.token_address || DEFAULT_TOKEN_ADDRESS,
         asset.token_id,
+        null,
+        asset.amount || '-1',
         asset.name,
         asset.normalized_metadata?.description,
         asset.normalized_metadata?.animation_url,
         asset.token_uri,
-        null,
         asset.possible_spam,
         asset.verified_collection,
         null,
         null,
-        asset.amount,
       )
     })
+    result.size = tokensReturn.length
+
     result.tokens = result.tokens.concat(token);
   }
+  result.toBlock = toBlock;
+  result.toTimestamp = endTimestamp;
   return result;
 }
 

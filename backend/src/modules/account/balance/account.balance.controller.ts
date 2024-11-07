@@ -1,75 +1,109 @@
 import { Request, Response } from 'express';
 import codes from 'src/errors/codes';
-import { FrontEndResponsesType } from 'src/types/frontendResponse';
 
 import Service from './account.balance.service';
-import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '~/constants/defaultvalue';
-import timestampToBlock from 'src/utils/timestampToBlock';
-import { parseEther } from 'ethers/lib/utils';
+import { DEFAULT_LATEST_TIMESTAMP_STRING, DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '~/constants/defaultvalue';
+import { BalanceReturnType } from './account.balance.type.return';
+import { timestampToDateTime, toVNDateTime } from '~/utils/time';
 
-console.log("Controller")
 const Controller = {
-  GetERC20AndNativeBalance,
+  GetERC20Balance,
   GetNFTBalance,
+  GetERC20BalanceByRange,
 }
+async function GetERC20BalanceByRange(req: Request, res: Response) {
 
-let result: FrontEndResponsesType;
-
-async function GetERC20AndNativeBalance(req: Request, res: Response) {
-  console.log("GetERC20AndNativeBalance")
+}
+async function GetERC20Balance(req: Request, res: Response) {
   const { address } = req.params;
-  const { chainID, tokenAddresses, page, pageSize, toTimestamp } = req.query;
+  const { chainID, tokenAddresses, page, pageSize, endTimestamp } = req.query;
 
-  const pageNumber = typeof page === 'string' ? parseInt(page, 10) : DEFAULT_PAGE;
-  const pageSizeNumber = typeof pageSize === 'string' ? parseInt(pageSize, 10) : DEFAULT_PAGE_SIZE;
-  const toTimestampString = typeof toTimestamp === 'string' ? toTimestamp : '';
-  
-  const response = await Service.GetERC20AndNativeBalance(
+  const pageNumber = typeof page === 'number' ? parseInt(page, 10) : DEFAULT_PAGE;
+  const pageSizeNumber = typeof pageSize === 'number' ? parseInt(pageSize, 10) : DEFAULT_PAGE_SIZE;
+  const endTimestampString = typeof endTimestamp === 'string' ? endTimestamp : '';
+
+  const endDatetimeDate = timestampToDateTime(endTimestampString);
+  const endDatetime = toVNDateTime(endDatetimeDate);
+
+  const response = await Service.GetERC20Balance(
     address,
     chainID as string,
     tokenAddresses as string[],
-    toTimestampString
+    endTimestampString
   );
-
-  result = {
+  
+  const responsePage = response.tokens!.slice(pageNumber * pageSizeNumber, pageNumber * pageSizeNumber + pageSizeNumber)
+  const result: BalanceReturnType = {
     metadata: {
-      'total_data': response.size,
-      'page': pageNumber,
-      'page_size': pageSizeNumber
+      total_data: response.size,
+      page: {
+        index: pageNumber,
+        size: pageSizeNumber
+      },
+      block: {
+        start: 0,
+        end: response.toBlock,
+      },
+      timestamp: {
+        start: "0",
+        end: endTimestampString,
+      },
+      datetime: {
+        start: new Date(0),
+        end: endDatetime,
+      }
     },
-    result: response.tokens.slice(pageNumber * pageSizeNumber, pageNumber * pageSizeNumber + pageSizeNumber)
+    result: responsePage
   }
 
-  return res.status(codes.SUCCESS).json(response);
+  return res.status(codes.SUCCESS).json(result);
 }
 
 
 async function GetNFTBalance(req: Request, res: Response) {
-  console.log("GetNFTBalance")
-
   const { address } = req.params;
-  const { chainID, tokenAddresses, page, pageSize, toTimestamp } = req.query;
+  const { chainID, tokenAddresses, page, pageSize, endTimestamp } = req.query;
 
-  const pageNumber = typeof page === 'string' ? parseInt(page, 10) : DEFAULT_PAGE;
-  const pageSizeNumber = typeof pageSize === 'string' ? parseInt(pageSize, 10) : DEFAULT_PAGE_SIZE;
-  const toTimestampString = typeof toTimestamp === 'string' ? toTimestamp : '';
+  const pageNumber = typeof page === 'number' ? parseInt(page, 10) : DEFAULT_PAGE;
+  const pageSizeNumber = typeof pageSize === 'number' ? parseInt(pageSize, 10) : DEFAULT_PAGE_SIZE;
+  // const endTimestampString = typeof endTimestamp === 'string' ? endTimestamp : '';
+  const endTimestampString = DEFAULT_LATEST_TIMESTAMP_STRING
+
+  const endDatetimeDate = timestampToDateTime(endTimestampString);
+  const endDatetime = toVNDateTime(endDatetimeDate);
 
   const response = await Service.GetNFTBalance(
     address,
     chainID as string,
     tokenAddresses as string[],
-    toTimestampString
+    endTimestampString
   );
+  const responsePage = response.tokens!.slice(pageNumber * pageSizeNumber, pageNumber * pageSizeNumber + pageSizeNumber)
 
-  result = {
+  const result: BalanceReturnType = {
     metadata: {
-      'total_data': response.size,
-      'page': pageNumber,
-      'page_size': pageSizeNumber
+      total_data: response.size,
+      page: {
+        index: pageNumber,
+        size: pageSizeNumber
+      },
+      block: {
+        start: 0,
+        end: response.toBlock,
+      },
+      timestamp: {
+        start: "0",
+        end: endTimestampString,
+      },
+      datetime: {
+        start: new Date(0),
+        end: endDatetime,
+      }
     },
-    result: response.tokens.slice(pageNumber * pageSizeNumber, pageNumber * pageSizeNumber + pageSizeNumber)
+    result: responsePage
   }
-  return res.status(codes.SUCCESS).json(response);
+
+  return res.status(codes.SUCCESS).json(result);
 }
 
 export default Controller;
