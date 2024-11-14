@@ -1,168 +1,124 @@
 import React from 'react'
 import { Table, Tag } from 'antd'
-import MockStoryTransactions from '@/mocks/storyTransactions.json'
+import data from '@/mocks/storyTransactions.json'
+import { Transaction } from '@/types/transaction.interface'
+import { Event } from '@/types/story.interface'
 
 interface Asset {
   asset: string
   type: 'debit' | 'credit'
 }
 
-interface Event {
-  time: string
-  description: string
-  victimsWallets?: Asset[]
-  suspect?: Asset[]
-  newBuyer?: Asset[]
-  vault?: Asset[]
-  nftMarketplace?: Asset[]
-  distributedSmartContract?: Asset[]
+const transformTransaction = (txn: Transaction): Event => {
+  const shortenFromAddress =
+    txn.from.address!.substring(0, 12) +
+    '...' +
+    txn.from.address!.substring(txn.txnHash.length - 4)
+  const shortenToAddress =
+    txn.to.address!.substring(0, 12) +
+    '...' +
+    txn.to.address!.substring(txn.txnHash.length - 4)
+  const date = txn.date
+  let fromAddressName =
+    txn.from && txn.from.address_entity_label
+      ? txn.from.address_entity_label
+      : txn.from && txn.from.address_entity
+        ? txn.from.address_entity
+        : txn.from && txn.from.address
+          ? shortenFromAddress
+          : 'Unknown Address' // Fallback value if all are undefined
+  const toAddressName =
+    txn.to && txn.to.address_entity_label
+      ? txn.to.address_entity_label
+      : txn.to && txn.to.address_entity
+        ? txn.to.address_entity
+        : txn.to && txn.to.address
+          ? shortenToAddress
+          : 'Unknown Address' // Fallback value if all are undefined
+
+  // Assuming we want to process multiple ERC20 transfers
+  const fromWallet = [
+    {
+      asset: txn.amount,
+      type: 'debit',
+    },
+  ]
+
+  const toWallet = [
+    {
+      asset: txn.amount,
+      type: 'credit',
+    },
+  ]
+  // Constructing the event object
+  const event: Event = {
+    time: date,
+    description: txn.summary,
+  }
+
+  // Dynamically adding the custom keys
+  event[fromAddressName!] = fromWallet
+  event[toAddressName!] = toWallet
+  return event
 }
 
-const StoriesTable: React.FC = () => {
+const StoriesTable = ({ txnList }: { txnList: Transaction[] }) => {
+  console.log('Txn List', txnList)
+  const eventListData: Event[] = txnList.map((txn) => transformTransaction(txn))
+  console.log('Event List', eventListData)
+  const generateColumns = (fields: string[]) => {
+    return fields.map((field: string) => ({
+      title: field.charAt(0).toUpperCase() + field.slice(1),
+      dataIndex: field,
+      key: field,
+      render: (assets: Asset[]) =>
+        Array.isArray(assets) ? (
+          <>
+            {assets.map((asset, idx) => (
+              <div key={idx} className={idx === 0 ? 'mb-2' : ''}>
+                <Tag color={asset.type === 'debit' ? 'volcano' : 'green'} key={idx}>
+                  {asset.type === 'debit' ? '-' : '+'} {asset.asset}
+                </Tag>
+              </div>
+            ))}
+          </>
+        ) : (
+          assets
+        ),
+    }))
+  }
+  const eventFields = eventListData.reduce<string[]>((fields, event) => {
+    Object.keys(event).forEach((field) => {
+      if (!fields.includes(field) && field !== 'time' && field !== 'description') {
+        fields.push(field)
+      }
+    })
+    return fields
+  }, [])
+
   const columns = [
     {
       title: 'Event',
       dataIndex: 'description',
       key: 'description',
-      render: (description: string, event: Event) => (
-        <>
-          <h3 className="font-bold text-lg">{description}</h3>
-          <p className="opacity-70">{event.time}</p>
-        </>
-      ),
     },
     {
-      title: "Victim's Wallets",
-      dataIndex: 'victimsWallets',
-      key: 'victimsWallets',
-      render: (assets: Asset[]) => (
-        <>
-          {assets.map((asset, index) => (
-            <div key={index} className={index == 0 ? 'mb-2' : ''}>
-              <Tag color={asset.type === 'debit' ? 'volcano' : 'green'} key={index}>
-                {asset.type === 'debit' ? '-' : '+'} {asset.asset}
-              </Tag>
-            </div>
-          ))}
-        </>
-      ),
+      title: 'Time',
+      dataIndex: 'time',
+      key: 'time',
     },
-    {
-      title: 'Suspect',
-      dataIndex: 'suspect',
-      key: 'suspect',
-      render: (assets: Asset[]) => (
-        <>
-          {assets.map((asset, index) => (
-            <div key={index} className={index == 0 ? 'mb-2' : ''}>
-              <Tag color={asset.type === 'debit' ? 'volcano' : 'green'} key={index}>
-                {asset.type === 'debit' ? '-' : '+'} {asset.asset}
-              </Tag>
-            </div>
-          ))}
-        </>
-      ),
-    },
-    {
-      title: 'New Buyer',
-      dataIndex: 'newBuyer',
-      key: 'newBuyer',
-      render: (assets: Asset[]) => (
-        <>
-          {assets.map((asset, index) => (
-            <div key={index} className={index == 0 ? 'mb-2' : ''}>
-              <Tag color={asset.type === 'debit' ? 'volcano' : 'green'} key={index}>
-                {asset.type === 'debit' ? '-' : '+'} {asset.asset}
-              </Tag>
-            </div>
-          ))}
-        </>
-      ),
-    },
-    {
-      title: 'Vault',
-      dataIndex: 'vault',
-      key: 'vault',
-      render: (assets: Asset[]) => (
-        <>
-          {assets.map((asset, index) => (
-            <div key={index} className={index == 0 ? 'mb-2' : ''}>
-              <Tag color={asset.type === 'debit' ? 'volcano' : 'green'} key={index}>
-                {asset.type === 'debit' ? '-' : '+'} {asset.asset}
-              </Tag>
-            </div>
-          ))}
-        </>
-      ),
-    },
-    {
-      title: 'NFT Marketplace',
-      dataIndex: 'nftMarketplace',
-      key: 'nftMarketplace',
-      render: (assets: Asset[]) => (
-        <>
-          {assets.map((asset, index) => (
-            <div key={index} className={index == 0 ? 'mb-2' : ''}>
-              <Tag color={asset.type === 'debit' ? 'volcano' : 'green'} key={index}>
-                {asset.type === 'debit' ? '-' : '+'} {asset.asset}
-              </Tag>
-            </div>
-          ))}
-        </>
-      ),
-    },
-    {
-      title: 'Distributed Smart Contract',
-      dataIndex: 'distributedSmartContract',
-      key: 'distributedSmartContract',
-      render: (assets: Asset[]) => (
-        <>
-          {assets.map((asset, index) => (
-            <div key={index} className={index == 0 ? 'mb-2' : ''}>
-              <Tag color={asset.type === 'debit' ? 'volcano' : 'green'} key={index}>
-                {asset.type === 'debit' ? '-' : '+'} {asset.asset}
-              </Tag>
-            </div>
-          ))}
-        </>
-      ),
-    },
+    ...generateColumns(eventFields),
   ]
-
-  const tableData = MockStoryTransactions.events.map((event, index) => ({
+  const tableData = eventListData.map((event, index) => ({
     key: index,
+    ...event, // Spread the remaining fields dynamically
     time: event.time,
     description: event.description,
-    victimsWallets: (event.victimsWallets || []).map((asset) => ({
-      ...asset,
-      type: asset.type as 'debit' | 'credit',
-    })),
-    suspect: (event.suspect || []).map((asset) => ({
-      ...asset,
-      type: asset.type as 'debit' | 'credit',
-    })),
-    newBuyer: (event.newBuyer || []).map((asset) => ({
-      ...asset,
-      type: asset.type as 'debit' | 'credit',
-    })),
-    vault: (event.vault || []).map((asset) => ({
-      ...asset,
-      type: asset.type as 'debit' | 'credit',
-    })),
-    nftMarketplace: (event.nftMarketplace || []).map((asset) => ({
-      ...asset,
-      type: asset.type as 'debit' | 'credit',
-    })),
-    distributedSmartContract: (event.distributedSmartContract || []).map((asset) => ({
-      ...asset,
-      type: asset.type as 'debit' | 'credit',
-    })),
   }))
-
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">{MockStoryTransactions.date}</h2>
-      <Table columns={columns} dataSource={tableData} pagination={false} className="" />
+      {/* <h2 className="text-xl font-bold mb-4">{MockStoryTransactions.date}</h2> */}
+      <Table columns={columns} dataSource={tableData} pagination={false} />{' '}
     </div>
   )
 }

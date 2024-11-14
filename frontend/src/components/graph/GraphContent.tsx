@@ -7,7 +7,7 @@ import GraphTxDataTableCard from './GraphTxDataTableCard'
 
 import { EdgeData, NodeData } from '@/types/graph.interface'
 import { getAddressBalance, getAddressTransactions } from '@/services/address'
-import { Transaction } from '@/types/wallet.interface'
+import { Transaction } from '@/types/TODO: remove wallet.interface'
 
 import { useToast } from '@/hooks/use-toast'
 
@@ -22,12 +22,15 @@ const GraphContent = () => {
 
   // Trigger notification on balance or transactions fetch
   const handleNodeClick = (nodeInfo: NodeData) => {
+    console.log('Handle Node Click')
     setNodeInfo(nodeInfo)
     setEdgeInfo(null) // Clear edgeInfo when node is clicked
     setLastUpdated('node') // Set last updated to node
   }
 
   const handleEdgeClick = (edgeInfo: EdgeData) => {
+    console.log('Handle Edge Click')
+
     setEdgeInfo(edgeInfo)
     setNodeInfo(null) // Clear nodeInfo when edge is clicked
     setLastUpdated('edge') // Set last updated to edge

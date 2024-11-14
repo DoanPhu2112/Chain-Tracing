@@ -53,6 +53,7 @@ import { File, ListFilter } from 'lucide-react'
 import { DataTablePagination } from './DataTablePagination'
 import transactions_json from '@/mocks/transactions.json'
 import { Transaction, TransactionsList } from '@/types/transaction.interface'
+import { getAddressTransactions } from '@/services/address'
 
 // Define a custom TableMeta type
 interface CustomTableMeta extends TableMeta<Transaction> {
@@ -69,6 +70,9 @@ interface TxDataTableProps {
 }
 
 const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
+  const [searchTransaction, setSearchTransaction] =
+    useState<Transaction[]>(initialTransactions)
+
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -138,11 +142,26 @@ const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
         )
       },
     },
+
+    {
+      accessorKey: 'chainId',
+      header: 'Chain ID',
+      cell: ({ row }) => (
+        <Badge variant="outline">{row.getValue('chainId') as string}</Badge>
+      ),
+    },
     {
       accessorKey: 'txnHash',
       header: 'Transaction Hash',
       cell: ({ row }) => (
         <div className="truncate max-w-xs">{row.getValue('txnHash')}</div>
+      ),
+    },
+    {
+      accessorKey: 'tokenName',
+      header: 'Token Name',
+      cell: ({ row }) => (
+        <Badge variant="outline">{row.getValue('tokenName') as string}</Badge>
       ),
     },
     {
@@ -152,28 +171,7 @@ const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
         <Badge variant="outline">{row.getValue('type') as string}</Badge>
       ),
     },
-    {
-      accessorKey: 'status',
-      header: 'Status',
-      cell: ({ row }) => {
-        const status = row.getValue('status') as string
-        const isConfirmed = status.toLowerCase() === 'confirmed'
 
-        return (
-          <Badge
-            className={`gap-1 capitalize ${isConfirmed ? 'border-green-500 text-green-500' : 'border-red-500 text-red-500'}`}
-            variant="outline"
-          >
-            {isConfirmed ? (
-              <Check className="h-3.5 w-3.5" />
-            ) : (
-              <X className="h-3.5 w-3.5" />
-            )}
-            {status}
-          </Badge>
-        )
-      },
-    },
     {
       accessorKey: 'date',
       header: 'Date',
@@ -280,7 +278,7 @@ const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
 
     console.log('🚩🚩' + params.toString())
     setIsLoading(true)
-    const filteredData = transactions_json
+    const filteredData = searchTransaction
     const sortedData = filteredData
 
     // Paginate the data
@@ -294,9 +292,20 @@ const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
       setTotalCount(filteredData.length)
       setIsLoading(false)
     }, 500) // Simulate network delay
-  }, [debouncedSearch, sorting, pageIndex, pageSize])
+  }, [searchTransaction, debouncedSearch, sorting, pageIndex, pageSize])
+
+  async function handleFilterTransaction() {
+    const transactionList = await getAddressTransactions(search)
+    console.log('transactionList ', transactionList)
+    setSearchTransaction(transactionList)
+  }
   useEffect(() => {
+    if (!search) {
+      return
+    }
     console.log('SEARCH: ' + search)
+    //TODO: Check search is transaction or account address
+    handleFilterTransaction()
   }, [search])
 
   return (
