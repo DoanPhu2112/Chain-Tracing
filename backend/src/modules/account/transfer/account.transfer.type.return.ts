@@ -5,6 +5,7 @@ import { NFTTransfer } from "./account.transfer.type.nft";
 export type TransactionReturnType = {
   metadata: {
     total_data: number,
+    chainID: string,
     page: {
       index: number,
       size: number

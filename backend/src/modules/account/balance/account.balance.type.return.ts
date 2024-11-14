@@ -1,6 +1,7 @@
 export type BalanceReturnType = {
   metadata: {
     total_data: number,
+    chainID: string,
     page: {
       index: number,
       size:number

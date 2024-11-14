@@ -34,6 +34,7 @@ export type ERC20USD = {
   value: string | null;
   value24hrUsdChange: string | null;
 }
+
 export type ERC20Portfolio = {
   percentage: number;
   percentageRelativeToTotalSupply: number | null;

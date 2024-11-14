@@ -44,7 +44,7 @@ async function fetchAccountTransaction(
       end_date: endTimestamp,
       include_internal_transactions: false,
       nft_metadata: nft_metadata,
-      order: "ASC" as "ASC" | "DESC" | undefined,
+      order: "DESC" as "ASC" | "DESC" | undefined,
       ...(cursor && { cursor })
     }
     const pageResult = await Moralis.EvmApi.wallets.getWalletHistory(params);

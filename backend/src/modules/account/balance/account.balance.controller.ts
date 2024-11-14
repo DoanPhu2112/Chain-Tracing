@@ -16,8 +16,8 @@ async function GetERC20BalanceByRange(req: Request, res: Response) {
 }
 async function GetERC20Balance(req: Request, res: Response) {
   const { address } = req.params;
-  const { chainID, tokenAddresses, page, pageSize, endTimestamp } = req.query;
-
+  const { chainId, tokenAddresses, page, pageSize, endTimestamp } = req.query;
+  console.log("chainID",  req.query)
   const pageNumber = typeof page === 'number' ? parseInt(page, 10) : DEFAULT_PAGE;
   const pageSizeNumber = typeof pageSize === 'number' ? parseInt(pageSize, 10) : DEFAULT_PAGE_SIZE;
   const endTimestampString = typeof endTimestamp === 'string' ? endTimestamp : '';
@@ -27,15 +27,18 @@ async function GetERC20Balance(req: Request, res: Response) {
 
   const response = await Service.GetERC20Balance(
     address,
-    chainID as string,
+    chainId as string,
     tokenAddresses as string[],
     endTimestampString
   );
   
   const responsePage = response.tokens!.slice(pageNumber * pageSizeNumber, pageNumber * pageSizeNumber + pageSizeNumber)
+
+
   const result: BalanceReturnType = {
     metadata: {
       total_data: response.size,
+      chainID: chainId as string,
       page: {
         index: pageNumber,
         size: pageSizeNumber
@@ -62,7 +65,7 @@ async function GetERC20Balance(req: Request, res: Response) {
 
 async function GetNFTBalance(req: Request, res: Response) {
   const { address } = req.params;
-  const { chainID, tokenAddresses, page, pageSize, endTimestamp } = req.query;
+  const { chainId, tokenAddresses, page, pageSize, endTimestamp } = req.query;
 
   const pageNumber = typeof page === 'number' ? parseInt(page, 10) : DEFAULT_PAGE;
   const pageSizeNumber = typeof pageSize === 'number' ? parseInt(pageSize, 10) : DEFAULT_PAGE_SIZE;
@@ -74,7 +77,7 @@ async function GetNFTBalance(req: Request, res: Response) {
 
   const response = await Service.GetNFTBalance(
     address,
-    chainID as string,
+    chainId as string,
     tokenAddresses as string[],
     endTimestampString
   );
@@ -83,6 +86,7 @@ async function GetNFTBalance(req: Request, res: Response) {
   const result: BalanceReturnType = {
     metadata: {
       total_data: response.size,
+      chainID: chainId as string,
       page: {
         index: pageNumber,
         size: pageSizeNumber

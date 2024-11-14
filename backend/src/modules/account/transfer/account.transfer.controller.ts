@@ -45,6 +45,7 @@ async function GetWalletTransactionHistory(req: Request, res: Response) {
   const result: TransactionReturnType = {
     metadata: {
       total_data: response.size,
+      chainID: chainId as string,
       page: {
         index: pageNumber,
         size: pageSizeNumber

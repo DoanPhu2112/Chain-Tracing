@@ -66,6 +66,8 @@ async function fetchERC20Balance(
       limit: DEFAULT_LIMIT,
       excludeNative: false,
       excludeSpam: false,
+      order: "DESC" as "ASC" | "DESC" | undefined,
+
       excludeUnverifiedContracts: false,
       toBlock: toBlock !== undefined ? toBlock : undefined,
       ...(cursor && { cursor })
@@ -142,6 +144,7 @@ async function fetchNFTTokens(
       excludeSpam: false,
       normalizeMetadata: true,
       mediaItems: true,
+      order: "DESC" as "ASC" | "DESC" | undefined,
       // toBlock: toBlock,
       ...(cursor && { cursor })
     };
