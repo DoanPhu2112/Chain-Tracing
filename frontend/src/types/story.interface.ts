@@ -6,12 +6,8 @@ export interface AssetDetail {
 export interface Event {
     time: string;
     description: string;
-    victimsWallets?: AssetDetail[];
-    suspect?: AssetDetail[];
-    newBuyer?: AssetDetail[];
-    vault?: AssetDetail[];
-    nftMarketplace?: AssetDetail[];
-    distributedSmartContract?: AssetDetail[];
+    [key: string]: AssetDetail[] | string;
+
 }
 
 export interface StoryTransaction {

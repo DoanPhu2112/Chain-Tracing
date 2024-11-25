@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { TrendingUp } from 'lucide-react'
 import { Label, Pie, PieChart } from 'recharts'
+import { PortfolioBalance } from '@/types/TODO: remove wallet.interface'
 
 import {
   Card,
@@ -20,10 +21,22 @@ import {
 } from '@/components/ui/chart'
 
 export const description = 'A donut chart with text'
+interface chartAsset {
+  asset: string,
+  amount: number,
+  fill: string,
+}
+const colorList = [
+  'var(--color-solana)',
+  'var(--color-ethereum)',
 
-const chartData = [
+  'var(--color-polygon)',
+  'var(--color-bitcoin)',
+  'var(--color-other)'
+]
+const chartDataMock = [
   {
-    asset: 'Ethereum',
+    asset: 'ABC',
     amount: Math.random() * 1000,
     fill: 'var(--color-ethereum)',
   },
@@ -75,11 +88,19 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function PortfolioPieChart() {
+export function PortfolioPieChart({chartData}: { chartData: PortfolioBalance[]}) {
+  chartData = chartData.slice(0,5);
+  const chartDataWithColor = chartData.map((data, index) => {
+    return {
+      fill: colorList[index],
+      ...data,
+      value: Number(data.value),
+    }
+  })
   const totalAmount = React.useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + curr.amount, 0)
+    return chartData.reduce((acc, curr) => acc + Number(curr.value), 0)
   }, [])
-
+  console.log("chartData", chartDataWithColor)
   return (
     <Card className="h-full">
       <CardHeader className="items-center pb-0">
@@ -94,9 +115,9 @@ export function PortfolioPieChart() {
           <PieChart>
             <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
             <Pie
-              data={chartData}
-              dataKey="amount"
-              nameKey="asset"
+              data={chartDataWithColor}
+              dataKey="value"
+              nameKey="token"
               innerRadius={60}
               strokeWidth={5}
             >
@@ -115,7 +136,7 @@ export function PortfolioPieChart() {
                           y={viewBox.cy}
                           className="fill-foreground text-xl font-bold"
                         >
-                          {totalAmount.toLocaleString()}
+                          {totalAmount.toLocaleString()}$
                         </tspan>
                         <tspan
                           x={viewBox.cx}
@@ -135,7 +156,7 @@ export function PortfolioPieChart() {
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+          TODO: Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
         </div>
         <div className="leading-none text-muted-foreground">Assets</div>
       </CardFooter>

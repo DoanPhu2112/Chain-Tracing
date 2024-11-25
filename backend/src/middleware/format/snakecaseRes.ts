@@ -31,11 +31,13 @@ function transformObjectId(object: unknown) {
 }
 
 function snakecaseRes() {
+
   return mung.json((body, req, res) => {
     return snakecaseKeys(transformObjectId(body), {
       deep: true
     })
   })
+  
 }
 
 export default snakecaseRes;

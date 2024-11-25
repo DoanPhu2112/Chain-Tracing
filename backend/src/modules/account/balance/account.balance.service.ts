@@ -1,20 +1,20 @@
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from "~/constants/defaultvalue";
 import API from './account.balance.api'
 const Service = {
-  GetERC20AndNativeBalance,
+  GetERC20Balance,
   GetNFTBalance
 }
 
-async function GetERC20AndNativeBalance(
+async function GetERC20Balance(
   address: string,
   chainID: string,
   tokenAddresses: string[] = [],
-  toTimestamp: string,
+  endTimestamp: string,
 ) {
   // TODO: IF DB exist address data
 
   // ELSE:  
-  let response = await API.fetchERC20AndNativeBalance(chainID, address, tokenAddresses, toTimestamp);
+  let response = await API.fetchERC20Balance(chainID, address, tokenAddresses, endTimestamp);
   //TODO: STORE TO DB
 
   return response;
@@ -23,12 +23,12 @@ async function GetNFTBalance(
   address: string,
   chainID: string,
   tokenAddresses: string[] = [],
-  toTimestamp: string,
+  endTimestamp: string,
 ) {
   // TODO: IF DB exist address data
 
   // ELSE:  
-  let response = await API.fetchNFTTokens(chainID, address, tokenAddresses, toTimestamp);
+  let response = await API.fetchNFTTokens(chainID, address, tokenAddresses, endTimestamp);
   //TODO: STORE TO DB
 
   return response;

@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors'
+const path = require('path');
 
 import routes from './routes';
 import { errorHandler } from 'src/middleware/errorHandler';
@@ -16,12 +17,12 @@ const port: number = 3002;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-// app.use(camelCaseReq);
+app.use(camelCaseReq);
 app.use(omitReq);
-app.use(snakecaseRes);
+// app.use(snakecaseRes());
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 routes(app)
-
 app.use(errorHandler);
 
 app.listen(port, () => {

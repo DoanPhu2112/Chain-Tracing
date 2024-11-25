@@ -51,7 +51,7 @@ import { File, ListFilter } from 'lucide-react'
 // Import the JSON data
 import { DataTablePagination } from '@/components/tx/DataTablePagination'
 import transactions_json from '@/mocks/transactions.json'
-import { Transaction } from '@/types/wallet.interface'
+import { Transaction } from '@/types/TODO: remove wallet.interface'
 
 const assetColorMapping: { [key: string]: string } = {
   ETH: '#627eea', // Ethereum - Iconic Blue

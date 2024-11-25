@@ -2,8 +2,8 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 
-import portfolio from '@/mocks/portfolio.json'
-import transactions from '@/mocks/transactions.json'
+import portfolioMock from '@/mocks/portfolio.json'
+// import transactions from '@/mocks/transactions.json'
 
 import { File, ListFilter } from 'lucide-react'
 
@@ -39,8 +39,16 @@ import Activities from './Activities'
 import { FreqBarChart } from '../chart/portfolioChart/FreqBarChart'
 import { PortfolioPieChart } from '../chart/portfolioChart/PortfolioPieChart'
 import { BalanceByTimeAreaChart } from '../chart/portfolioChart/BalanceByTimeAreaChart'
+import { Transaction } from '@/types/transaction.interface'
+import { PortfolioBalance } from '@/types/TODO: remove wallet.interface'
 
-const TabCard = () => {
+const TabCard = ({
+  portfolio,
+  transactions,
+}: {
+  portfolio: PortfolioBalance[]
+  transactions: Transaction[]
+}) => {
   return (
     <>
       <Tabs defaultValue="portfolio">
@@ -75,10 +83,10 @@ const TabCard = () => {
         <TabsContent value="portfolio">
           <div className="grid flex-1 items-start gap-1 my-4 md:gap-4 lg:grid-cols-3 xl:grid-cols-4">
             <div className="flex flex-col h-full">
-              <PortfolioPieChart />
+              <PortfolioPieChart chartData={portfolio}/>
             </div>
             <div className="flex flex-col h-full">
-              <FreqBarChart />
+              <FreqBarChart chartData={portfolio}/>
             </div>
             <div className="flex flex-col h-full xl:col-span-2">
               <BalanceByTimeAreaChart />
@@ -96,9 +104,9 @@ const TabCard = () => {
                     <TableHead>Chain</TableHead>
                     <TableHead>Token</TableHead>
                     <TableHead className="hidden sm:table-cell">Portfolio %</TableHead>
-                    <TableHead className="hidden md:table-cell">Price</TableHead>
+                    <TableHead className="hidden md:table-cell">Price (Per Token)</TableHead>
                     <TableHead className="hidden md:table-cell">Amount</TableHead>
-                    <TableHead className="text-right">Value</TableHead>
+                    <TableHead className="text-right">Value (in $)</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -130,7 +138,7 @@ const TabCard = () => {
           <Card x-chunk="dashboard-05-chunk-3">
             <CardHeader className="px-7">
               <CardTitle>Transactions</CardTitle>
-              <CardDescription>Rencent transactions</CardDescription>
+              <CardDescription>Recent transactions</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>

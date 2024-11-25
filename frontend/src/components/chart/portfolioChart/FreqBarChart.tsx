@@ -17,10 +17,11 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
+import { PortfolioBalance } from '@/types/TODO: remove wallet.interface'
 
 export const description = 'A mixed bar chart'
 
-const chartData = [
+const chartDataMock = [
   { currency: 'ETH', volume: 525.51, fill: 'var(--color-eth)' },
   { currency: 'BTC', volume: 242.62, fill: 'var(--color-btc)' },
   { currency: 'USDT', volume: 172.32, fill: 'var(--color-usdt)' },
@@ -32,7 +33,7 @@ const chartConfig = {
   volume: {
     label: 'Volume $',
   },
-  eth: {
+  firstToken: {
     label: 'Ethereum (ETH)',
     color: 'hsl(var(--chart-5))',
   },
@@ -53,8 +54,23 @@ const chartConfig = {
     color: 'hsl(var(--chart-1))',
   },
 } satisfies ChartConfig
+const colorList = [
+  'var(--color-solana)',
+  'var(--color-ethereum)',
 
-export function FreqBarChart() {
+  'var(--color-polygon)',
+  'var(--color-bitcoin)',
+  'var(--color-other)'
+]
+export function FreqBarChart({chartData}: { chartData: PortfolioBalance[]}) {
+  chartData = chartData.slice(0,5);
+  const chartDataWithColor = chartData.map((data, index) => {
+    return {
+      fill: colorList[index],
+      ...data,
+    }
+  })
+  console.log("chartDataWithColor", chartDataWithColor)
   return (
     <Card className="h-full">
       <CardHeader>
@@ -65,34 +81,34 @@ export function FreqBarChart() {
         <ChartContainer config={chartConfig}>
           <BarChart
             accessibilityLayer
-            data={chartData}
+            data={chartDataWithColor}
             layout="vertical"
             margin={{
-              left: 0,
+              left: 5,
             }}
           >
             <YAxis
-              dataKey="currency"
+              dataKey="token"
               type="category"
               tickLine={false}
-              tickMargin={10}
+              tickMargin={0}
               axisLine={false}
-              tickFormatter={(value) =>
-                chartConfig[value.toLowerCase() as keyof typeof chartConfig]?.label
-              }
+              // tickFormatter={(value) =>
+              //   chartConfig[value.toLowerCase() as keyof typeof chartConfig]?.label
+              // }
             />
-            <XAxis dataKey="volume" type="number" hide />
+            <XAxis dataKey="value" type="number" hide />
             <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-            <Bar dataKey="volume" layout="vertical" radius={5} />
+            <Bar dataKey="value" layout="vertical" radius={5} />
           </BarChart>
         </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+          TODO: Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
         </div>
         <div className="leading-none text-muted-foreground">
-          Showing total transaction volumes for the last 6 months
+          TODO: Showing total transaction volumes for the last 6 months
         </div>
       </CardFooter>
     </Card>

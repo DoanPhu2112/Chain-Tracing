@@ -3,10 +3,10 @@
  */
 import { Application } from 'express';
 
-import account from './modules/account';
+import account from './modules/account/account.router';
 
 function routes(app: Application) {
-  app.use('/account', () => {console.log("ABC")});
+  app.use('/account', account);
 }
 
 export default routes;

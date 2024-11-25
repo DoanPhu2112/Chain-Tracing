@@ -1,5 +1,5 @@
 import React from 'react'
-import { TransactionsList } from '@/types/transaction.interface'
+import { Transaction } from '@/types/transaction.interface'
 import { ScrollArea, Box } from '@mantine/core'
 import { Separator } from '@/components/ui/separator'
 
@@ -9,7 +9,7 @@ import StoriesTable from './StoriesTable'
 const tags = Array.from({ length: 50 }).map((_, i, a) => `v1.2.0-beta.${a.length - i}`)
 
 interface TxDataVisualizeProps {
-  txList: TransactionsList
+  txList: Transaction[]
 }
 const lo =
   'lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.'
@@ -44,7 +44,7 @@ const TxDataVisualize: React.FC<TxDataVisualizeProps> = ({ txList }) => {
         </tbody>
       </table>
       <Separator className="my-8" />
-      <StoriesTable />
+      <StoriesTable txnList={txList}/>
       <div className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-4 xl:grid-cols-5">
         {/* <div className="col-span-1 bg-pink-300">
           <TxDataTimeline />
