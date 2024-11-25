@@ -1,18 +1,26 @@
-import express, { Request, Response } from 'express';
-import addressRouter from './routes/address.routers';
-import { errorHandler } from './middleware/errorHandler.middleware';
+import express from 'express';
+import cors from 'cors'
+
+import routes from './routes';
+import { errorHandler } from 'src/middleware/errorHandler';
+
+import camelCaseReq from 'src/middleware/format/camelcaseReq';
+import omitReq from 'src/middleware/format/omitReq';
+import snakecaseRes from 'src/middleware/format/snakecaseRes';
+
 import 'dotenv/config';
+
 const app = express();
 const port: number = 3002;
 
-// const cors = require('cors');
-import cors from 'cors'
 app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+// app.use(camelCaseReq);
+app.use(omitReq);
+app.use(snakecaseRes);
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('Hello, TypeScript + Node.js + Express!');
-});
-app.use('/address/', addressRouter);
+routes(app)
 
 app.use(errorHandler);
 

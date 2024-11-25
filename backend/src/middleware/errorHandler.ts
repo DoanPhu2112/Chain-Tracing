@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction, ErrorRequestHandler } from 'express';
 import snakecaseKeys from 'snakecase-keys';
 
-import codes from '../utils/codes';
+import codes from '../errors/codes';
 
 
-import { getErrorMessage } from '../errors/messages.errors';
+import { getErrorMessage } from '../errors/messages';
 
 interface ErrorHandler {
   code: number;

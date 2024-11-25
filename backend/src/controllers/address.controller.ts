@@ -1,30 +1,52 @@
 import { Request, Response } from 'express';
 import { AssetTransfersCategory, SortingOrder } from 'alchemy-sdk';
 
-import CustomError from '../errors/CustomError.errors';
-import codes from '../utils/codes';
+import codes from '../errors/codes';
 import Service from '../services/address.services'
+import { is_contract } from '~/utils/accountclassify';
 
-
-async function getAssetInformation(req: Request, res: Response) {
+async function checkExistCode(req: Request, res: Response) {
   const { address } = req.params;
-  const { chainID, tokenAddresses, limit } = req.query;
-  console.log("Chain ID", chainID)
-  console.log("token Addresses", tokenAddresses)
-  console.log("limit", limit)
-  // const cursor = undefined;
 
-  // if (cursor) {
-  //   if (typeof (cursor) === 'string') query.cursor = cursor
-  //   else {
-  //     throw new CustomError(codes.BAD_REQUEST, "Cursor Param Error");
-  //   }
-  // } else {
-  //   query.cursor = cursor
-  // }
+  const result = await is_contract(address);
 
-  const result = await Service.getAssetInformation(address, chainID as string, undefined, tokenAddresses as string[], Number(limit as string));
-  
+  return res.status(codes.SUCCESS).json(result);
+}
+async function getAccountTransactionHistory(req: Request, res: Response) {
+  const { address } = req.params;
+  const { chain_id,
+    start_timestamp,
+    end_timestamp,
+    include_erc20_transactions_triggered,
+    include_nft_transactions_triggered,
+    include_native_transactions_triggered,
+    page,
+    page_size } = req.query;
+  const result = await Service.getWalletTransactionHistory(
+    address,
+    chain_id?.toString(),
+    start_timestamp?.toString(),
+    end_timestamp?.toString(),
+    Boolean(include_erc20_transactions_triggered),
+    Boolean(include_nft_transactions_triggered),
+    Boolean(include_native_transactions_triggered),
+    Number(page),
+    Number(page_size)
+  );
+  return res.status(codes.SUCCESS).json(result);
+}
+async function getUserAssetInformation(req: Request, res: Response) {
+  const { address } = req.params;
+  const { chainID, tokenAddresses, page, pageSize } = req.query;
+
+  const result = await Service.getUserAssetInformation(
+    address,
+    chainID as string,
+    tokenAddresses as string[],
+    Number(page),
+    Number(pageSize)
+  );
+
   return res.status(codes.SUCCESS).json(result);
 
 }
@@ -62,96 +84,25 @@ async function getUserBalance(req: Request, res: Response) {
   }
 }
 
-async function getAddressTransactions(req: Request, res: Response) {
-  try {
-    const { address } = req.params;
-    const { fromBlock, toAddress, category, order, pageKey } = req.query;
-
-    if (!address) {
-      return res.status(400).json({ error: 'Address is required' });
-    }
-    if (address.length != 42) {
-      return res.status(400).json({ error: 'Invalid address' });
-
-    }
-    const fromBlockString = typeof fromBlock === 'string' ? fromBlock : undefined;
-
-    const toAddressString = typeof toAddress === 'string' ? toAddress : undefined;
-    // Parse and validate the category
-    let parsedCategory: AssetTransfersCategory[] | undefined;
-    if (category) {
-      try {
-        parsedCategory = JSON.parse(category as string) as AssetTransfersCategory[];
-      } catch (e) {
-        return res.status(400).json({ error: 'Invalid category format' });
-      }
-    }
-
-    // Parse and validate the order
-    let parsedOrder: SortingOrder | undefined;
-    if (order) {
-      if (order === SortingOrder.ASCENDING || order === SortingOrder.DESCENDING) {
-        parsedOrder = order;
-      } else {
-        return res.status(400).json({ error: 'Invalid order value' });
-      }
-    }
-
-    const transactions = await Service.getAddressTransactions(
-      address,
-      fromBlockString,
-      toAddressString,
-      parsedCategory,
-      parsedOrder,
-      pageKey as string
-    );
-    res.json(transactions);
-  } catch (error) {
-    console.error('Error fetching address transactions:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-}
 
 async function getAddressERC20Transactions(req: Request, res: Response) {
   try {
     const { address } = req.params;
-    const { fromBlock, toAddress, category, order, pageKey } = req.query;
 
-    if (!address) {
-      return res.status(400).json({ error: 'Address is required' });
-    }
-    if (address.length != 42) {
-      return res.status(400).json({ error: 'Invalid address' });
+    const { chain_id,
+      start_timestamp,
+      end_timestamp,
+      page,
+      page_size } = req.query;
 
-    }
-    const fromBlockString = typeof fromBlock === 'string' ? fromBlock : undefined;
-
-    const toAddressString = typeof toAddress === 'string' ? toAddress : undefined;
-
-    let parsedCategory: AssetTransfersCategory[] | undefined;
-    if (category) {
-      try {
-        parsedCategory = JSON.parse(category as string) as AssetTransfersCategory[];
-      } catch (e) {
-        return res.status(400).json({ error: 'Invalid category format' });
-      }
-    }
-
-    let parsedOrder: SortingOrder | undefined;
-    if (order) {
-      if (order === SortingOrder.ASCENDING || order === SortingOrder.DESCENDING) {
-        parsedOrder = order;
-      } else {
-        return res.status(400).json({ error: 'Invalid order value' });
-      }
-    }
 
     const transactions = await Service.getAddressERC20Transaction(
       address,
-      fromBlockString,
-      toAddressString,
-      parsedOrder,
-      pageKey as string
+      chain_id?.toString(),
+      start_timestamp?.toString(),
+      end_timestamp?.toString(),
+      Number(page),
+      Number(page_size)
     );
 
     res.json(transactions);
@@ -371,7 +322,6 @@ async function getAddressTokenBalance(req: Request, res: Response) {
 
 export {
   getUserBalance,
-  getAddressTransactions,
   getAddressERC20Transactions,
   getAddressERC721TransactionsByETH,
   getAddressERC721TransactionsByERC20,
@@ -379,5 +329,7 @@ export {
   getNFTTransaction,
   getAddressTokenBalance,
   getUserInformation,
-  getAssetInformation
+  getUserAssetInformation as getAssetInformation,
+  checkExistCode,
+  getAccountTransactionHistory as getWalletTransactionHistory
 };

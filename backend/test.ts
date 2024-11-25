@@ -1,6 +1,7 @@
-function test() {
-  const a: string[] = [];
-  console.log(Array.isArray(a))
+const { ethers } = require('ethers');
+import moment from 'moment';
+async function abc(s: string) {
+  console.log(moment(s).unix());
 }
 
-test();
+abc('2018-11-24T10:33:48.000Z')

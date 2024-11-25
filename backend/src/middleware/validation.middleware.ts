@@ -1,58 +1,47 @@
 import { Request, Response, NextFunction } from 'express';
-import CustomError from '~/errors/CustomError.errors';
-import codes from '~/utils/codes';
-import { ethers } from 'ethers'
-import { ParsedQs } from 'qs';
-import { chainIDList } from '~/utils/chainIDList';
-import { DEFAULT_PAGE_SIZE } from '~/utils/const';
+import Field from './fieldValidate.middleware';
+import Joi, { CustomHelpers } from 'joi'
+import CustomError from '~/errors/CustomError';
+import codes from '~/errors/codes';
 
-function validateAddress(address: string) {
-  if (typeof address === 'string' && ethers.utils.isAddress(address)) {
-    return address;
+
+const schema = Joi.object({
+  address: Joi.string().length(42).custom(Field.validateAddress, 'Ethereum Address Validation').required(),
+
+  chainId: Joi.string().pattern(/^0x[0-9a-fA-F]+$/),
+
+  page: Joi.string().pattern(/^\d+$/),
+
+  pageSize: Joi.string().pattern(/^\d+$/),
+
+  startTimestamp: Joi.number().integer().min(0).max(Date.now()),
+
+  endTimestamp: Joi.number().integer().min(0).max(Date.now()),
+
+  tokenAddresses: Joi.alternatives().try(
+    Joi.array().items(Joi.string().custom(Field.validateAddress, 'Ethereum Address Validation')),
+    Joi.string().custom(Field.validateAddress, 'Ethereum Address Validation').optional(),
+  ),
+  toTimestamp: Joi.string().optional() // Optional, and doesn’t need .allow('')
+
+})
+
+export function validateGetBalanceParam(req: Request, res: Response, next: NextFunction) {
+  console.log("validateGetBalanceParam")
+
+  // Validate request query
+  const { error, value } = schema.validate(req.query, { convert: true });
+  console.log("value", value)
+  console.log("error", error)
+  if (error) {
+    // Send validation error response
+    throw new CustomError(codes.BAD_REQUEST, error)
   }
-  throw new CustomError(codes.BAD_REQUEST, "Address Param Error");
-}
 
-function validateTokenAddresses(tokenAddresses: string | ParsedQs | string[] | ParsedQs[] | undefined): string[] | ParsedQs[] | undefined {
-  if (!tokenAddresses) {
-    return undefined;
-  }
-  if (typeof (tokenAddresses) === 'string') {
-    return [tokenAddresses];
-  }
-  if (Array.isArray(tokenAddresses)) {
-    return tokenAddresses;
-  }
-  throw new CustomError(codes.BAD_REQUEST, "Token Param Error");
-}
-function validateChainID(chainID: string | ParsedQs | string[] | ParsedQs[] | undefined): string {
+  // Replace query with validated values to ensure correct types
+  req.query = value;
 
-  if (typeof (chainID) === 'string' && chainIDList.includes(chainID)) {
-    return chainID;
-  }
+  // Proceed to the next middleware or controller
+  next();
+};
 
-  throw new CustomError(codes.BAD_REQUEST, "ChainID Param Error");
-}
-
-function validateLimit(limit: string | ParsedQs | string[] | ParsedQs[] | undefined): string {
-  if (limit === undefined) return DEFAULT_PAGE_SIZE.toString(); // Set a default limit if needed
-  if (typeof limit === 'string') {
-    return limit; // Convert to number if it’s a string
-  }
-  throw new CustomError(codes.BAD_REQUEST, "Limit Param Error");
-}
-
-export function validateAssetInformationParam(req: Request, res: Response, next: NextFunction) {
-  const { address } = req.params;
-  const { chainID, tokenAddresses, limit } = req.query;
-
-  req.params.address = validateAddress(address);
-
-  req.query.tokenAddresses = validateTokenAddresses(tokenAddresses);
-
-  req.query.chainID = validateChainID(chainID);
-
-  req.query.limit = validateLimit(limit)
-
-  next()
-}
