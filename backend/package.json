@@ -55,6 +55,7 @@
     "ethers": "^5.7.2",
     "express": "^4.19.2",
     "express-mung": "^0.5.1",
+    "husky": "^9.1.7",
     "joi": "^17.13.3",
     "moment": "^2.30.1",
     "mongoose": "^8.5.3",
