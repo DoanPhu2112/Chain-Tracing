@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Separator } from '../ui/separator'
 import { longSlice } from '@/helpers/hashSlice'
+import { useToast } from '@/hooks/use-toast'
 
 const AddressInfoCard = ({
   balance,
@@ -28,6 +29,30 @@ const AddressInfoCard = ({
   balance: number | undefined
   address: string
 }) => {
+  const { toast } = useToast()
+  const handleCopyAddress = () => {
+    // Copy the address to the clipboard
+    navigator.clipboard
+      .writeText(address)
+      .then(() => {
+        toast({
+          title: 'Address copied',
+          description: 'The address has been successfully copied to the clipboard.',
+          duration: 2000,
+        })
+      })
+      .catch((err) => {
+        console.error('Failed to copy: ', err)
+      })
+  }
+  const handleViewOnEtherscan = () => {
+    // Construct the Etherscan URL for the address
+    const etherscanUrl = `https://etherscan.io/address/${address}`
+
+    // Open the Etherscan URL in a new tab
+    window.open(etherscanUrl, '_blank')
+  }
+
   return (
     <Card className="overflow-hidden shadow-md" x-chunk="dashboard-05-chunk-4">
       <CardHeader className="flex flex-row items-start bg-muted/50">
@@ -38,7 +63,12 @@ const AddressInfoCard = ({
           <CardDescription className="break-all pr-6"></CardDescription>
         </div>
         <div className="ml-auto flex items-center gap-1">
-          <Button size="sm" variant="outline" className="h-8 gap-1">
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 gap-1"
+            onClick={handleCopyAddress}
+          >
             <Copy className="h-3.5 w-3.5" />
           </Button>
           <DropdownMenu>
@@ -49,7 +79,9 @@ const AddressInfoCard = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>View on Etherscan</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleViewOnEtherscan()}>
+                View on Etherscan
+              </DropdownMenuItem>
               <DropdownMenuItem>Export</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>Trash</DropdownMenuItem>

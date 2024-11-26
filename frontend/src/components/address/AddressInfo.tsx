@@ -37,7 +37,7 @@ const AddressInfo = () => {
           console.log('🚀 ~ fetchWalletData ~ transactionsData:', transactionsData)
           console.log('🚀 ~ fetchWalletData ~ balanceData:', balanceData)
           setBalance(balanceData) // Set the fetched balance
-          //@ ts-ignore
+          //@ts-ignore
           setTransactions(transactionsData) // Set the fetched transactions
         } catch (error) {
           console.error('Error fetching wallet data:', error)

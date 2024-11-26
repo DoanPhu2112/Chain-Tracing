@@ -9,9 +9,8 @@ import { EdgeData, NodeData } from '@/types/graph.interface'
 import { getAddressBalance, getAddressTransactions } from '@/services/address'
 import { Transaction } from '@/types/wallet.interface'
 import InputCard from '../card/InputCard'
-import { Transaction } from '@/types/TODO: remove wallet.interface'
 
-import { useToast } from '@/helpers/hooks/use-toast'
+import { useToast } from '@/hooks/use-toast'
 
 const GraphContent = () => {
   const [nodeInfo, setNodeInfo] = useState<NodeData | null>(null)

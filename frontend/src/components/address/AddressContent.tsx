@@ -9,7 +9,7 @@ import AddressInfoCard from './AddressInfoCard'
 import TabCard from './TabCard'
 import { PortfolioBalance } from '@/types/wallet.interface'
 import { getAddressBalance, getAddressTransactions } from '@/services/address'
-import { useToast } from '@/helpers/hooks/use-toast'
+import { useToast } from '@/hooks/use-toast'
 import { AddressTxByMonth } from '../chart/AddressTxByMonth'
 import { Transaction } from '@/types/transaction.interface'
 const initialBalance = [

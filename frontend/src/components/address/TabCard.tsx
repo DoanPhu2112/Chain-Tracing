@@ -2,6 +2,7 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 
+import { useToast } from '@/hooks/use-toast'
 import portfolioMock from '@/mocks/portfolio.json'
 // import transactions from '@/mocks/transactions.json'
 
@@ -33,6 +34,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 
 import Activities from './Activities'
 
@@ -51,6 +53,21 @@ const TabCard = ({
   portfolio: PortfolioBalance[]
   transactions: Transaction[]
 }) => {
+  const { toast } = useToast()
+  const handleCopy = (txnHash: string) => {
+    navigator.clipboard
+      .writeText(txnHash)
+      .then(() => {
+        toast({
+          title: 'Transaction hash copied ',
+          description: 'Transaction hash copied to clipboard!',
+          duration: 2000,
+        })
+      })
+      .catch((err) => {
+        console.error('Failed to copy: ', err)
+      })
+  }
   return (
     <>
       <Tabs defaultValue="portfolio">
@@ -87,10 +104,10 @@ const TabCard = ({
             <div className="flex flex-col h-full">
               <PortfolioPieChart chartData={portfolio} />
             </div>
-            <div className="flex flex-col h-full">
+            {/* <div className="flex flex-col h-full">
               <FreqBarChart chartData={portfolio} />
-            </div>
-            <div className="flex flex-col h-full xl:col-span-2">
+            </div> */}
+            <div className="flex flex-col col-span-2 h-full xl:col-span-3">
               <BalanceByTimeAreaChart />
             </div>
           </div>
@@ -179,8 +196,22 @@ const TabCard = ({
                     <TableRow key={transaction.txnHash}>
                       <TableCell>
                         <div className="font-medium">
-                          {transaction.txnHash.substring(0, 12)}...
-                          {transaction.txnHash.substring(transaction.txnHash.length - 4)}
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span
+                                className="hover:bg-gray-200 p-1 rounded cursor-pointer"
+                                onClick={() => handleCopy(transaction.txnHash)}
+                              >
+                                {transaction.txnHash.substring(0, 12)}...
+                                {transaction.txnHash.substring(
+                                  transaction.txnHash.length - 4
+                                )}
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent side="left" className="bg-gray-600">
+                              <p>Copy tx hash</p>
+                            </TooltipContent>
+                          </Tooltip>
                         </div>
                       </TableCell>
                       <TableCell className="hidden sm:table-cell">
@@ -200,7 +231,8 @@ const TabCard = ({
                         {transaction.date}
                       </TableCell>
                       <TableCell className="text-right">
-                        {cropNumber(parseInt(transaction.amount), 9)}
+                        {transaction.amount}
+                        {/* {cropNumber(parseInt(transaction.amount), 9)} */}
                       </TableCell>
                     </TableRow>
                   ))}
