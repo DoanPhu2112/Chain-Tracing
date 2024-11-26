@@ -40,7 +40,9 @@ import { FreqBarChart } from '../chart/portfolioChart/FreqBarChart'
 import { PortfolioPieChart } from '../chart/portfolioChart/PortfolioPieChart'
 import { BalanceByTimeAreaChart } from '../chart/portfolioChart/BalanceByTimeAreaChart'
 import { Transaction } from '@/types/transaction.interface'
-import { PortfolioBalance } from '@/types/TODO: remove wallet.interface'
+import { PortfolioBalance } from '@/types/wallet.interface'
+
+import { cropNumber } from '@/helpers/numberSlice'
 
 const TabCard = ({
   portfolio,
@@ -83,10 +85,10 @@ const TabCard = ({
         <TabsContent value="portfolio">
           <div className="grid flex-1 items-start gap-1 my-4 md:gap-4 lg:grid-cols-3 xl:grid-cols-4">
             <div className="flex flex-col h-full">
-              <PortfolioPieChart chartData={portfolio}/>
+              <PortfolioPieChart chartData={portfolio} />
             </div>
             <div className="flex flex-col h-full">
-              <FreqBarChart chartData={portfolio}/>
+              <FreqBarChart chartData={portfolio} />
             </div>
             <div className="flex flex-col h-full xl:col-span-2">
               <BalanceByTimeAreaChart />
@@ -101,33 +103,54 @@ const TabCard = ({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Chain</TableHead>
-                    <TableHead>Token</TableHead>
+                    {/* <TableHead>Chain</TableHead> */}
+
+                    <TableHead className="pl-8">Token</TableHead>
                     <TableHead className="hidden sm:table-cell">Portfolio %</TableHead>
-                    <TableHead className="hidden md:table-cell">Price (Per Token)</TableHead>
+                    <TableHead className="hidden md:table-cell">
+                      Price (Per Token)
+                    </TableHead>
                     <TableHead className="hidden md:table-cell">Amount</TableHead>
                     <TableHead className="text-right">Value (in $)</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {portfolio.map((asset, index) => (
-                    <TableRow key={`${asset.chain}-${asset.token}`}>
-                      <TableCell>
+                  {portfolio
+                    .sort(function (a, b) {
+                      return b.value - a.value
+                    })
+                    .map((asset, index) => (
+                      <TableRow key={`${asset.chain}-${asset.token}`}>
+                        {/* <TableCell>
                         <div className="font-medium">{asset.chain}</div>
-                      </TableCell>
-                      <TableCell>{asset.token}</TableCell>
-                      <TableCell className="hidden sm:table-cell">
-                        {asset.portfolioPercentage}
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        {asset.price}
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        {asset.amount}
-                      </TableCell>
-                      <TableCell className="text-right">{asset.value}</TableCell>
-                    </TableRow>
-                  ))}
+                      </TableCell> */}
+                        <TableCell className="flex gap-1 font-medium">
+                          {asset.logo ? (
+                            <Image
+                              alt={asset.token}
+                              src={asset.logo}
+                              width={20}
+                              height={20}
+                            ></Image>
+                          ) : (
+                            <span className="ml-5" />
+                          )}
+                          {asset.token}
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell">
+                          {cropNumber(asset.portfolioPercentage, 2)}
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          {cropNumber(asset.price, 10)} $
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          {cropNumber(asset.amount)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {cropNumber(asset.value)} $
+                        </TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
             </CardContent>
@@ -176,7 +199,9 @@ const TabCard = ({
                       <TableCell className="hidden md:table-cell">
                         {transaction.date}
                       </TableCell>
-                      <TableCell className="text-right">{transaction.amount}</TableCell>
+                      <TableCell className="text-right">
+                        {cropNumber(parseInt(transaction.amount), 9)}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

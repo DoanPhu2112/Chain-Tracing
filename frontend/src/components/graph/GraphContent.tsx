@@ -11,7 +11,7 @@ import { Transaction } from '@/types/wallet.interface'
 import InputCard from '../card/InputCard'
 import { Transaction } from '@/types/TODO: remove wallet.interface'
 
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/helpers/hooks/use-toast'
 
 const GraphContent = () => {
   const [nodeInfo, setNodeInfo] = useState<NodeData | null>(null)

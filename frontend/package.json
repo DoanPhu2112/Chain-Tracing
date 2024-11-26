@@ -39,7 +39,7 @@
     "react-dom": "^18",
     "react-flow-renderer": "^10.3.17",
     "react-router-dom": "^6.26.0",
-    "recharts": "^2.12.7",
+    "recharts": "^2.13.0-alpha.5",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7"
   },

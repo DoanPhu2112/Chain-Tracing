@@ -11,13 +11,14 @@ import { Transaction } from '@/types/wallet.interface'
 import { getAddressBalance, getAddressTransactions } from '@/services/address'
 import { useToast } from '@/hooks/use-toast'
 import { AddressTxByMonth } from '../chart/AddressTxByMonth'
+import { PortfolioBalance } from '@/types/wallet.interface'
 
 const AddressInfo = () => {
   const { toast } = useToast()
   const params = useParams<{ address: string }>()
   //@ts-ignore
   const address = params.address
-  const [balance, setBalance] = useState<number>()
+  const [balance, setBalance] = useState<PortfolioBalance[]>()
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState<boolean>(false)
 
@@ -36,6 +37,7 @@ const AddressInfo = () => {
           console.log('🚀 ~ fetchWalletData ~ transactionsData:', transactionsData)
           console.log('🚀 ~ fetchWalletData ~ balanceData:', balanceData)
           setBalance(balanceData) // Set the fetched balance
+          //@ ts-ignore
           setTransactions(transactionsData) // Set the fetched transactions
         } catch (error) {
           console.error('Error fetching wallet data:', error)
@@ -55,11 +57,16 @@ const AddressInfo = () => {
   return (
     <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
       <div>
-        <AddressInfoCard balance={balance} address={address} />
+        <AddressInfoCard portfolio={balance} address={address} />
         <AddressTxByMonth />
       </div>
       <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
-        <TabCard />
+        {/* <TabCard /> */}
+        {!loading && balance && transactions ? (
+          <TabCard portfolio={balance} transactions={transactions} />
+        ) : (
+          <p>Loading data...</p> // Optional loading message
+        )}
       </div>
     </main>
   )

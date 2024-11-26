@@ -1,14 +1,15 @@
 import { BackendTransaction, Transaction } from '@/types/transaction.interface'
-import { ERC20Balance, PortfolioBalance } from '@/types/TODO: remove wallet.interface';
+import { ERC20Balance, PortfolioBalance } from '@/types/wallet.interface';
 const prefix = 'http://localhost:3002/account';
 function ERC20BalanceToPortfolioBalance(chainID: string, erc20Balances: ERC20Balance[]): PortfolioBalance[] {
     return erc20Balances.map((balance: ERC20Balance): PortfolioBalance => (
         {
             chain: chainID,
             token: balance.token.name,
+            logo: balance.token.logo,
             portfolioPercentage: balance.portfolio.percentage,
-            price: balance.usd.price,
-            amount: balance.balance,
+            price: parseInt(balance.usd.price),
+            amount: parseInt(balance.balance),
             value: Number(balance.usd.value) || -1,
         }
     ))

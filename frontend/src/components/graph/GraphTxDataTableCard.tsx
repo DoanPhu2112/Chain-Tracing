@@ -1,6 +1,6 @@
 import React from 'react'
 import { NodeData } from '@/types/graph.interface'
-import { Transaction } from '@/types/TODO: remove wallet.interface'
+import { Transaction } from '@/types/wallet.interface'
 import GraphTxDataTable from '@/components/graph/GraphTxDataTable'
 
 import {

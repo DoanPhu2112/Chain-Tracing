@@ -1,18 +1,19 @@
 export interface PortfolioBalance {
     chain: string;
     token: string;
+    logo: string | null;
     portfolioPercentage: number;
     price: number; // or number, depending on how the price is handled
     amount: number; // or number, depending on how the amount is handled
     value: number; // or number, depending on how the value is handled
 }
 export interface Transaction {
-    blockNum: string;
-    uniqueId: string;
-    hash: string;
-    from: string;
-    to: string;
-    value: number;
+    blockNum: string | null;
+    uniqueId: string | null;
+    hash: string | null;
+    from: string | null;
+    to: string | null;
+    value: number | null;
     erc721TokenId: string | null;
     erc1155Metadata: any | null;
     tokenId: string | null;

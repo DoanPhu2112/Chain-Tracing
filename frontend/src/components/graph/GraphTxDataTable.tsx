@@ -51,7 +51,7 @@ import { File, ListFilter } from 'lucide-react'
 // Import the JSON data
 import { DataTablePagination } from '@/components/tx/DataTablePagination'
 import transactions_json from '@/mocks/transactions.json'
-import { Transaction } from '@/types/TODO: remove wallet.interface'
+import { Transaction } from '@/types/wallet.interface'
 
 const assetColorMapping: { [key: string]: string } = {
   ETH: '#627eea', // Ethereum - Iconic Blue
@@ -286,11 +286,14 @@ const GraphTxDataTable: React.FC<GraphTxDataTableProps> = ({ txs, loading }) => 
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(transaction.hash)}
-              >
-                Copy transaction hash
-              </DropdownMenuItem>
+              {transaction.hash && (
+                <DropdownMenuItem
+                  //@ts-ignore
+                  onClick={() => navigator.clipboard.writeText(transaction.hash)}
+                >
+                  Copy transaction hash
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem>View details</DropdownMenuItem>
             </DropdownMenuContent>
