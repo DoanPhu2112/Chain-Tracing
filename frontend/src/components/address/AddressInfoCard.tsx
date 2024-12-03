@@ -1,3 +1,5 @@
+'use client'
+import { useState, useEffect } from 'react'
 import React from 'react'
 import { NodeData } from '@/types/graph.interface'
 
@@ -18,17 +20,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Badge } from '../ui/badge'
 import { Separator } from '../ui/separator'
-import { longSlice } from '@/helpers/hashSlice'
+import { longSlice, shortSlice } from '@/helpers/hashSlice'
 import { useToast } from '@/hooks/use-toast'
+import { PortfolioBalance } from '@/types/wallet.interface'
+import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip'
 
 const AddressInfoCard = ({
-  balance,
+  portfolio,
   address,
 }: {
-  balance: number | undefined
+  portfolio: PortfolioBalance[]
   address: string
 }) => {
+  const [addressEther, setAddressEther] = useState<{ amount: number; value: number }>()
   const { toast } = useToast()
   const handleCopyAddress = () => {
     // Copy the address to the clipboard
@@ -53,14 +59,36 @@ const AddressInfoCard = ({
     window.open(etherscanUrl, '_blank')
   }
 
+  useEffect(() => {
+    setAddressEther(portfolio.find((item) => item.token === 'Ether'))
+  }, [portfolio])
+  console.log(addressEther)
+
   return (
-    <Card className="overflow-hidden shadow-md" x-chunk="dashboard-05-chunk-4">
+    <Card className="overflow-hidden shadow-md mb-4" x-chunk="dashboard-05-chunk-4">
       <CardHeader className="flex flex-row items-start bg-muted/50">
         <div className="grid gap-0.5">
           <CardTitle className="group flex items-center gap-2 text-lg">
-            {longSlice(address)}
+            Address details
+            {/* {longSlice(address)} */}
           </CardTitle>
-          <CardDescription className="break-all pr-6"></CardDescription>
+          <CardDescription className="break-all pr-6">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <Badge
+                    variant="outline"
+                    className="text-gray-700 border-gray-700 items-center align-middle h-6 gap-1 shadow-sm hover:bg-gray-100 hover:text-gray-600 p-1 rounded cursor-pointer"
+                  >
+                    {shortSlice(address)}
+                  </Badge>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="ml-24 bg-gray-600">
+                <p>{address}</p>
+              </TooltipContent>
+            </Tooltip>
+          </CardDescription>
         </div>
         <div className="ml-auto flex items-center gap-1">
           <Button
@@ -92,27 +120,18 @@ const AddressInfoCard = ({
 
       <CardContent className="p-6 text-sm">
         <div className="grid gap-3">
-          <div className="font-semibold">
-            Address <span className="font-semibold">{longSlice(address)}</span> Details
-          </div>
-          <ul className="grid gap-3">
-            {/* <li className="flex items-center">
-              <span className="text-muted-foreground w-1/4 ">Status:</span>
-              <span>
-                <Badge
-                  variant="outline"
-                  className="text-green-500 border-green-500 items-center align-middle h-6 gap-1 shadow-sm"
-                >
-                  <Check className="h-3 w-3" />
-                  Success
-                </Badge>
-              </span>
-            </li> */}
+          {/* <div className="font-semibold"></div> */}
+
+          <ul className="grid gap-3 mt-2">
             <li className="flex items-center">
-              <span className="text-muted-foreground w-1/4 ">Balance:</span>
+              <span className="text-muted-foreground w-1/3 ">ETH Balance:</span>
+              {/* {addressEther && <span>{addressEther.amount} ETH</span>} */}
+            </li>
+            <li className="flex items-center">
+              <span className="text-muted-foreground w-1/3 ">ETH Value:</span>
               <span className="flex gap-1">
-                <span>{balance}</span>
-                <span>ETH</span>
+                <span>{}</span>
+                {/* {addressEther && <span>{addressEther.value} $</span>} */}
               </span>
             </li>
             {/* <li className="flex">

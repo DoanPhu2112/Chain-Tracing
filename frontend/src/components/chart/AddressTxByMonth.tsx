@@ -43,7 +43,7 @@ const chartConfig = {
 
 export function AddressTxByMonth() {
   return (
-    <Card className="mt-4">
+    <Card className="">
       <CardHeader>
         <CardTitle>Monthly Transactions</CardTitle>
         <CardDescription>January - June 2024</CardDescription>
