@@ -1,6 +1,5 @@
 export type Transaction = {
   chainId: string,
-
   txnHash: string
   from: {
     address?: string;

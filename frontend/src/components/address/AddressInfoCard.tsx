@@ -26,13 +26,16 @@ import { longSlice, shortSlice } from '@/helpers/hashSlice'
 import { useToast } from '@/hooks/use-toast'
 import { PortfolioBalance } from '@/types/wallet.interface'
 import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip'
+import { Skeleton } from 'antd'
 
 const AddressInfoCard = ({
   portfolio,
   address,
+  loading,
 }: {
   portfolio: PortfolioBalance[]
   address: string
+  loading: boolean //
 }) => {
   const [addressEther, setAddressEther] = useState<{ amount: number; value: number }>()
   const { toast } = useToast()

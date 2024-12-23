@@ -63,7 +63,7 @@ const AddressInfo = () => {
       <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
         {/* <TabCard /> */}
         {!loading && portfolio && transactions ? (
-          <TabCard portfolio={portfolio} transactions={transactions} />
+          <TabCard portfolio={portfolio} transactions={transactions} loading={loading} />
         ) : (
           <p>Loading data...</p> // Optional loading message
         )}

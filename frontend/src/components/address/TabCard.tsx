@@ -49,9 +49,11 @@ import { cropNumber } from '@/helpers/numberSlice'
 const TabCard = ({
   portfolio,
   transactions,
+  loading,
 }: {
   portfolio: PortfolioBalance[]
   transactions: Transaction[]
+  loading: boolean
 }) => {
   const { toast } = useToast()
   const handleCopy = (txnHash: string) => {
