@@ -65,7 +65,7 @@ async function fetchERC20Balance(
       tokenAddresses: tokenAddresses,
       limit: DEFAULT_LIMIT,
       excludeNative: false,
-      excludeSpam: false,
+      excludeSpam: true,
       order: "DESC" as "ASC" | "DESC" | undefined,
 
       excludeUnverifiedContracts: false,
@@ -76,6 +76,9 @@ async function fetchERC20Balance(
     try {
       pageResult = await Moralis.EvmApi.wallets.getWalletTokenBalancesPrice(params);
     } catch (e: any) {
+      if (e.message.includes('Cursor is invalid or expired')) {
+        throw new CustomError(codes.NOT_FOUND, 'Server cannot handle this request');
+      }
       throw new CustomError(codes.EXTERNAL_API_ERROR, `External API error ${e}`)
     }
 
@@ -109,6 +112,7 @@ async function fetchERC20Balance(
 
     result.tokens = result.tokens!.concat(token);
   }
+  console.log(JSON.stringify(result))
   result.toBlock = toBlock;
   result.toTimestamp = endTimestamp;
   return result;
@@ -141,7 +145,7 @@ async function fetchNFTTokens(
       address: address,
       tokenAddresses: tokenAddresses,
       limit: DEFAULT_LIMIT,
-      excludeSpam: false,
+      excludeSpam: true,
       normalizeMetadata: true,
       mediaItems: true,
       order: "DESC" as "ASC" | "DESC" | undefined,

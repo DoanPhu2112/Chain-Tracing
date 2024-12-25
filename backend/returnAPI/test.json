@@ -1,0 +1,79 @@
+{
+    "size": 3,
+    "toBlock": 21329871,
+    "toTimestamp": "1733324230",
+    "tokens": [
+        {
+            "native_token": true,
+            "balance": "0.006152427053630099",
+            "token": {
+                "name": "Ether",
+                "decimal": 18,
+                "address": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+                "symbol": "ETH",
+                "logo": "https://cdn.moralis.io/eth/0x.png",
+                "possibleSpam": false,
+                "verifiedContract": true
+            },
+            "usd": {
+                "price": 3787.2477899630267,
+                "price24hrUsdChange": 206.19355149036755,
+                "price24hrPercentChange": 5.757900823594055,
+                "value": "23.300765761769327",
+                "value24hrUsdChange": 1.2685907844734068
+            },
+            "portfolio": {
+                "percentage": 0.0043935479688935715,
+                "percentageRelativeToTotalSupply": null
+            }
+        },
+        {
+            "native_token": false,
+            "balance": "2000000",
+            "token": {
+                "name": "Ethereum Games",
+                "decimal": 18,
+                "address": "0x3fC29836E84E471a053D2D9E80494A867D670EAD",
+                "symbol": "ETHG",
+                "logo": "",
+                "possibleSpam": true,
+                "verifiedContract": false
+            },
+            "usd": {
+                "price": 0.2649127926206216,
+                "price24hrUsdChange": 0,
+                "price24hrPercentChange": 0,
+                "value": "529825.5852412432",
+                "value24hrUsdChange": null
+            },
+            "portfolio": {
+                "percentage": 99.90290223525047,
+                "percentageRelativeToTotalSupply": 10
+            }
+        },
+        {
+            "native_token": false,
+            "balance": "72.620178",
+            "token": {
+                "name": "LayerZero",
+                "decimal": 18,
+                "address": "0x6985884C4392D348587B19cb9eAAf157F13271cd",
+                "symbol": "ZRO",
+                "logo": "https://logo.moralis.io/0x1_0x6985884c4392d348587b19cb9eaaf157f13271cd_28b49480df5483cd6343ed1058d73d0e.jpeg",
+                "possibleSpam": false,
+                "verifiedContract": true
+            },
+            "usd": {
+                "price": 6.770129899118116,
+                "price24hrUsdChange": 0.6741720918600214,
+                "price24hrPercentChange": 11.05933002123679,
+                "value": "491.6480383570796",
+                "value24hrUsdChange": 48.95849731350711
+            },
+            "portfolio": {
+                "percentage": 0.09270421678065192,
+                "percentageRelativeToTotalSupply": 0.000007769312149204
+            }
+        }
+    ]
+}
