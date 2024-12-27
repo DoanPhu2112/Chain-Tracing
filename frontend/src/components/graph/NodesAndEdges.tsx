@@ -1,7 +1,7 @@
 import { Position } from '@xyflow/react'
 import { Node, Edge, MarkerType } from '@xyflow/react'
-import { NodeData, EdgeData, TransactionDetails } from '@/types/graph.interface'
-import transactions from '@/mocks/transactions_new.json'
+import { NodeData, EdgeData } from '@/types/graph.interface'
+import transactions from '@/mocks/transactions.json'
 
 // REDUX
 import { useSelector, useDispatch } from 'react-redux'
@@ -10,6 +10,7 @@ import {
   addTransaction,
   removeTransaction,
 } from '@/lib/features/transactions/transactionsSlice'
+import { Transaction } from '@/types/transaction.interface'
 
 const nodeDefaults = {
   sourcePosition: Position.Right,
@@ -48,7 +49,7 @@ export function mapNodeType(nodeType: string | undefined): string {
   } else return 'normalAddress'
 }
 
-export function mapTransactionToNodeData(transactions: TransactionDetails[]): NodeData[] {
+export function mapTransactionToNodeData(transactions: Transaction[]): NodeData[] {
   const nodesMap: Record<string, NodeData> = {}
   const levelMap: Record<string, number> = {}
   const levelPositions: Record<number, number> = {} // Tracks the y position for each level
@@ -59,9 +60,9 @@ export function mapTransactionToNodeData(transactions: TransactionDetails[]): No
 
   transactions.forEach((transaction) => {
     const fromNodeId = transaction.from.address
-    const fromNodeClassify = mapNodeType(transaction.from.type)
+    const fromNodeClassify = mapNodeType(transaction.from.type || "eoa")
     const toNodeId = transaction.to.address
-    const toNodeClassify = mapNodeType(transaction.to.type)
+    const toNodeClassify = mapNodeType(transaction.to.type || "eoa")
 
     // Determine levels
     if (levelMap[fromNodeId] === undefined) {
@@ -118,11 +119,11 @@ export function mapTransactionToNodeData(transactions: TransactionDetails[]): No
   return Object.values(nodesMap)
 }
 
-export function mapTransactionFields(transactions: TransactionDetails[]): EdgeData[] {
+export function mapTransactionFields(transactions: Transaction[]): EdgeData[] {
   return transactions.map((transaction) => {
-    const { from, to, hash, ...otherDetails } = transaction
+    const { from, to, txnHash, ...otherDetails } = transaction
     return {
-      id: hash,
+      id: txnHash,
       source: from.address,
       target: to.address,
       details: {

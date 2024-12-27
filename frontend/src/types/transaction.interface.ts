@@ -2,16 +2,18 @@ export type Transaction = {
   chainId: string,
   txnHash: string
   from: {
-    address?: string;
+    address: string;
     address_entity?: string;
     address_entity_logo?: string;
     address_entity_label?: string;
+    type: string;
   };
   to: {
-    address?: string;
+    address: string;
     address_entity?: string;
     address_entity_logo?: string;
     address_entity_label?: string;
+    type: string;
   };
   tokenName: string,
   type: string
@@ -19,6 +21,7 @@ export type Transaction = {
   status: string
   date: string
   amount: string
+  asset: string
   added?: boolean // New field
 }
 

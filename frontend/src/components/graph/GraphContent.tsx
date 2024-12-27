@@ -7,17 +7,24 @@ import GraphTxDataTableCard from './GraphTxDataTableCard'
 
 import { EdgeData, NodeData } from '@/types/graph.interface'
 import { getAddressBalance, getAddressTransactions } from '@/services/address'
-import { Transaction } from '@/types/wallet.interface'
+import { Transaction } from '@/types/transaction.interface'
 import InputCard from '../card/InputCard'
 
 import { useToast } from '@/hooks/use-toast'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from '@/lib/store'
+import { setTransactions } from '@/lib/features/transactions/transactionsSlice'
 
 const GraphContent = () => {
+  const dispatch = useDispatch();
+
+  const transactions = useSelector((state: RootState) => state.transactions.transactions);
+
   const [nodeInfo, setNodeInfo] = useState<NodeData | null>(null)
   const [edgeInfo, setEdgeInfo] = useState<EdgeData | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
   const [balance, setBalance] = useState<number>()
-  const [transactions, setTransactions] = useState<Transaction[]>([])
+  // const [transactions, setTransactions] = useState<Transaction[]>([])
   const [lastUpdated, setLastUpdated] = useState<'node' | 'edge' | null>(null)
   const { toast } = useToast()
 
@@ -51,8 +58,10 @@ const GraphContent = () => {
           const transactionsData = await getAddressTransactions(nodeInfo.details.address)
           console.log('🚀 ~ fetchWalletData ~ transactionsData:', transactionsData)
           console.log('🚀 ~ fetchWalletData ~ balanceData:', balanceData)
-          setBalance(balanceData) // Set the fetched balance
-          setTransactions(transactionsData) // Set the fetched transactions
+
+          // NOTE: Temp only, modify in the future
+          setBalance(balanceData[0].amount) // Set the fetched balance
+          dispatch(setTransactions(transactionsData)) // Set the fetched transactions
         } catch (error) {
           console.error('Error fetching wallet data:', error)
         } finally {

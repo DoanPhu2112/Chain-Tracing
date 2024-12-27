@@ -51,7 +51,7 @@ import { File, ListFilter } from 'lucide-react'
 // Import the JSON data
 import { DataTablePagination } from '@/components/tx/DataTablePagination'
 import transactions_json from '@/mocks/transactions.json'
-import { Transaction } from '@/types/wallet.interface'
+import { Transaction } from '@/types/transaction.interface'
 
 const assetColorMapping: { [key: string]: string } = {
   ETH: '#627eea', // Ethereum - Iconic Blue
@@ -164,7 +164,7 @@ const GraphTxDataTable: React.FC<GraphTxDataTableProps> = ({ txs, loading }) => 
       cell: ({ row, table }) => {
         const transaction = row.original
         const isAdded = addedTransactions.some(
-          (addedTxn: Transaction) => addedTxn.hash === transaction.hash
+          (addedTxn: Transaction) => addedTxn.txnHash === transaction.txnHash
         )
 
         return (
@@ -209,7 +209,9 @@ const GraphTxDataTable: React.FC<GraphTxDataTableProps> = ({ txs, loading }) => 
       accessorKey: 'hash',
       header: 'Transaction Hash',
       cell: ({ row }) => {
-        const hash: string = row.getValue('hash')
+        const hash: string = row.getValue('hash') ? row.getValue('hash') :  '0xbc44d53298a03a181702194df3b768bcea05df2be01509c99de03d9f1e583fca'
+        // console.log("Hash", row.getValue('hash'))
+        // console.log("txnHash",row.getValue('txnHash'))
         const shortenedHash = `${hash.slice(0, 6)}...${hash.slice(-6)}`
         return <div className="truncate max-w-xs">{shortenedHash}</div>
       },
@@ -223,7 +225,8 @@ const GraphTxDataTable: React.FC<GraphTxDataTableProps> = ({ txs, loading }) => 
       accessorKey: 'to',
       header: 'To',
       cell: ({ row }) => {
-        const hash: string = row.getValue('to')
+        const hash: string = row.getValue('to').address
+        console.log("Hash: ", hash)
         const shortenedHash = `${hash.slice(0, 6)}...${hash.slice(-6)}`
         return <div className="text-blue-600 truncate max-w-xs">{shortenedHash}</div>
       },
@@ -232,7 +235,8 @@ const GraphTxDataTable: React.FC<GraphTxDataTableProps> = ({ txs, loading }) => 
       accessorKey: 'value',
       header: () => <div className="text-right">Value</div>,
       cell: ({ row }) => {
-        const value: string = row.getValue('value')
+        const value: string = row.getValue('value') ? row.getValue('value') : 13;
+        console.log("Value ", value)
         const formattedValue = parseFloat(value).toFixed(5) // Ensure 5 decimal places
         const valueString = value.toString() // Convert value to string for splitting
         const hasMoreDecimals =
@@ -286,7 +290,7 @@ const GraphTxDataTable: React.FC<GraphTxDataTableProps> = ({ txs, loading }) => 
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              {transaction.hash && (
+              {transaction.txnHash && (
                 <DropdownMenuItem
                   //@ts-ignore
                   onClick={() => navigator.clipboard.writeText(transaction.hash)}
@@ -334,10 +338,10 @@ const GraphTxDataTable: React.FC<GraphTxDataTableProps> = ({ txs, loading }) => 
     meta: {
       toggleAdd: (transaction: Transaction) => {
         setAddedTransactions((current) => {
-          const exists = current.some((txn) => txn.hash === transaction.hash)
+          const exists = current.some((txn) => txn.txnHash === transaction.txnHash)
           if (exists) {
             // Remove the transaction if it exists
-            return current.filter((txn) => txn.hash !== transaction.hash)
+            return current.filter((txn) => txn.txnHash !== transaction.txnHash)
           } else {
             // Add the transaction if it doesn't exist
             return [...current, { ...transaction, added: true }]
@@ -465,12 +469,12 @@ const GraphTxDataTable: React.FC<GraphTxDataTableProps> = ({ txs, loading }) => 
           <DataTablePagination table={table} totalCount={totalCount} />
         </div>
       </div>
-      {isClient && (
+      {/* {isClient && (
         <div>
           <h2>Added Transactions</h2>
           <ul>{JSON.stringify(addedTransactions)}</ul>
         </div>
-      )}
+      )} */}
     </div>
   )
 }

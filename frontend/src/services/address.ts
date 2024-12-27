@@ -34,29 +34,33 @@ export const getAddressBalance = async (address: string): Promise<PortfolioBalan
     }
 };
 function transformTransaction(chainId: string, backendTransactions: BackendTransaction[]): Transaction[] {
-
+    console.log("Transform Transaction Called")
     return backendTransactions.map((transaction) => {
 
-        let amount: string = ''
+        let amount: string = '';
+        let asset: string = '';
         let token: string = '';
         if (transaction.value != '0') {
-            amount += transaction.value + '\n'
+            amount += transaction.value + '\n',
+            asset += "Native Token"
             token += 'Native Token' + '\n'
         }
-        if (transaction.nativeTransfers[0]) {
-            amount += transaction.nativeTransfers[0].value_formatted + ' ' + transaction.nativeTransfers[0].token.symbol + '\n'
+        else if (transaction.nativeTransfers[0]) {
+            amount += transaction.nativeTransfers[0].value_formatted;
+            asset = transaction.nativeTransfers[0].token.symbol!
             token += transaction.nativeTransfers[0].token.symbol + '\n'
 
         }
-        if (transaction.erc20Transfers[0]) {
-            amount += transaction.erc20Transfers[0].value_formatted + ' ' + transaction.erc20Transfers[0].token_entity.symbol + '\n'
+        else if (transaction.erc20Transfers[0]) {
+            amount += transaction.erc20Transfers[0].value_formatted 
+            asset = transaction.erc20Transfers[0].token_entity.symbol!
             token += transaction.erc20Transfers[0].token_entity.symbol + '\n'
 
         }
-        if (transaction.nftTransfers[0]) {
-            amount += transaction.nftTransfers[0].value + ' ' + transaction.nftTransfers[0].token.name + '\n'
+        else if (transaction.nftTransfers[0]) {
+            amount += transaction.nftTransfers[0].value;
+            asset = transaction.nftTransfers[0].token.name !
             token += transaction.nftTransfers[0].token.name + '\n'
-
         }
         if (amount === '') {
             console.log('amount', transaction)
@@ -82,6 +86,7 @@ function transformTransaction(chainId: string, backendTransactions: BackendTrans
             status: 'Confirmed', // You might want to determine status based on certain criteria
             date: new Date(transaction.blockTimestamp).toLocaleDateString(), // Convert timestamp to readable date
             amount: amount,
+            asset: asset,
             added: false // Default to false or set based on additional logic
         }
     })

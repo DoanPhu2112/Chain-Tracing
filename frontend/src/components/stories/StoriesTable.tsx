@@ -10,6 +10,7 @@ interface Asset {
 }
 
 const transformTransaction = (txn: Transaction): Event => {
+  console.log("Transform transaction ", txn)
   const shortenFromAddress =
     txn.from.address!.substring(0, 12) +
     '...' +
@@ -20,18 +21,18 @@ const transformTransaction = (txn: Transaction): Event => {
     txn.to.address!.substring(txn.txnHash.length - 4)
   const date = txn.date
   let fromAddressName =
-    txn.from && txn.from.address_entity_label
-      ? txn.from.address_entity_label
-      : txn.from && txn.from.address_entity
-        ? txn.from.address_entity
+    txn.from && txn.from.entity
+      ? txn.from.entity
+      : txn.from && txn.from.label
+        ? txn.from.label
         : txn.from && txn.from.address
           ? shortenFromAddress
           : 'Unknown Address' // Fallback value if all are undefined
   const toAddressName =
-    txn.to && txn.to.address_entity_label
-      ? txn.to.address_entity_label
-      : txn.to && txn.to.address_entity
-        ? txn.to.address_entity
+    txn.to && txn.to.entity
+      ? txn.to.entity
+      : txn.to && txn.to.label
+        ? txn.to.label
         : txn.to && txn.to.address
           ? shortenToAddress
           : 'Unknown Address' // Fallback value if all are undefined

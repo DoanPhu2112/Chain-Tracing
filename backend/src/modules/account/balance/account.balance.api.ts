@@ -59,6 +59,8 @@ async function fetchERC20Balance(
     if (result.size > DEFAULT_MAX_RESULT_COUNT) {
       break;
     }
+    // if (cursor === "") cursor = null;
+    
     const params = {
       chain: chainID,
       address: address,
@@ -70,7 +72,7 @@ async function fetchERC20Balance(
 
       excludeUnverifiedContracts: false,
       toBlock: toBlock !== undefined ? toBlock : undefined,
-      ...(cursor && { cursor })
+      // ...(cursor && { cursor })
     };
     let pageResult;
     try {

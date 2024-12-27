@@ -1,11 +1,12 @@
 import { Node, Edge } from '@xyflow/react'
+import { Transaction } from './transaction.interface';
 
 export interface NodeData extends Node {
   details: Account
 }
 
 export interface EdgeData extends Edge {
-    details: TransactionDetails
+    details: Transaction
 }
 
 export interface Account {

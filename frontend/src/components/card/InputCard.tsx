@@ -41,6 +41,10 @@ import { cn } from '@/lib/utils'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Separator } from '../ui/separator'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from '@/lib/store'
+import { getAddressBalance, getAddressTransactions } from '@/services/address'
+import { setTransactions } from '@/lib/features/transactions/transactionsSlice'
 
 dayjs.extend(buddhistEra)
 
@@ -70,6 +74,8 @@ const globalBuddhistLocale: typeof enUS = {
 const defaultValue = dayjs('2024-01-01')
 
 const InputCard = () => {
+  const dispatch = useDispatch();
+
   const [input, setInput] = React.useState<string>('')
   const [chain, setChain] = React.useState<string>('')
   const [startDate, setStartDate] = React.useState<Date>()
@@ -77,6 +83,16 @@ const InputCard = () => {
 
   const onChange: DatePickerProps['onChange'] = (_, dateStr) => {
     console.log('onChange:', dateStr)
+  }
+
+  const handleTrackAddress = async () => {
+    if (input.length === 42) {
+      const transactions = await getAddressTransactions(input);
+      console.log("Input Card Transactions", transactions)
+      dispatch(setTransactions(transactions));
+      return;
+    }
+    alert("Input length must equal 42")
   }
 
   useEffect(() => {
@@ -118,7 +134,7 @@ const InputCard = () => {
           </Select>
           <Input
             type="text"
-            placeholder="Input an address / transaction's hash"
+            placeholder="Input an address hash"
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
@@ -148,7 +164,12 @@ const InputCard = () => {
       </CardContent>
       <Separator className="my-4" />
       <CardFooter className="gap-0.5 grid justify-end">
-        <Button size="default" variant="outline" className=" col-span-1 h-12 w-48 gap-1">
+        <Button
+          size="default"
+          variant="outline"
+          className=" col-span-1 h-12 w-48 gap-1"
+          onClick={handleTrackAddress}
+        >
           <FileSearchIcon className="h-3.5 w-3.5" />
           <span className="xl:whitespace-nowrap">Track</span>
         </Button>

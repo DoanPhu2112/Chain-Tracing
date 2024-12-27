@@ -298,6 +298,7 @@ const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
     const transactionList = await getAddressTransactions(search)
     console.log('transactionList ', transactionList)
     setSearchTransaction(transactionList)
+    setAddedTransactions([])
   }
   useEffect(() => {
     if (!search) {

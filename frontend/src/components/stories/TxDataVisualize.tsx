@@ -15,10 +15,11 @@ const lo =
   'lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.'
 const lorem = lo + lo + lo + lo + lo + lo + lo + lo + lo + lo + lo
 const TxDataVisualize: React.FC<TxDataVisualizeProps> = ({ txList }) => {
+  console.log(txList)
   return (
     <div>
       <h2>Transaction Data</h2>
-      <table>
+      {/* <table>
         <thead>
           <tr>
             <th>Txn Hash</th>
@@ -42,7 +43,7 @@ const TxDataVisualize: React.FC<TxDataVisualizeProps> = ({ txList }) => {
               </tr>
             ))}
         </tbody>
-      </table>
+      </table> */}
       <Separator className="my-8" />
       <StoriesTable txnList={txList}/>
       <div className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-4 xl:grid-cols-5">
