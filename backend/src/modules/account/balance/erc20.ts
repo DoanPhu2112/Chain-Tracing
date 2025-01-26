@@ -2,7 +2,7 @@ import { ERC20Portfolio, ERC20Token, ERC20USD } from "~/modules/account/types/to
 
 export type ERC20BalanceReturn = {
   size: number;
-  toTimestamp: string,
+  toTimestamp: number,
   toBlock: number | undefined;
   tokens: ERC20Balance[];
 };

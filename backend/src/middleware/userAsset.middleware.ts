@@ -11,9 +11,9 @@ const userAssetSchema = Joi.object({
 
   page_size: Joi.string().pattern(/^\d+$/),
 
-  start_timestamp: Joi.number().integer().min(0).max(Date.now()),
+  start_timestamp: Joi.number().integer().min(0),
 
-  end_timestamp: Joi.number().integer().min(0).max(Date.now()),
+  end_timestamp: Joi.number().integer().min(0),
 
   token_addresses: Joi.alternatives().try(
     Joi.array().items(Joi.string().custom(Field.validateAddress, 'Ethereum Address Validation')),

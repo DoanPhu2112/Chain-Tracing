@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import codes from 'src/errors/codes';
 
-import Service from './account.balance.service';
-import { DEFAULT_LATEST_TIMESTAMP_STRING, DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '~/constants/defaultvalue';
-import { BalanceReturnType } from './account.balance.type.return';
+import Service from './service';
+import { DEFAULT_LATEST_TIMESTAMP, DEFAULT_LATEST_TIMESTAMP_STRING, DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '~/constants/defaultvalue';
+import { BalanceReturnType } from './type.return';
 import { timestampToDateTime, toVNDateTime } from '~/utils/time';
 
 const Controller = {
@@ -20,16 +20,19 @@ async function GetERC20Balance(req: Request, res: Response) {
   console.log("chainID",  req.query)
   const pageNumber = typeof page === 'number' ? parseInt(page, 10) : DEFAULT_PAGE;
   const pageSizeNumber = typeof pageSize === 'number' ? parseInt(pageSize, 10) : DEFAULT_PAGE_SIZE;
-  const endTimestampString = typeof endTimestamp === 'string' ? endTimestamp : '';
+  const endTimestampNumber = typeof endTimestamp === 'string' ? parseInt(endTimestamp) : undefined;
 
-  const endDatetimeDate = timestampToDateTime(endTimestampString);
+  if (!endTimestampNumber) {
+    return res.status(codes.BAD_REQUEST).json({ message: "Invalid endTimestamp" });
+  }
+  const endDatetimeDate = timestampToDateTime(endTimestampNumber);
   const endDatetime = toVNDateTime(endDatetimeDate);
 
   const response = await Service.GetERC20Balance(
     address,
     chainId as string,
     tokenAddresses as string[],
-    endTimestampString
+    endTimestampNumber
   );
   
   const responsePage = response.tokens!.slice(pageNumber * pageSizeNumber, pageNumber * pageSizeNumber + pageSizeNumber)
@@ -48,8 +51,8 @@ async function GetERC20Balance(req: Request, res: Response) {
         end: response.toBlock,
       },
       timestamp: {
-        start: "0",
-        end: endTimestampString,
+        start: 0,
+        end: endTimestampNumber,
       },
       datetime: {
         start: new Date(0),
@@ -70,7 +73,7 @@ async function GetNFTBalance(req: Request, res: Response) {
   const pageNumber = typeof page === 'number' ? parseInt(page, 10) : DEFAULT_PAGE;
   const pageSizeNumber = typeof pageSize === 'number' ? parseInt(pageSize, 10) : DEFAULT_PAGE_SIZE;
   // const endTimestampString = typeof endTimestamp === 'string' ? endTimestamp : '';
-  const endTimestampString = DEFAULT_LATEST_TIMESTAMP_STRING
+  const endTimestampString = DEFAULT_LATEST_TIMESTAMP
 
   const endDatetimeDate = timestampToDateTime(endTimestampString);
   const endDatetime = toVNDateTime(endDatetimeDate);
@@ -96,7 +99,7 @@ async function GetNFTBalance(req: Request, res: Response) {
         end: response.toBlock,
       },
       timestamp: {
-        start: "0",
+        start: 0,
         end: endTimestampString,
       },
       datetime: {

@@ -7,7 +7,6 @@ import { errorHandler } from 'src/middleware/errorHandler';
 
 import camelCaseReq from 'src/middleware/format/camelcaseReq';
 import omitReq from 'src/middleware/format/omitReq';
-import snakecaseRes from 'src/middleware/format/snakecaseRes';
 
 import 'dotenv/config';
 

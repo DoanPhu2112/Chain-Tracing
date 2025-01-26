@@ -1,8 +1,13 @@
 import Moralis from "moralis";
 
 
-async function timestampToBlock(timestamp: string, chainID: string): Promise<number> {
-  const timestampDate = new Date(parseInt(timestamp) * 1000);
+async function timestampToBlock(timestamp: number | undefined, chainID: string): Promise<number | undefined> {
+  console.log("timestamp", timestamp);
+  if (timestamp === undefined) {
+    return undefined;
+  }
+
+  const timestampDate = new Date(timestamp * 1000);
   try {
     const response = await Moralis.EvmApi.block.getDateToBlock({
       "chain": chainID,
@@ -17,8 +22,8 @@ async function timestampToBlock(timestamp: string, chainID: string): Promise<num
     return -1
   }
 }
-function timestampToDateTime(timestamp: string): Date {
-  return new Date(parseInt(timestamp) * 1000);
+function timestampToDateTime(timestamp: number): Date {
+  return new Date(timestamp * 1000);
 }
 function toVNDateTime(date: Date): string {
   const vietnamOffset = 7 * 60 * 60 * 1000; 

@@ -11,8 +11,8 @@ export type BalanceReturnType = {
       end: number | undefined,
     }
     timestamp: {
-      start: string,
-      end: string,
+      start: number,
+      end: number,
     }
     datetime: {
       start: Date,

@@ -2,8 +2,8 @@ import { NFTToken } from "~/modules/account/types/token";
 
 export type NFTBalanceReturn = {
   size: number;
-  toTimestamp: string,
-  toBlock: number;
+  toTimestamp: number,
+  toBlock: number | undefined;
   tokens: NFTBalance[];
 };
 export type NFTBalance = {

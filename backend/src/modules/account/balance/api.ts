@@ -2,11 +2,11 @@ import Moralis from "moralis";
 import { wait } from "src/utils/wait";
 import { DEFAULT_LIMIT, DEFAULT_TOKEN_ADDRESS, DEFAULT_CONTRACT_VERIFICATION, DEFAULT_INVALID_VALUE, DEFAULT_INVALID_PERCENTAGE, DEFAULT_MAX_RESULT_COUNT } from '~/constants/defaultvalue';
 
-import { ERC20Balance, ERC20BalanceReturn as ERC20APIBalanceReturn, NewERC20Balance } from "./account.balance.type.erc20";
+import { ERC20Balance, ERC20BalanceReturn as ERC20APIBalanceReturn, NewERC20Balance } from "./erc20";
 
 import { timestampToBlock } from "~/utils/time";
-import { getRandomMoralisAPI } from "~/configs/provider.configs";
-import { NewNFTBalance, NFTBalanceReturn as NFTAPIBalanceReturn } from "./account.balance.type.nft";
+import { getMoralisAPI } from "~/configs/provider.configs";
+import { NewNFTBalance, NFTBalanceReturn as NFTAPIBalanceReturn } from "./type.nft";
 import CustomError from "~/errors/CustomError";
 import codes from "~/errors/codes";
 
@@ -16,7 +16,8 @@ const API = {
   fetchNativeBalance
 }
 
-const moralisAPI = getRandomMoralisAPI();
+const moralisAPI = getMoralisAPI();
+console.log("Moralis Api", moralisAPI)
 Moralis.start({
   apiKey: moralisAPI,
 });
@@ -24,7 +25,7 @@ Moralis.start({
 async function fetchNativeBalance(
   chainID: string,
   address: string,
-  endTimestamp: string
+  endTimestamp: number
 ) {
   let toBlock = await timestampToBlock(endTimestamp, chainID)
 
@@ -41,7 +42,7 @@ async function fetchERC20Balance(
   chainID: string,
   address: string,
   tokenAddresses: string[],
-  endTimestamp: string
+  endTimestamp: number
 ): Promise<ERC20APIBalanceReturn> {
   let cursor: string | null = "";
 
@@ -124,7 +125,7 @@ async function fetchNFTTokens(
   chainID: string,
   address: string,
   tokenAddresses: string[],
-  endTimestamp: string
+  endTimestamp: number
 ): Promise<NFTAPIBalanceReturn> {
 
   let cursor: string | null = "";

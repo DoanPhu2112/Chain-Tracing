@@ -1,0 +1,122 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+datasource chain_tracing {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
+
+}
+
+model Story {
+  story_id          Int                @id @default(autoincrement())
+  title             String             @chain_tracing.VarChar(255)
+  description       String             @chain_tracing.VarChar(255)
+  created_at        DateTime
+  updated_at        DateTime
+  storyTransactions Story_Transaction[]
+}
+
+model Erc20token {
+  erc20_id          Int      @id @default(autoincrement())
+  address           String   @chain_tracing.Char(42)
+  name              String
+  symbol            String   @chain_tracing.VarChar(255)
+  possible_spam     Boolean?
+  decimal           Decimal
+  verified_contract Boolean?
+  logo              String?
+}
+
+model Erc721token {
+  erc721_id     Int     @id @default(autoincrement())
+  address       String  @chain_tracing.Char(42)
+  description   String?
+  animation_url String?
+  image         String?
+  value         String?
+  traits        BigInt?
+}
+model token {
+  id     Int     @id @default(autoincrement())
+  address       String  @chain_tracing.Char(42)
+  chain_id   String
+  label           String
+  name            String?
+  symbol         String?
+  website        String?
+  image String?
+}
+
+model Smartcontract {
+  contract_id Int      @id @default(autoincrement())
+  address     String   @chain_tracing.Char(42)
+  source_code String   @chain_tracing.MediumText
+  is_verified Boolean?
+  type        String   @chain_tracing.Text
+  chain_hash  String
+  name_tag    String?
+  label_source   label_source @default(ethereum)
+  logo        String?
+  abi         String?          @chain_tracing.Text
+  chain       Chain    @relation(fields: [chain_hash], references: [hash])
+}
+
+model Transaction {
+  transaction_id   Int                @id @default(autoincrement())
+  hash             String             @chain_tracing.Char(66)
+  block_hash       String             @chain_tracing.Char(66)
+  from_address     String             @chain_tracing.Char(42)
+  to_address       String             @chain_tracing.Char(42)
+  asset_id         Int? // Removed foreign key constraint for flexibility
+  chain_hash       String
+  story_transaction Story_Transaction[]
+  chain          Chain   @relation(fields: [chain_hash], references: [hash])
+
+}
+
+model Eoa {
+  eoa_id         Int     @id @default(autoincrement())
+  native_balance BigInt
+  score          Int
+  name_tag       String?
+  label          String?
+  label_source   label_source @default(ethereum)
+  hash           String
+  chain_hash     String
+  logo           String?
+  chain          Chain   @relation(fields: [chain_hash], references: [hash])
+  @@index (fields: [name_tag])
+}
+
+model Story_Transaction {
+  story_transaction_id Int    @id @default(autoincrement())
+  story_id             Int
+  transaction_id       Int
+  sequence_number      BigInt
+
+  story       Story       @relation(fields: [story_id], references: [story_id])
+  transaction Transaction @relation(fields: [transaction_id], references: [transaction_id])
+}
+
+model Chain {
+  hash           String @id
+  name           String
+  rpc_url        String?
+  smartcontract  Smartcontract[]
+  transaction    Transaction[]
+  eoa            Eoa[]
+}
+
+enum label_source {
+  ethereum
+  moralis
+}

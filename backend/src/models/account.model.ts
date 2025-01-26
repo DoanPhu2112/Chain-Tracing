@@ -7,13 +7,16 @@ export type Account = {
 }
 
 export enum AccountType {
-  miner,
-  EOA_active,
-  EOA_inactive,
-  EOA_exchange,
-  contract_exchange,
-  contract_normal,
-  router,
+  MINER = "MINER",
+  EOA_ACTIVE = "EOA_ACTIVE",
+  EOA_INACTIVE = "EOA_INACTIVE",
+  EOA_EXCHANGE = "EOA_EXCHANGE",
+  CONTRACT_EXCHANGE = "CONTRACT_EXCHANGE",
+  CONTRACT_NORMAL = "CONTRACT_NORMAL",
+  ROUTER = "ROUTER",
+  CONTRACT_TOKEN = "CONTRACT_TOKEN",
+  INVALID = "INVALID",
+  TARGET = "TARGET",
 }
 
 export enum AccountTag {

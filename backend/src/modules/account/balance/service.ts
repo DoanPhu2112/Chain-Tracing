@@ -1,5 +1,5 @@
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from "~/constants/defaultvalue";
-import API from './account.balance.api'
+import API from './api'
 const Service = {
   GetERC20Balance,
   GetNFTBalance
@@ -9,7 +9,7 @@ async function GetERC20Balance(
   address: string,
   chainID: string,
   tokenAddresses: string[] = [],
-  endTimestamp: string,
+  endTimestamp: number,
 ) {
   // TODO: IF DB exist address data
 
@@ -23,7 +23,7 @@ async function GetNFTBalance(
   address: string,
   chainID: string,
   tokenAddresses: string[] = [],
-  endTimestamp: string,
+  endTimestamp: number,
 ) {
   // TODO: IF DB exist address data
 

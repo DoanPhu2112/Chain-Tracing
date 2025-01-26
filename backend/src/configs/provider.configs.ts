@@ -5,42 +5,51 @@ import { ethers } from "ethers";
 import { ALCHEMY_URLs, RPC_URLs, BIT_QUERY_URLS, MORALIS_URLS, ETHEREUM_URLS } from "../utils/API";
 import { randomIntFromInterval } from "~/utils/randomAPI";
 
-function random_API(URL: string[]): string {
-  const API_LENGTH = URL.length
+//ALCHEMY, RPC, BITQUERY, MORALIS, ETHEREUM
+const API_current = [0, 0, 0, 2, 0]
 
-  let number = randomIntFromInterval(0, API_LENGTH - 1);
+function round_robin_API(URL: string[], startIndex: number): string {
+  const API_LENGTH = URL.length - 1
 
-  const API_KEY = URL[number]
-  return API_KEY
+  let number = API_current[startIndex]
+  if (number >= API_LENGTH) {
+    number = 0;
+  }
+  else {
+    number += 1;
+  }
+  return URL[number]
 }
 
-export function getRandomDrpcAPI(): JsonRpcProvider {
-  const key: string = random_API(RPC_URLs);
+
+export function getDrpcAPI(): JsonRpcProvider {
+  const key: string = round_robin_API(RPC_URLs, 1);
   const provider: JsonRpcProvider =
     new ethers.providers.JsonRpcProvider(key)
   return provider;
 }
 
-export function getRandomAlchemyAPI(): Alchemy {
+export function getAlchemyAPI(): Alchemy {
   const config = {
-    apiKey: random_API(ALCHEMY_URLs),
+    apiKey: round_robin_API(ALCHEMY_URLs, 0),
     network: Network.ETH_MAINNET
   };
   const alchemy: Alchemy = new Alchemy(config);
   return alchemy;
 }
 
-export function getRandomBitQueryAPI() {
-  const apiKey = random_API(BIT_QUERY_URLS);
+export function getBitQueryAPI() {
+  const apiKey = round_robin_API(BIT_QUERY_URLS, 2);
   return apiKey;
 }
-export function getRandomMoralisAPI() {
-  const apiKey = random_API(MORALIS_URLS);
+export function getMoralisAPI() {
+  const apiKey = round_robin_API(MORALIS_URLS, 3);
   return apiKey;
 }
 
-export function getRandomEtherscanAPI() {
-  const apiKey = random_API(ETHEREUM_URLS);
+export function getEtherscanAPI() {
+  const apiKey = round_robin_API(ETHEREUM_URLS, 4);
+  console.log(apiKey)
   return apiKey;
 }
 

@@ -1,7 +1,7 @@
 import { Entity } from "../types/entity";
-import { Erc20Transfer } from "./account.transfer.type.erc20";
-import { NativeTransfer } from "./account.transfer.type.native";
-import { NFTTransfer } from "./account.transfer.type.nft";
+import { Erc20Transfer } from "./type.erc20";
+import { NativeTransfer } from "./type.native";
+import { NFTTransfer } from "./type.nft";
 export type TransactionReturnType = {
   metadata: {
     total_data: number,
@@ -15,8 +15,8 @@ export type TransactionReturnType = {
       end: number | undefined,
     }
     timestamp: {
-      start: string,
-      end: string,
+      start: number,
+      end: number,
     }
     datetime: {
       start: Date | string,
@@ -27,16 +27,17 @@ export type TransactionReturnType = {
 }
 export type TransactionAPIReturn = {
   size: number;
-  startTimestamp: string
-  endTimestamp: string,
+  startTimestamp: number | undefined
+  endTimestamp: number | undefined,
   startBlock: number | undefined;
   endBlock: number | undefined;
   transactions: Transaction[]
 }
 export type Transaction = {
-  transactionHash: string;
-  fromEntity: Entity;
-  toEntity: Entity;
+  chainId: string;
+  txnHash: string;
+  from: Entity;
+  to: Entity;
   summary: string;
   methodLabel?: string;
 
