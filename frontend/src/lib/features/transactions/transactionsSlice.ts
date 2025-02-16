@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import mock_transactions from '@/mocks/transactions_new.json'
+import mock_transactions from '@/mocks/graph_response.json'
 import { Transaction } from '@/types/transaction.interface'
 
 interface TransactionState {
@@ -17,7 +17,7 @@ const transactionSlice = createSlice({
     reducers: {
         setTransactions(state, action: PayloadAction<Transaction[]>) {
             state.transactions = action.payload;
-        },
+        }, 
         addTransaction(state, action: PayloadAction<Transaction>) {
             state.transactions.push(action.payload);
         },

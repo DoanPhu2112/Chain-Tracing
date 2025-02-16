@@ -1,11 +1,15 @@
 import React from 'react'
-import { ConfigProvider } from 'antd'
+import { ConfigProvider, Modal } from 'antd'
 
 const ConfigProviderHelper = () => {
   return (
     <ConfigProvider>
+      
         theme={{
             components: {
+              Modal:{
+                titleFontSize: '40px',
+              },
                 Button: {
                 colorPrimary: '#00b96b',
                 algorithm: true, // Enable algorithm

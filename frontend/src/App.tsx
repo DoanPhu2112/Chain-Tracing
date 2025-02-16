@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './App.css';
+import './app/globals.css';
 
 import InvestigateTxHash from './pages/InvestigateTxHash';
 import InvestigateAddress from './pages/InvestigateAddress';

@@ -1,6 +1,5 @@
 import React from 'react'
 import { NodeData } from '@/types/graph.interface'
-import { Transaction } from '@/types/wallet.interface'
 import GraphTxDataTable from '@/components/graph/GraphTxDataTable'
 
 import {
@@ -10,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Transaction } from '@/types/transaction.interface'
 
 interface TxDataVisualizeCardProps {
   nodeData: NodeData

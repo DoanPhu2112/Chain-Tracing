@@ -6,7 +6,6 @@ import {
   addTransaction,
   removeTransaction,
 } from '@/lib/features/transactions/transactionsSlice'
-import { TransactionDetails } from '@/types/graph.interface'
 
 // Properly typed sampleTransaction
 const sampleTransaction: Transaction = {

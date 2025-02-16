@@ -17,6 +17,232 @@ const config = {
         "2xl": "1400px",
       },
     },
+    fontSize: {
+      "xs-regular": [
+        "12px",
+        {
+          lineHeight: "16px",
+          fontWeight: 400,
+        },
+      ],
+      "xs-medium": [
+        "12px",
+        {
+          lineHeight: "16px",
+          fontWeight: 500,
+        },
+      ],
+      "xs-semibold": [
+        "12px",
+        {
+          lineHeight: "16px",
+          fontWeight: 600,
+        },
+      ],
+      "xs-bold": [
+        "12px",
+        {
+          lineHeight: "16px",
+          fontWeight: 700,
+        },
+      ],
+      "sm-regular": [
+        "14px",
+        {
+          lineHeight: "20px",
+          fontWeight: 400,
+        },
+      ],
+      "sm-medium": [
+        "14px",
+        {
+          lineHeight: "20px",
+          fontWeight: 500,
+        },
+      ],
+      "sm-semibold": [
+        "14px",
+        {
+          lineHeight: "20px",
+          fontWeight: 600,
+        },
+      ],
+      "sm-bold": [
+        "14px",
+        {
+          lineHeight: "20px",
+          fontWeight: 700,
+        },
+      ],
+      "base-regular": [
+        "16px",
+        {
+          lineHeight: "24px",
+          fontWeight: 400,
+        },
+      ],
+      "base-medium": [
+        "16px",
+        {
+          lineHeight: "24px",
+          fontWeight: 500,
+        },
+      ],
+      "base-semibold": [
+        "16px",
+        {
+          lineHeight: "24px",
+          fontWeight: 600,
+        },
+      ],
+      "base-bold": [
+        "16px",
+        {
+          lineHeight: "24px",
+          fontWeight: 700,
+        },
+      ],
+      "lg-regular": [
+        "18px",
+        {
+          lineHeight: "28px",
+          fontWeight: 400,
+        },
+      ],
+      "lg-medium": [
+        "18px",
+        {
+          lineHeight: "28px",
+          fontWeight: 500,
+        },
+      ],
+      "lg-semibold": [
+        "18px",
+        {
+          lineHeight: "28px",
+          fontWeight: 600,
+        },
+      ],
+      "lg-bold": [
+        "18px",
+        {
+          lineHeight: "28px",
+          fontWeight: 700,
+        },
+      ],
+      "xl-regular": [
+        "20px",
+        {
+          lineHeight: "28px",
+          fontWeight: 400,
+        },
+      ],
+      "xl-medium": [
+        "20px",
+        {
+          lineHeight: "28px",
+          fontWeight: 500,
+        },
+      ],
+      "xl-semibold": [
+        "20px",
+        {
+          lineHeight: "28px",
+          fontWeight: 600,
+        },
+      ],
+      "xl-bold": [
+        "20px",
+        {
+          lineHeight: "28px",
+          fontWeight: 700,
+        },
+      ],
+      "2xl-regular": [
+        "24px",
+        {
+          lineHeight: "32px",
+          fontWeight: 400,
+        },
+      ],
+      "2xl-medium": [
+        "24px",
+        {
+          lineHeight: "32px",
+          fontWeight: 500,
+        },
+      ],
+      "2xl-semibold": [
+        "24px",
+        {
+          lineHeight: "32px",
+          fontWeight: 600,
+        },
+      ],
+      "2xl-bold": [
+        "24px",
+        {
+          lineHeight: "32px",
+          fontWeight: 700,
+        },
+      ],
+      "3xl-regular": [
+        "30px",
+        {
+          lineHeight: "36px",
+          fontWeight: 400,
+        },
+      ],
+      "3xl-medium": [
+        "30px",
+        {
+          lineHeight: "36px",
+          fontWeight: 500,
+        },
+      ],
+      "3xl-semibold": [
+        "30px",
+        {
+          lineHeight: "36px",
+          fontWeight: 600,
+        },
+      ],
+      "3xl-bold": [
+        "30px",
+        {
+          lineHeight: "36px",
+          fontWeight: 700,
+        },
+      ],
+      "4xl-regular": [
+        "36px",
+        {
+          lineHeight: "40px",
+          fontWeight: 400,
+        },
+      ],
+      "4xl-medium": [
+        "36px",
+        {
+          lineHeight: "40px",
+          fontWeight: 500,
+        },
+      ],
+      "4xl-semibold": [
+        "36px",
+        {
+          lineHeight: "40px",
+          fontWeight: 600,
+        },
+      ],
+      "4xl-bold": [
+        "36px",
+        {
+          lineHeight: "40px",
+          fontWeight: 700,
+        },
+      ],
+    },
     extend: {
       colors: {
         border: "hsl(var(--border))",

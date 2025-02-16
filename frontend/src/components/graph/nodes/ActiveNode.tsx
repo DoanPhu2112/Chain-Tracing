@@ -15,14 +15,17 @@ const labelStyle: React.CSSProperties = {
 const ActiveNode: React.FC<NodeProps> = ({ data }) => {
   return (
     <>
+      <Handle type="target" position={Position.Left} id="left-target" />
+      <Handle type="source" position={Position.Left} id="left-source" />
       <div className="wrapper gradient gradient-active">
         <div className="inner">
           <User className="text-white" />
         </div>
       </div>
-      <Handle type="target" position={Position.Left} />
-      <Handle type="source" position={Position.Right} />
-      <div style={labelStyle}>{data.label as React.ReactNode}</div>
+      {/* <div style={labelStyle}>{data.label as React.ReactNode}</div> */}
+      <div style={labelStyle}>ABCW</div>
+      <Handle type="target" position={Position.Right} id="right-target" />
+      <Handle type="source" position={Position.Right} id="right-source" />{' '}
     </>
   )
 }

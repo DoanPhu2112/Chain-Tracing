@@ -4,6 +4,23 @@
 
 @layer base {
   :root {
+    --radius: 0.375rem;
+    /* ============ COLORS ============ */
+    --base-pri: 23 23 23;
+    --base-sec: 245 245 245;
+    --base-card: 255 255 255;
+    --dp-card-fg: 10 10 10;
+    --dp-muted-fg: 115 115 115;
+    --dp-accent-fg: 23 23 23;
+    --dp-sec-fg: 23 23 23;
+    --dp-pri-fg: 250 250 250;
+    --dp-bd: 229 229 229;
+    --dp-des-fg: 254 242 242;
+    --dp-fg: 23 23 23;
+    --dp-input: 245 245 245;
+    --dp-muted: 229 229 229;
+    --dp-pov-fg: 10 10 10;
+    --dp-ring-offset: 255 255 255;
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
@@ -32,6 +49,33 @@
   }
 
   .dark {
+    --radius: 0.375rem;
+    /* ============ COLORS ============ */
+    --base-pri: 250 250 250;
+    --base-sec: 38 38 38;
+    --base-card: 10 10 10;
+    --dp-card-fg: 250 250 250;
+    --dp-muted-fg: 163 163 163;
+    --dp-accent-fg: 250 250 250;
+    --dp-sec-fg: 250 250 250;
+    --dp-pri-fg: 23 23 23;
+    --dp-bd: 64 64 64;
+    --dp-des-fg: 254 242 242;
+    --dp-fg: 250 250 250;
+    --dp-input: 23 23 23;
+    --dp-muted: 38 38 38;
+    --dp-pov-fg: 250 250 250;
+    --dp-ring-offset: 255 255 255;
+    --brand-pri: 236 101 57;
+    --brand-sec: 243 162 126;
+    --brand-ter: 245 245 245;
+    --accent-des: 239 68 68;
+    --accent-wn: 245 158 11;
+    --accent-sc: 34 197 94;
+    --base-accent: 38 38 38;
+    --base-bg: 10 10 10;
+    --base-pov: 10 10 10;
+    --base-ring: 212 212 212;
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
     --card: 222.2 84% 4.9%;
@@ -66,4 +110,7 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+.modalStyle {
+  border-radius: 40px;
 }

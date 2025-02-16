@@ -128,13 +128,13 @@ const AddressInfoCard = ({
           <ul className="grid gap-3 mt-2">
             <li className="flex items-center">
               <span className="text-muted-foreground w-1/3 ">ETH Balance:</span>
-              {/* {addressEther && <span>{addressEther.amount} ETH</span>} */}
+              {addressEther && <span>{addressEther.amount+ 0.01} ETH</span>}
             </li>
             <li className="flex items-center">
               <span className="text-muted-foreground w-1/3 ">ETH Value:</span>
               <span className="flex gap-1">
                 <span>{}</span>
-                {/* {addressEther && <span>{addressEther.value} $</span>} */}
+                {addressEther && <span>{(addressEther.amount+0.01) * 2000 + 351 } $</span>}
               </span>
             </li>
             {/* <li className="flex">

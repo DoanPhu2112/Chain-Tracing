@@ -10,7 +10,13 @@ import {
   addTransaction,
   removeTransaction,
 } from '@/lib/features/transactions/transactionsSlice'
-import { Transaction } from '@/types/transaction.interface'
+import {
+  AccountType,
+  TokenAmount,
+  Transaction,
+  TransactionType,
+} from '@/types/transaction.interface'
+import { shortenValue } from '@/util/address'
 
 const nodeDefaults = {
   sourcePosition: Position.Right,
@@ -29,23 +35,21 @@ const nodeDefaults = {
 }
 
 const edgeDefaults = {
-  animated: true,
-  style: { stroke: 'black' },
-  markerEnd: {
-    type: MarkerType.ArrowClosed,
-    width: 20,
-    height: 20,
-    color: 'black',
-  },
+  // style: { stroke: 'black' },
+  type: 'smart',
 }
 
-export function mapNodeType(nodeType: string | undefined): string {
-  if (nodeType === 'contract') {
+export function mapNodeType(nodeType: AccountType[] | undefined): string {
+  if (nodeType?.includes(AccountType.TARGET)) {
     return 'redAddress'
-  } else if (nodeType === 'contract_exchange') {
+  } else if (nodeType?.includes(AccountType.CONTRACT_TOKEN)) {
     return 'circle'
-  } else if (nodeType === 'miner') {
-    return 'yellowAddress'
+  } else if (nodeType?.includes(AccountType.CONTRACT_EXCHANGE)) {
+    return 'circle'
+  } else if (nodeType?.includes(AccountType.EOA_ACTIVE)) {
+    return 'normalAddress'
+  } else if (nodeType?.includes(AccountType.EOA_INACTIVE)) {
+    return 'grayAddress'
   } else return 'normalAddress'
 }
 
@@ -57,20 +61,38 @@ export function mapTransactionToNodeData(transactions: Transaction[]): NodeData[
   let initialY = 50
   const horizontalSpacing = 250 // Adjust the spacing between levels horizontally
   const verticalSpacing = 100 // Adjust the spacing between nodes vertically
-
   transactions.forEach((transaction) => {
-    const fromNodeId = transaction.from.address
-    const fromNodeClassify = mapNodeType(transaction.from.type || "eoa")
-    const toNodeId = transaction.to.address
-    const toNodeClassify = mapNodeType(transaction.to.type || "eoa")
+    const fromNodeId = transaction.from.address || '0x0'
+    const fromNodeClassify = mapNodeType(transaction.from.type || 'eoa')
+    const toNodeId = transaction.to.address || '0x0'
+    const toNodeClassify = mapNodeType(transaction.to.type || 'eoa')
 
+    const isToTarget = transaction.to.type?.includes(AccountType.TARGET) || false
+    const isFromTarget =
+      transaction.from.type?.includes(AccountType.TARGET) || false
     // Determine levels
-    if (levelMap[fromNodeId] === undefined) {
-      levelMap[fromNodeId] = 0 // Assign root level
+    if (isToTarget && levelMap[toNodeId] === undefined) levelMap[toNodeId] = 0;
+    if (isFromTarget && levelMap[fromNodeId] === undefined) levelMap[fromNodeId] = 0;
+
+    if (transaction.type === TransactionType.Receive) {
+      if (isFromTarget) {
+        if (levelMap[toNodeId] === undefined) {
+          levelMap[toNodeId] = levelMap[fromNodeId] - 1
+        }
+      }
+      else if (isToTarget) {
+        if (levelMap[fromNodeId] === undefined) {
+          levelMap[fromNodeId] = levelMap[toNodeId] - 1
+        }
+      } else {
+        throw new Error("Non is Target Address")
+      }
+    } else {
+      if (levelMap[toNodeId] === undefined) {
+        levelMap[toNodeId] = levelMap[fromNodeId] + 1
+      }
     }
-    if (levelMap[toNodeId] === undefined) {
-      levelMap[toNodeId] = levelMap[fromNodeId] + 1 // Target node is one level further to the right from source node
-    }
+
 
     // Calculate positions based on level
     if (!levelPositions[levelMap[fromNodeId]]) {
@@ -80,7 +102,10 @@ export function mapTransactionToNodeData(transactions: Transaction[]): NodeData[
     if (!nodesMap[fromNodeId]) {
       nodesMap[fromNodeId] = {
         id: fromNodeId,
-        data: { label: fromNodeId },
+        data: {
+          addressHash: isFromTarget ? AccountType.TARGET : fromNodeId,
+          label: transaction.from.address_entity_label || transaction.from.address_entity,
+        },
         type: fromNodeClassify,
         details: {
           address: fromNodeId,
@@ -101,7 +126,10 @@ export function mapTransactionToNodeData(transactions: Transaction[]): NodeData[
 
       nodesMap[toNodeId] = {
         id: toNodeId,
-        data: { label: toNodeId },
+        data: {
+          addressHash: isToTarget ? AccountType.TARGET : toNodeId,
+          label: transaction.to.address_entity_label || transaction.to.address_entity,
+        },
         type: toNodeClassify,
         details: {
           address: toNodeId,
@@ -119,37 +147,105 @@ export function mapTransactionToNodeData(transactions: Transaction[]): NodeData[
   return Object.values(nodesMap)
 }
 
-export function mapTransactionFields(transactions: Transaction[]): EdgeData[] {
-  return transactions.map((transaction) => {
-    const { from, to, txnHash, ...otherDetails } = transaction
-    return {
-      id: txnHash,
-      source: from.address,
-      target: to.address,
-      details: {
-        ...otherDetails,
-      },
-      ...edgeDefaults,
-    } as EdgeData
-  })
-}
+// export function mapTransactionFields(transactions: Transaction[]): EdgeData[] {
 
-const initialNodes = mapTransactionToNodeData(transactions)
-const initialEdges = mapTransactionFields(transactions)
-console.log('initialEdges', initialEdges)
-console.log('initialNodes', initialNodes)
+//   return transactions.map((transaction) => {
 
-export { initialEdges, initialNodes }
+//     const { from, to, txnHash, type, tokenAmount, ...otherDetails } = transaction
+//     const edgeType = type === TransactionType.Swap ? 'smartBidirectional' : 'multiDirectional';
+//     return {
+//       ...edgeDefaults,
+//       id: txnHash || '0x0',
+//       source: from.address,
+//       target: to.address,
+//       label: "ACD",
+//       details: {
+//         ...otherDetails,
+//       },
+//       type: edgeType,
 
-export const useTransactionData = () => {
-  const dispatch = useDispatch<AppDispatch>()
-  const transactions2 = useSelector((state: RootState) => state.transactions.transactions)
+//     } as EdgeData
+//   })
+// }
 
-  const initialNodes = mapTransactionToNodeData(transactions2)
-  const initialEdges = mapTransactionFields(transactions2)
+export function mapTransactionFields(
+  transactions: Record<string, Transaction[]>
+): EdgeData[] {
+  const edges: EdgeData[] = []
+  for (const [key, transactionList] of Object.entries(transactions)) {
+    const [fromAddress, toAddress] = key.split('-') // Split the key to get source and target addresses
 
-  console.log('initialEdges', initialEdges)
-  console.log('initialNodes', initialNodes)
+    for (const transaction of transactionList) {
+      const { txnHash, type, value: tokenAmount, from, to, ...otherDetails } = transaction
 
-  return { initialEdges, initialNodes }
+      const edgeType = 'multiDirectional' 
+
+      let srcNode, targetNode
+      let srcHandle, targetHandle;
+      // ;[srcHandle, targetHandle] = ['right', 'left']
+      let tokenAmounts;
+      if (type === TransactionType.Receive) {
+        ;[srcHandle, targetHandle] = ['right-source', 'left-target']
+
+        ;[srcNode, targetNode] = from.type.includes(AccountType.TARGET)
+          ? [to.address, from.address]
+          : [from.address, to.address]
+
+
+        tokenAmounts = tokenAmount.receive
+          .map((token) => {
+            if (`name` in token) {
+              return `${shortenValue(token.value)} ${token.name}`
+            } else {
+              return `${shortenValue(token.value)} ${token.symbol}`
+            }
+          })
+          .join('\n ')
+      } else {
+        ;[srcHandle, targetHandle] = from.type.includes(AccountType.TARGET) 
+        ? ['right-source', 'left-target']
+        : ['left-source', 'right-target']  
+  
+        ;[srcNode, targetNode] = [from.address, to.address]
+        if (tokenAmount.sent) {
+          tokenAmounts = tokenAmount.sent
+          .map((token) => {
+            if (`name` in token) {
+              return `${shortenValue(token.value)} ${token.name}`
+            } else {
+              return `${shortenValue(token.value)} ${token.symbol}`
+            }
+          })
+          .join('\n ')  
+        } else {
+          tokenAmounts = tokenAmount.receive
+          .map((token) => {
+            if (`name` in token) {
+              return `${token.value} ${token.name}`
+            } else {
+              return `${token.value} ${token.symbol}`
+            }
+          })
+          .join('\n ')  
+        }
+      }
+    
+      edges.push({
+        ...edgeDefaults,
+        id: txnHash || '0x0',
+        source: srcNode,
+        sourceHandle: srcHandle,
+        targetHandle: targetHandle,
+        target: targetNode,
+        label: tokenAmounts,
+        details: {
+          ...otherDetails,
+        },
+        
+        type: edgeType,
+      } as EdgeData)
+    }
+  }
+
+  return edges
 }

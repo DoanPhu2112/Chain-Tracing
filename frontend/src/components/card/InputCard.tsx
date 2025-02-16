@@ -43,12 +43,18 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Separator } from '../ui/separator'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/lib/store'
-import { getAddressBalance, getAddressTransactions } from '@/services/address'
+import {
+  getAddressBalance,
+  getAddressTransactions,
+  getAddressTxnsByRange,
+} from '@/services/address'
 import { setTransactions } from '@/lib/features/transactions/transactionsSlice'
-
+import heu_4 from '@/mocks/heu_4.json'
 dayjs.extend(buddhistEra)
 
-const { Title } = Typography
+const { RangePicker } = DatePicker
+const dateFormatList = ['DD/MM/YYYY', 'DD/MM/YY', 'DD-MM-YYYY', 'DD-MM-YY']
+const dateFormat = 'DD/MM/YYYY'
 
 // Component level locale
 const buddhistLocale: typeof en = {
@@ -71,37 +77,42 @@ const globalBuddhistLocale: typeof enUS = {
   },
 }
 
-const defaultValue = dayjs('2024-01-01')
+const defaultFromValue = dayjs().startOf('day').subtract(1, 'day');
+const defaultToValue = dayjs().endOf('day')
 
-const InputCard = () => {
-  const dispatch = useDispatch();
+type InputCardProps = {
+  setIsLoading: (arg0: boolean) => void
+}
+const InputCard = ({setIsLoading}: InputCardProps) => {
+  const dispatch = useDispatch()
 
   const [input, setInput] = React.useState<string>('')
   const [chain, setChain] = React.useState<string>('')
-  const [startDate, setStartDate] = React.useState<Date>()
-  const [endDate, setEndDate] = React.useState<Date>()
-
-  const onChange: DatePickerProps['onChange'] = (_, dateStr) => {
-    console.log('onChange:', dateStr)
-  }
+  const [startDate, setStartDate] = React.useState<Date>(dayjs(defaultFromValue).toDate())
+  const [endDate, setEndDate] = React.useState<Date>(dayjs(defaultToValue).toDate())
 
   const handleTrackAddress = async () => {
     if (input.length === 42) {
-      const transactions = await getAddressTransactions(input);
-      console.log("Input Card Transactions", transactions)
-      dispatch(setTransactions(transactions));
-      return;
+      setIsLoading(true)
+      const transactions = await getAddressTxnsByRange(input, startDate, endDate)
+      console.log('Input Card Transactions', transactions)
+      dispatch(setTransactions(transactions))
+      setIsLoading(false)
+
+      return
     }
-    alert("Input length must equal 42")
+    alert('Input length must equal 42')
   }
 
-  useEffect(() => {
-    console.log('Input:', input)
-    console.log('Chain:', chain)
-    console.log('Start Date:', startDate)
-    console.log('End Date:', endDate)
-  }, [input, chain, startDate, endDate])
 
+  function onOpenChange(open) {
+    console.log('onOpenChange', open)
+  }
+
+  function onCalendarChange(dates) {
+    setStartDate(new Date(dates[0].$d))
+    setEndDate(new Date(dates[1].$d))
+  }
   return (
     <Card className="overflow-hidden" x-chunk="dashboard-05-chunk-0">
       <CardHeader className="px-7">
@@ -110,9 +121,18 @@ const InputCard = () => {
       </CardHeader>
       <CardContent>
         <div className="gap-2 flex">
+          <Input
+            type="text"
+            placeholder="Input target address hash"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+          />
+        </div>
+        <div className="flex mt-2 justify-end">
+          <div className="flex gap-2 items-center">
           <Select onValueChange={(value) => setChain(value)}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select a chain" />
+              <SelectValue placeholder="Ethereum" defaultValue="ethereum" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
@@ -132,32 +152,15 @@ const InputCard = () => {
               </SelectGroup>
             </SelectContent>
           </Select>
-          <Input
-            type="text"
-            placeholder="Input an address hash"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-          />
-        </div>
-        <div className="flex mt-2 justify-end">
-          <div className="flex gap-2 items-center">
             {/* START DATE */}
-            <DatePicker
-              variant="outlined"
-              defaultValue={defaultValue}
-              showTime
-              locale={buddhistLocale}
-              onChange={onChange}
-            />
-            <ArrowRight className="h-3.5 w-3.5" />
-            {/* END DATE */}
-            <DatePicker
-              className="border-slate-300 shadow-sm bg-red-200"
-              variant="outlined"
-              defaultValue={defaultValue}
-              showTime
-              locale={buddhistLocale}
-              onChange={onChange}
+            <RangePicker
+              defaultValue={[
+                defaultFromValue,
+                defaultToValue,
+              ]}
+              format={dateFormat}
+              onOpenChange={onOpenChange}
+              onCalendarChange={onCalendarChange}
             />
           </div>
         </div>

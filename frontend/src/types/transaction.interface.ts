@@ -1,116 +1,92 @@
-export type Transaction = {
-  chainId: string,
-  txnHash: string
-  from: {
-    address: string;
-    address_entity?: string;
-    address_entity_logo?: string;
-    address_entity_label?: string;
-    type: string;
-  };
-  to: {
-    address: string;
-    address_entity?: string;
-    address_entity_logo?: string;
-    address_entity_label?: string;
-    type: string;
-  };
-  tokenName: string,
-  type: string
-  summary: string
-  status: string
-  date: string
-  amount: string
-  asset: string
-  added?: boolean // New field
+export enum TransactionType {
+  Approve = 'Approved',
+  Receive = 'Received',
+  Swap = 'Swapped',
+  Sent = 'Sent',
+  Sign = 'Sign',
+  Airdrop = 'Airdrop'
 }
 
 export type BackendTransaction = {
-  transactionHash: string;
-  fromEntity: {
-    address?: string;
-    address_entity?: string;
-    address_entity_logo?: string;
-    address_entity_label?: string;
-  };
-  toEntity: {
-    address?: string;
-    address_entity?: string;
-    address_entity_logo?: string;
-    address_entity_label?: string;
-  };
+  chainId: string;
+  txnHash: string;
+  from: Entity;
+  to: Entity;
+  tokenAmount: TokenAmount | TokenAmount[];
+  type: TransactionType | string;
   summary: string;
-  methodLabel?: string;
-
   value: string;
-
-  blockTimestamp: string,
-
-  nftTransfers: NFTTransfer[];
-
-  erc20Transfers: Erc20Transfer[];
-
-  nativeTransfers: NativeTransfer[];
+  date: string;
 };
-export type Erc20Transfer = {
-  token_entity: ERC20Token;
-  from_entity: Entity;
-  to_entity: Entity;
-  direction: 'send' | 'receive';
-  block_timestamp?: string;
-  value_formatted: string;
-};
-export type ERC20Token = {
+
+export type TokenAmount = {
   name: string;
-  decimal: number;
-  address: string;
-  symbol: string;
-  logo: string | null;
-  possibleSpam: boolean | null,
-  verifiedContract: boolean | null;
-}
-export type NativeTransfer = {
-  from_entity: Entity,
-  to_entity: Entity,
-  token: NativeToken
-  value_formatted: string,
-  block_timestamp?: string,
-  direction?: string,
-
-}
-export type NativeToken = {
-  symbol?: string,
-  logo?: string,
-}
-export type NFTTransfer = {
-  token: NFTToken;
-  from_entity: Entity;
-  to_entity: Entity;
-  direction: string;
   amount: string;
-  contract_type: string;  // Either ERC1155 or ERC721
-  block_timestamp?: string;
-  value: string;  //The value that was sent in the transaction (ETH/BNB/etc..)
+}
+
+export type Transaction = {
+  chainId: string;
+  txnHash: string;
+  from: Entity;
+  to: Entity;
+  type: TransactionType | string;
+  summary: string;
+  value: { sent: (ERC20Amount | NFTAmount | NativeAmount)[], receive: (ERC20Amount | NFTAmount | NativeAmount)[]};
+  date: Date;
 };
+
+export enum AccountType {
+  MINER = "MINER",
+  EOA_ACTIVE = "EOA_ACTIVE",
+  EOA_INACTIVE = "EOA_INACTIVE",
+  EOA_EXCHANGE = "EOA_EXCHANGE",
+  CONTRACT_EXCHANGE = "CONTRACT_EXCHANGE",
+  CONTRACT_NORMAL = "CONTRACT_NORMAL",
+  ROUTER = "ROUTER",
+  CONTRACT_TOKEN = "CONTRACT_TOKEN",
+  INVALID = "INVALID",
+  TARGET = "TARGET",
+}
+
 export type Entity = {
   address?: string;
   address_entity?: string;
   address_entity_logo?: string;
   address_entity_label?: string;
+  type: AccountType[];
 };
+
+export type ERC20Amount = ERC20Token & {value: string}
+export type ERC20Token = {
+  name: string
+  decimal: number
+  address: string
+  symbol: string
+  logo: string | null
+  possibleSpam: boolean | null
+  verifiedContract: boolean | null
+}
+
+export type NativeAmount = NativeToken & {value: string}
+export type NativeToken = {
+  symbol?: string,
+  logo?: string,
+}
+
+export type NFTAmount = NFTToken & {value: string}
 export type NFTToken = {
-  address: string;
-  id: string;
-  name: string | null;
-  description?: string | null;
-  animationUrl?: string | null;
-  image?: string | null;  // e.g. https://dobutsu.xyz/api/thebuns/revealed/9455.png
-  possibleSpam?: boolean | null;
-  collection: NFTCollection;
-};
+  address: string
+  id: string
+  name: string | null
+  description?: string | null
+  animationUrl?: string | null
+  image?: string | null // e.g. https://dobutsu.xyz/api/thebuns/revealed/9455.png
+  possibleSpam?: boolean | null
+  collection: NFTCollection
+}
 export type NFTCollection = {
-  verified?: boolean | null;
-  logo: string | null;
-  bannerImage: string | null;
+  verified?: boolean | null
+  logo: string | null
+  bannerImage: string | null
 }
 export type TransactionsList = Transaction[]

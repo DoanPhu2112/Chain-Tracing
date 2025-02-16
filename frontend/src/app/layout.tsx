@@ -32,6 +32,16 @@ export default function RootLayout({
             <ConfigProvider
               theme={{
                 components: {
+                  Alert: {
+                    zIndexBase: 1001,
+                    zIndexPopupBase: 1001,
+                  },
+                  Modal: {
+                    zIndexBase: 49,
+                    zIndexPopupBase: 49,
+                    titleFontSize: 30,
+
+                  },
                   DatePicker: {
                     // colorPrimary: 'black',
                     colorPrimary: 'grey',

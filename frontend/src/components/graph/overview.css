@@ -70,7 +70,6 @@
   .react-flow__node-textinput .react-flow__handle-left {
     height: 8px;
     width: 4px;
-    left: -5px;
     border-radius: 2px 0 0 2px;
   }
   
@@ -92,8 +91,9 @@
     color: #fff;
     border-radius: 100%;
     display: flex;
-    height: 75px;
-    width: 75px;    
+    margin: auto;
+    width: 50px;
+    height: 50px;
     box-shadow:
       6px 2px 15px rgba(42, 138, 246, 0.3),
       -6px 2px 15px rgba(42, 138, 246, 0.3);
@@ -106,8 +106,8 @@
     color: #fff;
     border-radius: 100%;
     display: flex;
-    height: 75px;
-    width: 75px;
+    height: 50px;
+    width: 50px;
     justify-content: center;
     text-align: center;
   }
@@ -116,8 +116,9 @@
     color: #fff;
     border-radius: 100%;
     display: flex;
-    height: 75px;
-    width: 75px;
+    margin: auto;
+    height: 50px;
+    width: 50px;
     box-shadow:
       6px 2px 15px rgba(254, 0, 0, 0.3),
       -6px 2px 15px rgba(254, 0, 0, 0.3);
@@ -129,8 +130,9 @@
     color: #fff;
     border-radius: 100%;
     display: flex;
-    height: 75px;
-    width: 75px;
+    margin: auto;
+    max-width: 50px;
+    height: 50px;
     box-shadow:
       6px 2px 15px rgba(246, 255, 0, 0.5),
       -6px 2px 15px rgba(254, 237, 0, 0.5);
@@ -144,19 +146,25 @@
   .react-flow__node-redAddress .wrapper,
   .react-flow__node-yellowAddress .wrapper,
   .react-flow__node-textinput .wrapper {
+    margin: auto;
+    max-width: 50px;
+    height: 50px;
     overflow: hidden;
     display: flex;
-    padding: 2px;
+    padding: 8px;
     position: relative;
     border-radius: 100%;
     flex-grow: 1;
+    background: rgba(255, 255, 255, 0);
+    border: solid 2px rgba(0, 31, 157, 0.5);
   }
   
   .react-flow__node-circle .inner,
   .react-flow__node-normalAddress .inner ,
   .react-flow__node-redAddress .inner,
   .react-flow__node-yellowAddress .inner {
-    background: rgba(255, 255, 255, 0.5);
+    margin: auto;
+    background: #122149;
     border-radius: 100%;
     display: flex;
     justify-content: center;
@@ -164,11 +172,14 @@
     flex-grow: 1;
     position: relative;
     text-align: center;
+    width: fit-content;
+    height: 31px;
+
   }
   
   .react-flow__node-textinput {
     border-radius: 5px;
-    width: 150px;
+    width: 50px;
     text-align: left;
     height: auto;
   }
@@ -179,7 +190,6 @@
   }
   
   .react-flow__node-textinput .inner {
-    background: rgba(255, 255, 255, 0.5);
     flex-grow: 1;
     position: relative;
     padding: 10px;
@@ -211,12 +221,12 @@
     opacity: 1;
   }
   .gradient-input:before {
-    background: rgba(0, 110, 255, 0.8);
+    background: rgba(62, 146, 255, 0.8);
   }
 
-  .gradient-normal:before {
+  /* .gradient-normal:before {
     background: rgb(128, 128, 128, 0.9)
-  }
+  } */
 
   .gradient-red:before {
     background: rgb(255,0, 0, 0.8)

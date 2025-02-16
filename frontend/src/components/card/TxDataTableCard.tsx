@@ -23,8 +23,8 @@ const TxDataTableCard: React.FC<TxDataTableCardProps> = ({ onUpdate }) => {
     <>
       <Card x-chunk="dashboard-05-chunk-3">
         <CardHeader className="px-7">
-          <CardTitle>Recent Transactions</CardTitle>
-          <CardDescription>Recent transactions description</CardDescription>
+          <CardTitle>Relevant Transactions</CardTitle>
+          <CardDescription>Relevant transactions description</CardDescription>
         </CardHeader>
         <CardContent>
           <TxDataTable onUpdate={onUpdate} />

@@ -1,0 +1,53 @@
+[
+    {
+        "chainId": "0x1",
+        "from": {
+            "address": "0xD1E2F3G4H5I60708090A0B0C0D0E0F0G0H0I0J0K0",
+            "entity": "address_entity2",
+            "logo": null,
+            "label": "address_entity2: Receive",
+            "type": "contract"
+
+        },
+        "to": {
+            "address": "0x6982508145454Ce325dDbE47a25d4ec3d2311933",
+            "entity": null,
+            "logo": null,
+            "label": "Pepe (PEPE)"
+        },
+        "tokenName": "PEPE\n",
+        "txnHash": "0xe238fec45d6479d3087d8bb95d7ffc68205a92d9daa0faea7d5d3fc048beb8e8",
+        "type": "transfer",
+        "summary": "Sent 40,000,000 PEPE to 0x60...5c17",
+        "status": "Confirmed",
+        "date": "12/27/2024",
+        "amount": "40000000",
+        "asset": "PEPE",
+        "added": false
+    },
+    {
+        "txnHash": "0xe238fec45d6479d3087d8bb95d7ffc68205a92d9daa0faea7d5d3fc048beb8e8",
+        "type": "Transfer",
+        "status": "Confirmed",
+        "date": "4 days ago",
+        "amount": "0.00000033 ETH",
+        "from": {
+            "address": "0xD1E2F3G4H5I60708090A0B0C0D0E0F0G0H0I0J0K0",
+            "entity": "address_entity2",
+            "label": "address_entity2: Receive",
+            "logo": null,
+            "type": "contract"
+
+        },
+        "to": {
+            "address": "0xA1B2C3D4E5F60708090A0B0C0D0E0F0G0H0I0J0K0",
+            "entity": "address_entity1",
+            "label": "address_entity1: Transfer",
+            "logo": null,
+            "type": "eoa"
+        },
+        "summary": "Airdrop from Null Address: 0x000...000",
+        "chainId": "0x1",
+        "tokenName": "ETH"
+    }
+]

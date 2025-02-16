@@ -3,8 +3,12 @@
 import * as React from 'react'
 import useDebounce from '@/lib/useDebounce'
 import { useEffect, useState, useMemo } from 'react'
-import { CaretSortIcon, ChevronDownIcon, DotsHorizontalIcon } from '@radix-ui/react-icons'
-import { Check, X } from 'lucide-react'
+import { ChevronDownIcon, DotsHorizontalIcon } from '@radix-ui/react-icons'
+import { Modal, Row } from 'antd'
+import { Typography } from 'antd'
+import { useToast } from '@/hooks/use-toast'
+import { ToastAction } from '@/components/ui/toast'
+
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -13,7 +17,6 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
   TableMeta,
@@ -21,7 +24,6 @@ import {
 } from '@tanstack/react-table'
 
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -31,6 +33,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { LoadingOutlined } from '@ant-design/icons'
+
 import { Input } from '@/components/ui/input'
 import {
   Table,
@@ -48,13 +52,24 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { File, ListFilter } from 'lucide-react'
-
+import { Select } from 'antd'
 // Import the JSON data
 import { DataTablePagination } from './DataTablePagination'
 import transactions_json from '@/mocks/transactions.json'
 import { Transaction, TransactionsList } from '@/types/transaction.interface'
-import { getAddressTransactions } from '@/services/address'
+import {
+  getAddressTransactions,
+  getAddressTransactionsFollowup,
+} from '@/services/address'
+import { isEtherAddress, isEtherTransaction } from '@/helpers/addressValidation'
+const { Title } = Typography
+import { Spin } from 'antd'
+import { shortenAddress } from '@/util/address'
+import { cn } from '@/lib/utils'
 
+const INPUT_ERROR = {
+  InvalidateAddress: 'Invalid address',
+}
 // Define a custom TableMeta type
 interface CustomTableMeta extends TableMeta<Transaction> {
   toggleAdd: (transaction: Transaction) => void
@@ -68,8 +83,41 @@ const initialTransactions = transactions_json.map((txn) => ({
 interface TxDataTableProps {
   onUpdate: (txList: TransactionsList) => void
 }
+interface ReportData {
+  reportType: string
+  suspiciousAddress: string
+  transactionHash: string
+}
+function timeAgo(timestampStr: string) {
+  const timestamp = new Date(timestampStr);
+  const now = new Date();
+  const diffInMs = now - timestamp;
+
+  const secondsAgo = Math.floor(diffInMs / 1000);
+  const minutesAgo = Math.floor(secondsAgo / 60);
+  const hoursAgo = Math.floor(minutesAgo / 60);
+  const daysAgo = Math.floor(hoursAgo / 24);
+
+  if (daysAgo > 365) {
+    return `${Math.floor(daysAgo / 365)} years ago`;
+  }
+  else if (daysAgo > 0) {
+    return `${daysAgo} days ${hoursAgo % 24} hours ago`;
+  } else if (hoursAgo > 0) {
+    return `${hoursAgo} hours ${minutesAgo % 60} minutes ago`;
+  } else if (minutesAgo > 0) {
+    return `${minutesAgo} minutes ago`;
+  } else {
+    return `${secondsAgo} seconds ago`;
+  }
+}
+
 
 const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
+  const { toast } = useToast()
+
+  const [isFormVisible, setIsFormVisible] = useState(true)
+
   const [searchTransaction, setSearchTransaction] =
     useState<Transaction[]>(initialTransactions)
 
@@ -81,7 +129,13 @@ const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
 
   const [data, setData] = useState<TransactionsList>([])
   const [isLoading, setIsLoading] = useState(false) //TODO: skeleton loading
+
   const [search, setSearch] = useState('')
+  const [reportData, setReportData] = useState<ReportData>({
+    reportType: '',
+    suspiciousAddress: '',
+    transactionHash: '',
+  })
   const debouncedSearch = useDebounce(search, 500) // Debounce the search
   const [totalCount, setTotalCount] = useState(0)
   const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
@@ -96,6 +150,7 @@ const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
     }),
     [pageIndex, pageSize]
   )
+
   const columns: ColumnDef<Transaction>[] = [
     {
       id: 'add',
@@ -150,19 +205,32 @@ const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
         <Badge variant="outline">{row.getValue('chainId') as string}</Badge>
       ),
     },
+    // {  
     {
-      accessorKey: 'txnHash',
-      header: 'Transaction Hash',
-      cell: ({ row }) => (
-        <div className="truncate max-w-xs">{row.getValue('txnHash')}</div>
-      ),
+      accessorKey: "fromAddress",
+      header: "From Address",
+      cell: ({row}) => {
+        const { from: { address, address_entity_label } } = row.original;
+      
+        return (
+          <div className={cn("truncate max-w-xs", address === reportData.suspiciousAddress && "underline")}>
+            {address_entity_label || shortenAddress(address!)}
+          </div>
+        );
+      }
     },
     {
-      accessorKey: 'tokenName',
-      header: 'Token Name',
-      cell: ({ row }) => (
-        <Badge variant="outline">{row.getValue('tokenName') as string}</Badge>
-      ),
+      accessorKey: "toAddress",
+      header: "To Address",
+      cell: ({row}) => {
+        const { to: { address, address_entity_label } } = row.original;
+      
+        return (
+          <div className={cn("truncate max-w-xs", address === reportData.suspiciousAddress && "underline")}>
+            {address_entity_label || shortenAddress(address!)}
+          </div>
+        );
+      }
     },
     {
       accessorKey: 'type',
@@ -175,6 +243,9 @@ const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
     {
       accessorKey: 'date',
       header: 'Date',
+      cell: ({ row }) => (
+        <div>{timeAgo(row.original.date)}</div>
+      )
     },
     {
       accessorKey: 'amount',
@@ -183,6 +254,14 @@ const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
         <div className="text-right font-medium">{row.getValue('amount')}</div>
       ),
     },
+    {
+      accessorKey: 'tokenName',
+      header: 'Token Name',
+      cell: ({ row }) => (
+        <Badge variant="outline">{row.getValue('tokenName') as string}</Badge>
+      ),
+    },
+
     {
       id: 'actions',
       enableHiding: false,
@@ -244,6 +323,7 @@ const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
     meta: {
       toggleAdd: (transaction: Transaction) => {
         setAddedTransactions((current) => {
+          console.log("Set Add Transaction Clicked")
           const exists = current.some((txn) => txn.txnHash === transaction.txnHash)
           if (exists) {
             // Remove the transaction if it exists
@@ -257,12 +337,44 @@ const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
     } as CustomTableMeta, // Cast to CustomTableMeta
   })
 
+  const showModal = () => {
+    setIsFormVisible(true)
+  }
+
+  const handleOk = (e) => {
+    if (
+      !isEtherAddress(reportData.suspiciousAddress) ||
+      !isEtherTransaction(reportData.transactionHash)
+    ) {
+      toast({
+        title: 'Please enter valid address',
+        action: <ToastAction altText="Goto schedule to undo">Undo</ToastAction>,
+      })
+      return
+    }
+    handleFilterTransaction()
+
+    setIsFormVisible(false)
+  }
+
+  const handleCancel = () => {
+    setIsFormVisible(false)
+  }
+  const handleChangeReportSusAddress = (e) => {
+    setReportData({ ...reportData, suspiciousAddress: e.target.value })
+  }
+  const handleChangeReportTxHash = (e) => {
+    setReportData({ ...reportData, transactionHash: e.target.value })
+  }
+  const handleChangeReportCategory = (e) => {
+    console.log(e)
+    setReportData({ ...reportData, reportType: e })
+  }
   useEffect(() => {
     setIsClient(true)
     setTotalCount(table.getFilteredRowModel().rows.length)
   }, [])
   useEffect(() => {
-    console.log(addedTransactions.length)
     onUpdate(addedTransactions)
   }, [addedTransactions])
   useEffect(() => {
@@ -294,28 +406,79 @@ const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
     }, 500) // Simulate network delay
   }, [searchTransaction, debouncedSearch, sorting, pageIndex, pageSize])
 
+  useEffect(() => {}, [reportData])
   async function handleFilterTransaction() {
-    const transactionList = await getAddressTransactions(search)
-    console.log('transactionList ', transactionList)
+    setIsLoading(true)
+
+    const transactionList = await getAddressTransactionsFollowup(
+      reportData.suspiciousAddress,
+      reportData.transactionHash
+    )
+    setIsLoading(false)
+
     setSearchTransaction(transactionList)
+    setData(transactionList)
+
     setAddedTransactions([])
   }
-  useEffect(() => {
-    if (!search) {
-      return
-    }
-    console.log('SEARCH: ' + search)
-    //TODO: Check search is transaction or account address
-    handleFilterTransaction()
-  }, [search])
-
+  // useEffect(() => {
+  //   if (!search) {
+  //     return
+  //   }
+  //   console.log('SEARCH: ' + search)
+  //   //TODO: Check search is transaction or account address
+  //   handleFilterTransaction()
+  // }, [search])
+  const modalStyles = {
+    header: {
+      fontSize: 30,
+      titleFontSize: 30
+    },
+    content: {
+      borderRadius: 20,
+    },
+  };
   return (
     <div className="w-full">
+      {isLoading && <Spin indicator={<LoadingOutlined spin />} size="large" />}
+      <Modal
+        title="Enter report details"
+        loading={isLoading}
+        open={isFormVisible}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        className='modalStyle'
+        style={{ fontSize: '11px' }} // Set font size for the entire Modal
+        >
+        <div className="space-y-3">
+          <Title level={5}>What happened?</Title>
+          <Select
+            onChange={handleChangeReportCategory}
+            className="w-full"
+            options={[
+              {
+                value: 'Fraud - NFT Airdrop Scam',
+                label: <span>Fraud - NFT Airdrop Scam</span>,
+              },
+              {
+                value: 'Blackmail - Sextortion Scam',
+                label: <span>Blackmail - Sextortion Scam</span>,
+              },
+              { value: 'Fraud - Romance Scam', label: <span>Fraud - Romance Scam</span> },
+            ]}
+          />
+
+          <Title level={5}>Blockchain address of scammer</Title>
+          <Input placeholder="0x.." onChange={handleChangeReportSusAddress} />
+          <Title level={5}>Transaction hash</Title>
+          <Input placeholder="0x.." onChange={handleChangeReportTxHash} />
+        </div>
+      </Modal>
       <div className="flex justify-between items-center py-4">
         <Input
-          placeholder="Filter by ..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Input suspicious transaction here"
+          // value={isFormVisible.toString()}
+          onClick={showModal}
           className="max-w-sm"
         />
         <div className="flex gap-1">
@@ -396,7 +559,7 @@ const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
           <DataTablePagination table={table} totalCount={totalCount} />
         </div>
       </div>
-      {isClient && (
+      {/* {isClient && (
         <div>
           <h2>Added Transactions</h2>
           <ul>
@@ -407,7 +570,7 @@ const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
             ))}
           </ul>
         </div>
-      )}
+      )} */}
     </div>
   )
 }

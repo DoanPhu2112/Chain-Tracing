@@ -20,12 +20,12 @@ const dragHandleStyle = {
 const ColorSelectorNode: FC<NodeProps> = () => {
   return (
     <>
-      <Handle type="target" position={Position.Left} onConnect={onConnect} />
+      <Handle type="target" position={Position.Left} onConnect={onConnect} id='left'/>
       <div style={labelStyle}>
         Only draggable here →{' '}
         <span className="custom-drag-handle" style={dragHandleStyle} />
       </div>
-      <Handle type="source" position={Position.Right} />
+      <Handle type="source" position={Position.Right} id='right'/>
     </>
   )
 }

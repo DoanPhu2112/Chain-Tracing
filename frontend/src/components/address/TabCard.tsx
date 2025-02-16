@@ -45,6 +45,7 @@ import { Transaction } from '@/types/transaction.interface'
 import { PortfolioBalance } from '@/types/wallet.interface'
 
 import { cropNumber } from '@/helpers/numberSlice'
+import { AddressTxByMonth } from '../chart/AddressTxByMonth'
 
 const TabCard = ({
   portfolio,
@@ -110,7 +111,8 @@ const TabCard = ({
               <FreqBarChart chartData={portfolio} />
             </div> */}
             <div className="flex flex-col col-span-2 h-full xl:col-span-3">
-              <BalanceByTimeAreaChart />
+              {/* <BalanceByTimeAreaChart /> */}
+              <AddressTxByMonth/>
             </div>
           </div>
           <Card x-chunk="dashboard-05-chunk-3">

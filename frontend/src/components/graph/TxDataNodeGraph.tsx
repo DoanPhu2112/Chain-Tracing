@@ -27,31 +27,56 @@ const connectionLineStyle = { stroke: '#fff' }
 import CircleNode from './nodes/CircleNode'
 import DefaultNode from './nodes/DefaultNode'
 import RedNode from './nodes/RedNode'
-import YellowNode from './nodes/YellowNode'
+import GrayNode from './nodes/GrayNode'
+import SmartBidirectionalEdge from './edges/BidirectionalEdge'
+import NormalDirectionalEdge from './edges/NormalDirectionalEdge'
+import { Transaction } from '@/types/transaction.interface'
+import MultiDirectionalEdges from './edges/MultiDirectionalEdge'
+
+const edgeTypes = {
+  smartBidirectional: SmartBidirectionalEdge,
+  smartDirectional: NormalDirectionalEdge,
+  multiDirectional: MultiDirectionalEdges
+};
 
 const nodeTypes: NodeTypes = {
   circle: CircleNode,
   normalAddress: DefaultNode,
   redAddress: RedNode,
-  yellowAddress: YellowNode,
+  grayAddress: GrayNode,
 }
 
 const nodeClassName = (node: NodeData): string => {
   return node.type ? node.type : 'normalAddress'
 }
-const edgeTypes = {}
 interface FlowProps {
   onAddressClick: (node: NodeData) => void // Function that takes NodeData as argument
   onTxClick: (edge: EdgeData) => void // Function that takes EdgeData as argument
 }
 
+function transformTxn(
+  transactions: Transaction[]
+): Record<string, Transaction[]> {
+  const txnPairRecord: Record<string, Transaction[]> = {};
+
+  for (const transaction of transactions) {
+    const addresses = [transaction.from.address, transaction.to.address].sort();
+    const key = addresses.join('-')
+    if (!txnPairRecord[key]) {
+      txnPairRecord[key] = [];
+    }
+    txnPairRecord[key].push(transaction);
+  }
+  return  txnPairRecord
+}
+
 export default function Flow({ onAddressClick, onTxClick }: FlowProps) {
   // Use useSelector to listen to the Redux store
   const transactions = useSelector((state: RootState) => state.transactions.transactions)
-
+  const transformedTxns = transformTxn(transactions);
   // Map transactions to nodes and edges
   const initialNodes = mapTransactionToNodeData(transactions)
-  const initialEdges = mapTransactionFields(transactions)
+  const initialEdges = mapTransactionFields(transformedTxns)
 
   // Use ReactFlow's state hooks
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
@@ -60,7 +85,7 @@ export default function Flow({ onAddressClick, onTxClick }: FlowProps) {
   // Use useEffect to update nodes and edges whenever transactions change
   useEffect(() => {
     const newNodes = mapTransactionToNodeData(transactions)
-    const newEdges = mapTransactionFields(transactions)
+    const newEdges = mapTransactionFields(transformedTxns)
     setNodes(newNodes)
     setEdges(newEdges)
   }, [transactions, setNodes, setEdges])

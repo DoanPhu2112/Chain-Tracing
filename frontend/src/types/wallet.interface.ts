@@ -7,24 +7,6 @@ export interface PortfolioBalance {
     amount: number; // or number, depending on how the amount is handled
     value: number; // or number, depending on how the value is handled
 }
-export interface Transaction {
-    blockNum: string | null;
-    uniqueId: string | null;
-    hash: string | null;
-    from: string | null;
-    to: string | null;
-    value: number | null;
-    erc721TokenId: string | null;
-    erc1155Metadata: any | null;
-    tokenId: string | null;
-    asset: string;
-    category: string;
-    rawContract: {
-        value: string;
-        address: string;
-        decimal: string;
-    };
-}
 export type ERC20Balance = {
     native_token: boolean;
     balance: string;

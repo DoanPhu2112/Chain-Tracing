@@ -1,0 +1,231 @@
+[
+    {
+        "summary": "Received 0.03162 ETH from 0xee...34be",
+        "transactionHash": "0x2d6e6f19c3e6757efa192e7728d1adda0b7f3deb46fd999c0757414f9635e266",
+        "fromEntity": {
+            "address": "0xee22f02D563bFc3F6343EBD6aFf461704d7834bE",
+            "address_entity": null,
+            "address_entity_logo": null,
+            "address_entity_label": null
+        },
+        "toEntity": {
+            "address": "0x366F1AE0f8c910dFD095DE009A18590f4824F299",
+            "address_entity": null,
+            "address_entity_logo": null,
+            "address_entity_label": null
+        },
+        "methodLabel": null,
+        "value": "31621954302363663",
+        "blockTimestamp": "2025-01-14T22:05:47.000Z",
+        "nftTransfers": [],
+        "erc20Transfers": [],
+        "nativeTransfers": [
+            {
+                "from_entity": {
+                    "address": "0xee22f02D563bFc3F6343EBD6aFf461704d7834bE",
+                    "address_entity": null,
+                    "address_entity_logo": null,
+                    "address_entity_label": null
+                },
+                "to_entity": {
+                    "address": "0x366F1AE0f8c910dFD095DE009A18590f4824F299",
+                    "address_entity": null,
+                    "address_entity_logo": null,
+                    "address_entity_label": null
+                },
+                "token": {
+                    "symbol": "ETH",
+                    "logo": "https://cdn.moralis.io/eth/0x.png"
+                },
+                "value_formatted": "0.03162195430236366",
+                "direction": "receive"
+            }
+        ]
+    },
+    {
+        "summary": "Approved 134 RAI",
+        "transactionHash": "0x87c0c8781743c186b12ddc3a1c1fe0845dccd7a6d6e2ae769c999eeab4204f2a",
+        "fromEntity": {
+            "address": "0x366F1AE0f8c910dFD095DE009A18590f4824F299",
+            "address_entity": null,
+            "address_entity_logo": null,
+            "address_entity_label": null
+        },
+        "toEntity": {
+            "address": "0xc575BD129848Ce06A460A19466c30E1D0328F52C",
+            "address_entity": null,
+            "address_entity_logo": null,
+            "address_entity_label": null
+        },
+        "methodLabel": "approve",
+        "value": "0",
+        "blockTimestamp": "2025-01-14T22:06:35.000Z",
+        "nftTransfers": [],
+        "erc20Transfers": [],
+        "nativeTransfers": []
+    },
+    {
+        "summary": "Swapped 134 RAI for 939.71 DAI",
+        "transactionHash": "0x01cd3ca4a581647b32ba5bb60f5bb89c383ec3acd81e00eb3da27dcb80534392",
+        "fromEntity": {
+            "address": "0x366F1AE0f8c910dFD095DE009A18590f4824F299",
+            "address_entity": null,
+            "address_entity_logo": null,
+            "address_entity_label": null
+        },
+        "toEntity": {
+            "address": "0xf2614A233c7C3e7f08b1F887Ba133a13f1eb2c55",
+            "address_entity": null,
+            "address_entity_logo": null,
+            "address_entity_label": null
+        },
+        "methodLabel": null,
+        "value": "0",
+        "blockTimestamp": "2025-01-14T22:07:35.000Z",
+        "nftTransfers": [],
+        "erc20Transfers": [
+            {
+                "token_entity": {
+                    "name": "Reploy",
+                    "decimal": 18,
+                    "address": "0xc575BD129848Ce06A460A19466c30E1D0328F52C",
+                    "symbol": "RAI",
+                    "logo": "https://logo.moralis.io/0x1_0xc575bd129848ce06a460a19466c30e1d0328f52c_8e99d52d9f9bab96af40b45d619b49e4.jpg",
+                    "possibleSpam": false,
+                    "verifiedContract": true
+                },
+                "from_entity": {
+                    "address": "0x366F1AE0f8c910dFD095DE009A18590f4824F299",
+                    "address_entity": null,
+                    "address_entity_logo": null,
+                    "address_entity_label": null
+                },
+                "to_entity": {
+                    "address": "0x4dE8c60541fdaDD33404CCB2c8b83907CE617341",
+                    "address_entity": null,
+                    "address_entity_logo": null,
+                    "address_entity_label": null
+                },
+                "value_formatted": "134.00643156628067"
+            },
+            {
+                "token_entity": {
+                    "name": "Dai Stablecoin",
+                    "decimal": 18,
+                    "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+                    "symbol": "DAI",
+                    "logo": "https://logo.moralis.io/0x1_0x6b175474e89094c44da98b954eedeac495271d0f_204eb3fa61c24996a80df7ae5ab61714.png",
+                    "possibleSpam": false,
+                    "verifiedContract": true
+                },
+                "from_entity": {
+                    "address": "0xf2614A233c7C3e7f08b1F887Ba133a13f1eb2c55",
+                    "address_entity": null,
+                    "address_entity_logo": null,
+                    "address_entity_label": null
+                },
+                "to_entity": {
+                    "address": "0x366F1AE0f8c910dFD095DE009A18590f4824F299",
+                    "address_entity": null,
+                    "address_entity_logo": null,
+                    "address_entity_label": null
+                },
+                "value_formatted": "939.7127345680394"
+            }
+        ],
+        "nativeTransfers": []
+    },
+    {
+        "summary": "Approved 850 DSync",
+        "transactionHash": "0x9a7fda1dc60f9f30a6ec0ba12ae557ba3f63940f42ad8052100d5bd0b6783521",
+        "fromEntity": {
+            "address": "0x366F1AE0f8c910dFD095DE009A18590f4824F299",
+            "address_entity": null,
+            "address_entity_logo": null,
+            "address_entity_label": null
+        },
+        "toEntity": {
+            "address": "0xf94e7d0710709388bCe3161C32B4eEA56d3f91CC",
+            "address_entity": null,
+            "address_entity_logo": null,
+            "address_entity_label": null
+        },
+        "methodLabel": "approve",
+        "value": "0",
+        "blockTimestamp": "2025-01-14T22:08:11.000Z",
+        "nftTransfers": [],
+        "erc20Transfers": [],
+        "nativeTransfers": []
+    },
+    {
+        "summary": "Swapped 850 DSync for 314.88 DAI",
+        "transactionHash": "0xcc73443b9ec9c11f9bcdcf1d45288976b667d8bab164ef3315fc21efeeab3e89",
+        "fromEntity": {
+            "address": "0x366F1AE0f8c910dFD095DE009A18590f4824F299",
+            "address_entity": null,
+            "address_entity_logo": null,
+            "address_entity_label": null
+        },
+        "toEntity": {
+            "address": "0xf2614A233c7C3e7f08b1F887Ba133a13f1eb2c55",
+            "address_entity": null,
+            "address_entity_logo": null,
+            "address_entity_label": null
+        },
+        "methodLabel": null,
+        "value": "0",
+        "blockTimestamp": "2025-01-14T22:13:59.000Z",
+        "nftTransfers": [],
+        "erc20Transfers": [
+            {
+                "token_entity": {
+                    "name": "Destra Network",
+                    "decimal": 18,
+                    "address": "0xf94e7d0710709388bCe3161C32B4eEA56d3f91CC",
+                    "symbol": "DSync",
+                    "logo": "https://logo.moralis.io/0x1_0xf94e7d0710709388bce3161c32b4eea56d3f91cc_550e611b181f4b4501317e6c83e72147.png",
+                    "possibleSpam": true,
+                    "verifiedContract": true
+                },
+                "from_entity": {
+                    "address": "0x366F1AE0f8c910dFD095DE009A18590f4824F299",
+                    "address_entity": null,
+                    "address_entity_logo": null,
+                    "address_entity_label": null
+                },
+                "to_entity": {
+                    "address": "0x1ffEc7119e315B15852557f654AE0052f76e6ae1",
+                    "address_entity": "Uniswap",
+                    "address_entity_logo": "https://entities-logos.s3.us-east-1.amazonaws.com/uniswap.png",
+                    "address_entity_label": "Uniswap: V2 Pool"
+                },
+                "value_formatted": "850"
+            },
+            {
+                "token_entity": {
+                    "name": "Dai Stablecoin",
+                    "decimal": 18,
+                    "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+                    "symbol": "DAI",
+                    "logo": "https://logo.moralis.io/0x1_0x6b175474e89094c44da98b954eedeac495271d0f_204eb3fa61c24996a80df7ae5ab61714.png",
+                    "possibleSpam": false,
+                    "verifiedContract": true
+                },
+                "from_entity": {
+                    "address": "0xf2614A233c7C3e7f08b1F887Ba133a13f1eb2c55",
+                    "address_entity": null,
+                    "address_entity_logo": null,
+                    "address_entity_label": null
+                },
+                "to_entity": {
+                    "address": "0x366F1AE0f8c910dFD095DE009A18590f4824F299",
+                    "address_entity": null,
+                    "address_entity_logo": null,
+                    "address_entity_label": null
+                },
+                "value_formatted": "314.8896330877797"
+            }
+        ],
+        "nativeTransfers": []
+    }
+]

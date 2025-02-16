@@ -125,7 +125,7 @@ export function BalanceByTimeAreaChart() {
 
   return (
     <Card>
-      <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
+      {/* <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
         <div className="grid flex-1 gap-1 text-center sm:text-left">
           <CardTitle>Ethereum Balance Over Time</CardTitle>
           <CardDescription>
@@ -198,7 +198,7 @@ export function BalanceByTimeAreaChart() {
             />
           </AreaChart>
         </ChartContainer>
-      </CardContent>
+      </CardContent> */}
     </Card>
   )
 }

@@ -45,11 +45,60 @@ export function AddressTxByMonth() {
   return (
     <Card className="">
       <CardHeader>
-        <CardTitle>Monthly Transactions</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
+        <CardTitle>Tornado Cash Transactions Count</CardTitle>
+        <CardDescription>Count number of deposit / withdraw to Tornado Cash</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig}>
+      <div className="grid gap-3">
+          {/* <div className="font-semibold"></div> */}
+
+          <ul className="grid gap-3 mt-2">
+            <li className="flex items-center">
+              <span className="text-muted-foreground w-1/3 ">Deposit:</span>
+              <span className="flex gap-1">
+                <span>{12} txs</span>
+                {/* {addressEther && <span>{addressEther.value} $</span>} */}
+              </span>
+            </li>
+            <li className="flex items-center">
+              <span className="text-muted-foreground w-1/3 ">Withdraw:</span>
+              <span className="flex gap-1">
+                <span>{11} txs</span>
+                {/* {addressEther && <span>{addressEther.value} $</span>} */}
+              </span>
+            </li>
+            <li className="flex items-center">
+              <span className="text-muted-foreground w-1/3 ">Address match reveals:</span>
+              <span className="flex gap-1">
+                <span>{3} addresses </span>
+                {/* {addressEther && <span>{addressEther.value} $</span>} */}
+              </span>
+            </li>
+            <li className="flex items-center">
+              <span className="text-muted-foreground w-1/3 ">Multi-denom reveals:</span>
+              <span className="flex gap-1">
+                <span>{1} address</span>
+                {/* {addressEther && <span>{addressEther.value} $</span>} */}
+              </span>
+            </li>
+            <li className="flex items-center">
+              <span className="text-muted-foreground w-1/3 ">Linked Address Reveals:</span>
+              <span className="flex gap-1">
+                <span>{2} addresses</span>
+                {/* {addressEther && <span>{addressEther.value} $</span>} */}
+              </span>
+            </li>
+            {/* <li className="flex">
+              <span className="text-muted-foreground w-1/4 ">Timestamp:</span>
+              <span className="grid">
+                <span className="grid">2 days ago </span>
+                <span>Aug-13-2024 12:09:59 PM UTC</span>
+              </span>
+            </li> */}
+          </ul>
+        </div>
+      </CardContent>
+        {/* <ChartContainer config={chartConfig}> 
           <BarChart
             accessibilityLayer
             data={chartData}
@@ -104,7 +153,7 @@ export function AddressTxByMonth() {
         <div className="leading-none text-muted-foreground">
           Showing total transactions for the last 6 months
         </div>
-      </CardFooter>
+      </CardFooter> */}
     </Card>
   )
 }
