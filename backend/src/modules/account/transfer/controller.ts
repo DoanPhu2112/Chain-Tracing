@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { getAccountFollowupTransaction, getAccountTransaction } from './service';
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '~/constants/defaultvalue';
 import { timestampToDateTime, toVNDateTime } from '~/utils/time';
-import { TransactionReturnType } from './type.return';
 import codes from '~/errors/codes';
 
 type SortOrder = 'ASC' | 'DESC' | undefined;
@@ -26,6 +25,7 @@ async function GetWalletTransactionHistory(req: Request, res: Response) {
     page,
     pageSize
   } = req.query;
+  const addressLowercase = address.toLowerCase()
   const pageNumber = typeof page === 'number' ? parseInt(page, 10) : DEFAULT_PAGE;
   const pageSizeNumber = typeof pageSize === 'number' ? parseInt(pageSize, 10) : DEFAULT_PAGE_SIZE;
 
@@ -50,44 +50,16 @@ async function GetWalletTransactionHistory(req: Request, res: Response) {
 
   console.log('GetWalletTransactionHistory Params', { address, chainId, startTimestamp, endTimestamp, startBlock, endBlock, order, include_erc20_transactions_triggered, include_nft_transactions_triggered, include_native_transactions_triggered, page, pageSize });
   const response = await getAccountTransaction(
-    address,
+    addressLowercase,
     chainId!.toString(),
     startTimestampNumber,
     endTimestampNumber,
     startBlockNumber,
     endBlockNumber,
-    orderString,
-    !include_erc20_transactions_triggered ? true : false,
-    !include_nft_transactions_triggered ? true : false,
-    !include_native_transactions_triggered ? true : false
+    orderString
   );
-  const responsePage = response.transactions!.slice(
-    pageNumber * pageSizeNumber,
-    pageNumber * pageSizeNumber + pageSizeNumber
-  );
-  const result: TransactionReturnType = {
-    metadata: {
-      total_data: response.size,
-      chainID: chainId as string,
-      page: {
-        index: pageNumber,
-        size: pageSizeNumber
-      },
-      block: {
-        start: response.startBlock!,
-        end: response.endBlock
-      },
-      timestamp: {
-        start: startTimestampNumber,
-        end: endTimestampNumber || 0
-      },
-      datetime: {
-        start: startDatetime,
-        end: endDatetime
-      }
-    },
-    result: responsePage
-  };
+  console.log("response", JSON.stringify(response))
+  const result = response.transactions
   return res.status(codes.SUCCESS).json(result);
 }
 async function GetWalletFollowupTransactions(req: Request, res: Response) {
@@ -95,51 +67,25 @@ async function GetWalletFollowupTransactions(req: Request, res: Response) {
   const {
     transactionHash,
     chainId = '0x1',
-    include_erc20_transactions_triggered,
-    include_nft_transactions_triggered,
-    include_native_transactions_triggered
   } = req.query;
-  console.log(address)
-  console.log(transactionHash)
-  if (address === undefined || transactionHash === undefined) {
+
+  if (!address || !transactionHash) {
     return res
       .status(codes.BAD_REQUEST)
       .json({ message: 'Address and transactionHash are required' });
   }
+  const addressLowercase = address.toLowerCase()
+
   const transactionHashString = transactionHash.toString();
   const chainIdString = chainId.toString();
   const response = await getAccountFollowupTransaction(
-    address,
+    addressLowercase,
     transactionHashString,
-    chainIdString,
-    !include_erc20_transactions_triggered ? true : false,
-    !include_nft_transactions_triggered ? true : false,
-    !include_native_transactions_triggered ? true : false
+    chainIdString
   );
   
-  const result: TransactionReturnType = {
-    metadata: {
-      total_data: response.size,
-      chainID: chainId as string,
-      page: {
-        index: 0,
-        size: 10
-      },
-      block: {
-        start: response.startBlock!,
-        end: response.endBlock
-      },
-      timestamp: {
-        start: 0,
-        end: 0
-      },
-      datetime: {
-        start: "0",
-        end: "0"
-      }
-    },
-    result: response.transactions
-  };
+  const result = response.transactions;
+
   return res.status(codes.SUCCESS).json(result);
 }
 export default Transaction;

@@ -1,7 +1,7 @@
 export const DEFAULT_PAGE = 0;
 export const DEFAULT_LATEST_TIMESTAMP_STRING = Math.trunc(Date.now() / 1000).toString()
 export const DEFAULT_LATEST_TIMESTAMP = Math.trunc(Date.now() / 1000)
-export const DEFAULT_PAGE_SIZE = 10;
+export const DEFAULT_PAGE_SIZE = 100;
 export const DEFAULT_START_TIMESTAMP = 100;
 export const DEFAULT_ADDRESS = '0x'
 export const DEFAULT_MAX_TRANSACTION_RETURN = 10;

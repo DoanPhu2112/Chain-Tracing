@@ -62,18 +62,17 @@ export async function createContract(props: ContractProps) {
   const contract = await prisma.smartcontract.create({
     data: {
       address: props.address,
-      source_code: props.sourceCode,
       is_verified: props.isVerified,
       type: props.type,
       chain_hash: props.chainHash,
       name_tag: props.nameTag,
       logo: props.logo,
       label_source: props.labelSource,
-      abi: props.abi  
-
+      abi: props.abi,
+      source_code: props.sourceCode || '',
     }
   });
-  logger.info("Contract created: ", contract);
+  // logger.info("Contract created: ", contract);
   return contract;
 }
 

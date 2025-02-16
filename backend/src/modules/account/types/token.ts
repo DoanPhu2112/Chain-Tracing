@@ -1,17 +1,23 @@
 export type NFTToken = {
   address: string;
   id: string;
-  name: string | null;
+  name?: string | null;
   description?: string | null;
   animationUrl?: string | null;
   image?: string | null;  // e.g. https://dobutsu.xyz/api/thebuns/revealed/9455.png
   possibleSpam?: boolean | null;
   collection: NFTCollection;
 };
+
+export type NFTAmount = NFTToken & {value: string}
+
 export type NativeToken = {
   symbol?: string,
   logo?: string,
 }
+
+export type NativeAmount = NativeToken & {value: string}
+
 export type ERC20Token = {
   name: string;
   decimal: number;
@@ -21,11 +27,13 @@ export type ERC20Token = {
   possibleSpam: boolean | null,
   verifiedContract: boolean | null;
 }
+export type ERC20Amount = ERC20Token & {value: string}
+
 
 export type NFTCollection = {
   verified?: boolean | null;
-  logo: string | null;
-  bannerImage: string | null;
+  logo?: string | null;
+  bannerImage?: string | null;
 }
 export type ERC20USD = {
   price: string;

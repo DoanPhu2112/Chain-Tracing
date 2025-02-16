@@ -1,7 +1,6 @@
 import { ethers } from 'ethers';
 import { parse } from '@solidity-parser/parser';
 
-console.log(__dirname)
 import { getAlchemyAPI, getEtherscanAPI } from 'src/configs/provider.configs';
 import { AccountType } from 'src/models/account.model';
 import axios from 'axios';

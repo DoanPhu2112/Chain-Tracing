@@ -25,6 +25,5 @@ export async function getTokenByAddress(address: string): Promise<TokenProps | u
   //   }
   // });
   const token: TokenProps[] = await prisma.$queryRaw`SELECT t.chain_id, t.address, t.symbol, t.label, t.name, s.name_tag, t.website, t.image FROM token as t JOIN Smartcontract as s WHERE t.address=${address} AND t.address = s.address AND t.chain_id='0x1';`
-  console.log("token", token)
   return token.length > 0 ? token[0] : undefined;
 }

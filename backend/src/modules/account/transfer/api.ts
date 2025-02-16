@@ -1,5 +1,11 @@
 import { wait } from '~/utils/wait';
-import { Transaction, TransactionAPIReturn } from './type.return';
+import {
+  TokenAmount,
+  Transaction,
+  TransactionAPIReturn,
+  TransactionType,
+  Direction
+} from './type.return';
 import Moralis from 'moralis';
 import { Erc20Transfer } from './type.erc20';
 import { NFTTransfer } from './type.nft';
@@ -25,29 +31,19 @@ import { Entity } from '../types/entity';
 import { AccountType } from '~/models/account.model';
 import { getTokenByAddress } from '~/modules/token/token.dao';
 import { MORALIS_URLS } from '~/utils/API';
+import { logger } from 'ethers';
+import { transferableAbortController } from 'util';
+import { ERC20Amount, ERC20Token, NativeAmount, NativeToken, NFTAmount, NFTToken } from '../types/token';
+import { processAirdropTransfers, processReceiveTransfers, processSentTransfers, processSignTransfers } from './processTxn';
 
-async function fetchBlockNumberFromTransaction(transactionHash: string) {
-  const alchemy = getAlchemyAPI();
-  const res = await alchemy.core.getTransactionReceipt(transactionHash);
-
-  return Number(res?.blockNumber);
-}
-
-async function getEntity(
+export async function getEntity(
+  chainId: string,
   addressHash: string,
   txAddressLabel: string | undefined,
-  txAddressEntity: string | undefined,
-  txAddressEntityLogo: string | undefined,
-  chainId: string,
+  txAddressEntity?: string | undefined,
+  txAddressEntityLogo?: string | undefined
 ): Promise<Entity> {
-  let entity: Entity = {
-    address: '',
-    address_entity: '',
-    address_entity_logo: '',
-    address_entity_label: '',
-    type: []
-  };
-
+  let entity: Entity | undefined = undefined
   let addressType = await getAddressType(addressHash);
 
   // check if from address is EOA
@@ -66,14 +62,14 @@ async function getEntity(
     };
 
     // if label is not empty, create EOA
-    if (!eoaDb && entity.address_entity_label) { 
+    if (!eoaDb && entity.address_entity_label) {
       await createEOA({
         hash: addressHash,
         nameTag: entity.address_entity_label || '',
         chainHash: chainId,
         logo: entity.address_entity_logo || '',
-        label: entity.address_entity_label || '',
-      })
+        label: entity.address_entity_label || ''
+      });
     }
   }
 
@@ -91,59 +87,76 @@ async function getEntity(
     };
   }
   //if not EOA && not token contract, create contract
-  if (!token && !isFromEOA && (txAddressEntityLogo || txAddressEntity)) {
+  if (!token && !isFromEOA) {
     const sourceCode = await get_contract_functions(addressHash);
     const verified =
       sourceCode.result[0].ABI === 'Contract source code not verified' ? false : true;
 
-    await createContract({
+    const contract = await createContract({
       address: addressHash,
       chainHash: chainId,
       isVerified: verified,
       logo: txAddressEntityLogo || '',
-      nameTag: txAddressEntity || "",
+      nameTag: txAddressEntity || '',
       sourceCode: sourceCode.result[0].SourceCode,
       type: 'ERC20',
       abi: sourceCode.result[0].ABI
-
-    })
-  }
-
-  return entity;
-}
-async function assignSameAddress(
-  innerAddress: string,
-  addressLabel: string | undefined,
-  addressLogo: string | undefined,
-  outerAddress: Entity
-): Promise<Entity> {
-  let resultAddress: Entity = {
-    address: '',
-    address_entity: '',
-    address_entity_logo: '',
-    address_entity_label: '',
-    type: []
-  };
-
-  if (innerAddress === outerAddress.address) {
-    resultAddress = outerAddress;
-  }
-  if (innerAddress !== outerAddress.address) {
-    const address: string = innerAddress || DEFAULT_ADDRESS;
-    const toAddressType: AccountType[] = await getAddressType(address);
-    const toLabel: string = (await getEOAByHash(address))?.name_tag || DEFAULT_LABEL;
-
-    resultAddress = {
-      address: address,
-      address_entity: addressLabel as string,
-      address_entity_logo: addressLogo as string,
-      address_entity_label: toLabel,
-      type: toAddressType
+    });
+    entity = {
+      address: addressHash,
+      address_entity: txAddressEntity,
+      address_entity_logo: contract.logo, // prior Moralis
+      address_entity_label: txAddressLabel,
+      type: addressType
     };
   }
-  return resultAddress;
+  if (entity === undefined) {
+    throw new Error("Cannot workaround to find entity: " + addressHash)
+  }
+  return entity;
 }
+async function buildParams(
+  startBlock: number | undefined,
+  startTimestamp: number | undefined,
+  endTimestamp: number | undefined,
+  chainID: string,
+  address: string,
+  order: 'ASC' | 'DESC' | undefined,
+  cursor: string | null,
+  toBlock: number | undefined
+) {
+  if (startBlock) {
+    const startBlockParam = startBlock || (await timestampToBlock(startTimestamp, chainID));
+    const toBlockParam = toBlock || (await timestampToBlock(endTimestamp, chainID));
 
+    return {
+      address,
+      chain: chainID,
+      fromBlock: startBlockParam,
+      toBlock: toBlockParam || undefined,
+      includeInternalTransactions: false,
+      nftMetadata: true,
+      order,
+      limit: DEFAULT_MAX_TRANSACTION_REQUEST,
+      ...(cursor && { cursor })
+    };
+  } else {
+    const startDateTime = new Date(startTimestamp!);
+    const endDateTime = new Date(endTimestamp!);
+
+    return {
+      address,
+      chain: chainID,
+      fromDate: startDateTime,
+      toDate: endDateTime,
+      includeInternalTransactions: true,
+      nftMetadata: true,
+      order,
+      limit: DEFAULT_MAX_TRANSACTION_REQUEST,
+      ...(cursor && { cursor })
+    };
+  }
+}
 async function fetchAccountTransactionWithRetry(
   address: string,
   chainID: string,
@@ -151,10 +164,7 @@ async function fetchAccountTransactionWithRetry(
   endTimestamp: number | undefined,
   startBlock: number | undefined,
   toBlock: number | undefined,
-  order: 'ASC' | 'DESC' | undefined,
-  include_erc20_transactions_triggered: boolean = true,
-  include_nft_transactions_triggered: boolean = true,
-  include_native_transactions_triggered: boolean = true
+  order: 'ASC' | 'DESC' | undefined
 ) {
   async function fetchAccountTransaction(
     address: string,
@@ -163,13 +173,10 @@ async function fetchAccountTransactionWithRetry(
     endTimestamp: number | undefined,
     startBlock: number | undefined,
     toBlock: number | undefined,
-    order: 'ASC' | 'DESC' | undefined,
-    include_erc20_transactions_triggered: boolean = true,
-    include_nft_transactions_triggered: boolean = true,
-    include_native_transactions_triggered: boolean = true
+    order: 'ASC' | 'DESC' | undefined
   ): Promise<TransactionAPIReturn> {
     let cursor: string | null = '';
-  
+
     let result: TransactionAPIReturn = {
       size: 0,
       startTimestamp: startTimestamp,
@@ -178,230 +185,288 @@ async function fetchAccountTransactionWithRetry(
       endBlock: toBlock,
       transactions: []
     };
-    console.log("startTimestamp", startTimestamp);
-    console.log("endTimestamp", endTimestamp);
     while (cursor != null) {
       await wait(1000);
-      console.log("result.size", result.size);
-      if (result.size >= DEFAULT_MAX_TRANSACTION_REQUEST) {
-        break;
-      }
-      let params;
-      if (startBlock) {
-        let startBlockParam = startBlock || (await timestampToBlock(startTimestamp, chainID));
-        let toBlockParam = toBlock || (await timestampToBlock(endTimestamp, chainID));
-  
-        params = {
-          address: address,
-          chain: chainID,
-          fromBlock: startBlockParam,
-          toBlock: toBlockParam || undefined,
-          includeInternalTransactions: false,
-          nftMetadata: true,
-          order: order,
-          limit: DEFAULT_MAX_TRANSACTION_REQUEST,
-          ...(cursor && { cursor })
-        };
-      } 
-      if (!startBlock) {
-        let startDateTime = new Date(startTimestamp!);
-        let endDateTime = new Date(endTimestamp!);
-        console.log("startDateTime", startDateTime);
-        console.log("endDateTime", endDateTime);
-        params = {
-          address: address,
-          chain: chainID,
-          fromDate: startDateTime,
-          toDate: endDateTime,
-          includeInternalTransactions: false,
-          nftMetadata: true,
-          order: order,
-          limit: DEFAULT_MAX_TRANSACTION_REQUEST,
-          ...(cursor && { cursor })
-        };
-      }
-  
+      // if (result.size >= DEFAULT_MAX_TRANSACTION_REQUEST) break;
+
+      const params = await buildParams(startBlock, startTimestamp, endTimestamp, chainID, address, order, cursor, toBlock);
       const pageResult = await Moralis.EvmApi.wallets.getWalletHistory(params!);
+
       cursor = pageResult.hasNext() ? pageResult.response.cursor : null;
-  
-      const walletTransactionHistoryReturn = pageResult.response.result;
-      const transactionPromises = walletTransactionHistoryReturn.map(async (transaction) => {
-        let erc20Transactions: Erc20Transfer[] = [];
-        let NFTTransactions: NFTTransfer[] = [];
-        let nativeTransactions: NativeTransfer[] = [];
-  
+
+      const transactions = pageResult.result
+      //.filter(txn => extractTxnType(txn.summary) !== TransactionType.Sign);
+
+      const transactionPromise = transactions.map(async (transaction) => {
         let transactionReturn: Transaction;
-  
-        let from: Entity = await getEntity(
-          transaction.fromAddress.checksum,
-          transaction.fromAddressLabel,
-          transaction.fromAddressEntity,
-          transaction.fromAddressEntityLogo,
-          chainID
-        );
-        if (from.address === address) {
-          from.type.push(AccountType.TARGET)
+
+        let fromEntity, toEntity;
+        let value: {
+          sent: (ERC20Amount | NFTAmount | NativeAmount)[];
+          receive: (ERC20Amount | NFTAmount | NativeAmount)[];
+        } = {
+          sent: [],
+          receive: []
+        };
+        let intermediaryEntities: Entity[] = [];
+
+        if (!transaction.toAddress) {
+          throw new Error('Unhandled case toaddress is null, transaction: \n' + transaction);
         }
-        let to: Entity = await getEntity(
-          transaction.toAddress?.checksum || DEFAULT_ADDRESS,
-          transaction.toAddressLabel,
-          transaction.toAddressEntity,
-          transaction.toAddressEntityLogo,
-          chainID
-        )
-        if (to.address === address) {
-          to.type.push(AccountType.TARGET)
+
+        const txnType = extractTxnType(transaction.summary);
+        if (txnType === TransactionType.Sent) {
+          const [from, to, v] = await processSentTransfers(transaction, chainID)
+          fromEntity = from
+          toEntity = to
+          value = v;
         }
-        console.log('from', from);
-        console.log('to', to);
-  
-        if (include_erc20_transactions_triggered) {
-          if (transaction.erc20Transfers.length > 0) {
-            // TODO: Handle transaction.direction
-            transaction.erc20Transfers.forEach(async (erc20: any) => {
-              let erc20From: Entity = await assignSameAddress(
-                erc20.fromAddress.checksum,
-                erc20.fromAddressEntity,
-                erc20.fromAddressEntityLogo,
-                from
-              );
-  
-              let erc20To: Entity = await assignSameAddress(
-                erc20.toAddress.checksum,
-                erc20.toAddressEntity,
-                erc20.toAddressEntityLogo,
-                to
-              );
-  
-              erc20Transactions.push({
-                token: {
-                  name: erc20.tokenName,
-                  decimal: erc20.tokenDecimals,
-                  address: erc20.address.checksum,
-                  symbol: erc20.tokenSymbol,
-                  logo: erc20.tokenLogo,
-                  possibleSpam: erc20.possibleSpam,
-                  verifiedContract: erc20.verifiedContract
-                },
-                from: erc20From,
-                to: erc20To,
-                blockTimestamp: erc20.blockTimestamp,
-                valueFormatted: erc20.valueFormatted,
-                direction: erc20.direction
+        
+        /**
+         * In case is Receive txn,
+         * from -> to (to may not be the txn we want)
+         * we let the flow be like
+         * => from -> inter -> to
+         */
+        if (txnType === TransactionType.Receive) {
+          const [from, to, inter, v] = await processReceiveTransfers(address, transaction, chainID)
+          fromEntity = from
+          toEntity = to
+          intermediaryEntities = inter
+          value = v;
+        }
+        if (txnType === TransactionType.Sign) {
+          const [from, to, v] = await processSignTransfers(transaction, chainID)
+          fromEntity = from
+          toEntity = to
+          value = v;
+        }
+        /**
+         * Approve should have the spender address,
+         * `to_address` in approve is seen as Token contract instead of the one who was approved
+         */
+        if (txnType === TransactionType.Approve) {
+          const intermediaryEntity = await getEntity(
+            chainID,
+            transaction.toAddress.lowercase,
+            transaction.toAddressLabel,
+            transaction.toAddressEntity,
+            transaction.toAddressEntityLogo
+          );
+          intermediaryEntities.push(intermediaryEntity);
+
+          const toAddresses = transaction.contractInteractions?.approvals;
+          if (!toAddresses) {
+            throw new Error('Approval summary but got no approval interaction');
+          }
+          if (toAddresses.length > 1) {
+            throw new Error('Unhandled case approve many users ');
+          }
+          const toAddress = toAddresses[0];
+          toEntity = await getEntity(
+            chainID,
+            toAddress.spender.address.lowercase,
+            toAddress.spender.addressLabel
+          );
+          value.sent.push({
+            value: toAddress.valueFormatted || '0',
+            address: toAddress.token.address.lowercase,
+            name: toAddress.token.tokenName,
+            symbol: toAddress.token.tokenSymbol,
+            possibleSpam: false,
+            verifiedContract: true
+          });
+        }
+
+        if (txnType === TransactionType.Swap) {
+          fromEntity = await getEntity(
+            chainID,
+            transaction.fromAddress.lowercase,
+            transaction.fromAddressLabel,
+            transaction.fromAddressEntity,
+            transaction.fromAddressEntityLogo
+          );
+          toEntity = await getEntity(
+            chainID,
+            transaction.toAddress.lowercase,
+            transaction.fromAddressLabel,
+            transaction.fromAddressEntity,
+            transaction.fromAddressEntityLogo
+          );
+
+          for (const nativeTransfer of transaction.nativeTransfers) {
+            if (nativeTransfer.direction === 'receive') {
+              value.receive.push({
+                value: nativeTransfer.valueFormatted,
+                symbol: nativeTransfer.tokenSymbol,
+                logo: nativeTransfer.tokenLogo
               });
-            });
+            } else {
+              value.sent.push({
+                value: nativeTransfer.valueFormatted,
+                symbol: nativeTransfer.tokenSymbol,
+                logo: nativeTransfer.tokenLogo
+              });
+            }
+          }
+          for (const transfer of transaction.erc20Transfers) {
+            if ((transfer as any).direction === 'receive') {
+              value.receive.push({
+                value: transfer.valueFormatted,
+
+                name: transfer.tokenName,
+                decimal: transfer.tokenDecimals,
+                address: transfer.address.lowercase,
+                symbol: transfer.tokenSymbol,
+                logo: transfer.tokenLogo,
+                possibleSpam: transfer.possibleSpam,
+                verifiedContract: transfer.verifiedContract
+              });
+            } else {
+              value.sent.push({
+                value: transfer.valueFormatted,
+
+                name: transfer.tokenName,
+                decimal: transfer.tokenDecimals,
+                address: transfer.address.lowercase,
+                symbol: transfer.tokenSymbol,
+                logo: transfer.tokenLogo,
+                possibleSpam: transfer.possibleSpam,
+                verifiedContract: transfer.verifiedContract
+              });
+            }
+          }
+          for (const transfer of transaction.nftTransfers) {
+            if (transfer.direction === 'receive') {
+              value.receive.push({
+                value: transfer.value,
+
+                address: transfer.tokenAddress.lowercase,
+                id: transfer.tokenId,
+                name: transfer.normalizedMetadata?.name,
+                description: transfer.normalizedMetadata?.description,
+                animationUrl: transfer.normalizedMetadata?.animationUrl,
+                image: transfer.normalizedMetadata?.image,
+                possibleSpam: transfer.possibleSpam,
+                collection: {
+                  verified: transfer.verifiedCollection,
+                  logo: transfer.collectionLogo,
+                  bannerImage: transfer.collectionBannerImage
+                }
+              });
+            } else {
+              value.sent.push({
+                value: transfer.value,
+                address: transfer.tokenAddress.lowercase,
+                id: transfer.tokenId,
+                name: transfer.normalizedMetadata?.name,
+                description: transfer.normalizedMetadata?.description,
+                animationUrl: transfer.normalizedMetadata?.animationUrl,
+                image: transfer.normalizedMetadata?.image,
+                possibleSpam: transfer.possibleSpam,
+                collection: {
+                  verified: transfer.verifiedCollection,
+                  logo: transfer.collectionLogo,
+                  bannerImage: transfer.collectionBannerImage
+                }
+              });
+            }
           }
         }
-        if (include_nft_transactions_triggered) {
-          if (transaction.nftTransfers.length > 0) {
-            transaction.nftTransfers.forEach(async (nft) => {
-              let nftFrom: Entity = await assignSameAddress(
-                nft.fromAddress.checksum,
-                nft.fromAddressLabel,
-                nft.fromAddressEntityLogo,
-                from
-              );
-              let nftTo: Entity = await assignSameAddress(
-                nft.toAddress?.checksum || DEFAULT_ADDRESS,
-                nft.toAddressLabel,
-                nft.toAddressEntityLogo,
-                to
-              );
-              NFTTransactions.push({
-                token: {
-                  address: nft.tokenAddress.checksum,
-                  id: nft.tokenId,
-                  name: nft.normalizedMetadata?.name || null,
-                  description: nft.normalizedMetadata?.description,
-                  animationUrl: nft.normalizedMetadata?.animationUrl || null,
-                  image: nft.normalizedMetadata?.image,
-                  possibleSpam: nft.possibleSpam,
-                  collection: {
-                    verified: nft.verifiedCollection,
-                    logo: nft.collectionLogo || null,
-                    bannerImage: nft.collectionBannerImage || null
-                  }
-                },
-                from: nftFrom,
-                to: nftTo,
-                amount: nft.amount,
-                direction: nft.direction,
-                contractType: nft.contractType,
-                value: nft.value
-              });
-            });
-          }
+
+        if (txnType === TransactionType.Airdrop) {
+          const [from, to, v] = await processAirdropTransfers(transaction, chainID)
+          fromEntity = from
+          toEntity = to
+          value = v;
         }
-        if (include_native_transactions_triggered) {
-          if (transaction.nativeTransfers.length > 0) {
-            transaction.nativeTransfers.forEach(async (native) => {
-              let nativeFrom: Entity = await assignSameAddress(
-                native.fromAddress.checksum,
-                native.fromAddressEntity,
-                native.fromAddressEntityLogo,
-                from
-              );
-              let nativeTo: Entity = await assignSameAddress(
-                native.toAddress?.checksum || DEFAULT_ADDRESS,
-                native.toAddressEntity,
-                native.toAddressEntityLogo,
-                to
-              );
-  
-              nativeTransactions.push({
-                from: nativeFrom,
-                to: nativeTo,
-                token: {
-                  symbol: native.tokenSymbol,
-                  logo: native.tokenLogo
-                },
-                valueFormatted: native.valueFormatted,
-                direction: native.direction
-              });
-            });
-          }
+        if (value.receive.length === 0 && value.sent.length === 0) {
+          return undefined
         }
+        if (!fromEntity || !toEntity) {
+          console.log("fromEntity", fromEntity);
+          console.log("toEntity", toEntity);
+          console.log("value", value);
+          throw new Error('Unhandled case parsing txn for txn: ' + JSON.stringify(transaction));
+        }
+        if (fromEntity.address === address) {
+          fromEntity.type.push(AccountType.TARGET);
+        }
+
+        if (toEntity.address === address) {
+          toEntity.type.push(AccountType.TARGET);
+        }
+
         transactionReturn = {
           chainId: chainID,
           summary: transaction.summary,
-          txnHash: transaction.blockHash,
-          from: from,
-          to: to,
-          methodLabel: transaction.methodLabel,
-          value: transaction.value,
-          blockTimestamp: transaction.blockTimestamp,
-          nftTransfers: NFTTransactions,
-          erc20Transfers: erc20Transactions,
-          nativeTransfers: nativeTransactions
+          txnHash: transaction.hash,
+          from: fromEntity,
+          to: toEntity,
+          value: value,
+          date: new Date(transaction.blockTimestamp),
+          type: extractTxnType(transaction.summary)
         };
         return transactionReturn;
       });
-  
+
       result.size += pageResult.response.pageSize;
-  
-      const resolvedTransactions = await Promise.all(transactionPromises);
+
+      const resolvedTransactions = (await Promise.all(transactionPromise)).filter(txn => !!txn);
       result.transactions = result.transactions.concat(resolvedTransactions);
-  
+
       await wait(1000);
       if (result.size > DEFAULT_MAX_TRANSACTION_REQUEST) {
         break;
       }
     }
-    console.log(result);
     return result;
   }
   let attempts = 0;
   let accountTxn = undefined;
-  while (attempts < MORALIS_URLS.length) {
+  while (attempts < 3) {
     try {
-      accountTxn = await fetchAccountTransaction(address, chainID, startTimestamp, endTimestamp, startBlock, toBlock, order, include_erc20_transactions_triggered, include_nft_transactions_triggered, include_native_transactions_triggered);
+      accountTxn = await fetchAccountTransaction(
+        address,
+        chainID,
+        startTimestamp,
+        endTimestamp,
+        startBlock,
+        toBlock,
+        order
+      );
       return accountTxn;
-    } catch(err) {
-      console.log("ATTEMPTS:", attempts)
+    } catch (err) {
+      console.log('ATTEMPTS:', attempts);
+      console.log('err:', err);
       attempts++;
       await wait(1000);
     }
   }
-  throw new Error("Failed to fetch account transaction");
-} 
-export { fetchAccountTransactionWithRetry, fetchBlockNumberFromTransaction };
+  throw new Error('Failed to fetch account transaction');
+}
+
+
+function extractTxnType(summary: string): TransactionType {
+  if (summary.startsWith('Approved')) {
+    return TransactionType.Approve;
+  }
+  if (summary.startsWith('Received')) {
+    return TransactionType.Receive;
+  }
+  if (summary.startsWith('Sent')) {
+    return TransactionType.Sent;
+  }
+  if (summary.startsWith('Swapped')) {
+    return TransactionType.Swap;
+  }
+  if (summary.startsWith('Signed')) {
+    return TransactionType.Sign;
+  }
+  if (summary.startsWith('Airdrop')) {
+    return TransactionType.Airdrop;
+  }
+
+  throw Error('Unknown summary + ' + summary);
+}
+export { fetchAccountTransactionWithRetry };
