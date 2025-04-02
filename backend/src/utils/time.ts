@@ -7,7 +7,7 @@ async function timestampToBlock(timestamp: number | undefined, chainID: string):
     return undefined;
   }
 
-  const timestampDate = new Date(timestamp * 1000);
+  const timestampDate = new Date(timestamp);
   try {
     const response = await Moralis.EvmApi.block.getDateToBlock({
       "chain": chainID,
@@ -19,7 +19,7 @@ async function timestampToBlock(timestamp: number | undefined, chainID: string):
     return response.result.block
   } catch( err) {
     console.log("err", err);
-    return -1
+    return undefined
   }
 }
 function timestampToDateTime(timestamp: number): Date {

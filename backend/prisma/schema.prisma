@@ -1,119 +1,156 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
+}
 
 datasource chain_tracing {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-  previewFeatures = ["relationJoins"]
-
-}
-
-model Story {
-  story_id          Int                @id @default(autoincrement())
-  title             String             @chain_tracing.VarChar(255)
-  description       String             @chain_tracing.VarChar(255)
+model Graph {
+  graph_id          Int                 @id @default(autoincrement())
+  description       String              @chain_tracing.VarChar(255)
   created_at        DateTime
   updated_at        DateTime
-  storyTransactions Story_Transaction[]
+  graphTransactions Graph_Transaction[]
+
+  reports Report[] // Added for Report relation
 }
 
-model Erc20token {
-  erc20_id          Int      @id @default(autoincrement())
-  address           String   @chain_tracing.Char(42)
-  name              String
-  symbol            String   @chain_tracing.VarChar(255)
-  possible_spam     Boolean?
-  decimal           Decimal
-  verified_contract Boolean?
-  logo              String?
-}
+model Token {
+  id       Int     @id @default(autoincrement())
+  address  String  @chain_tracing.Char(42)
+  label    String
+  name     String?
+  symbol   String?
+  website  String?
+  image    String?
+  chain_id Int
 
-model Erc721token {
-  erc721_id     Int     @id @default(autoincrement())
-  address       String  @chain_tracing.Char(42)
-  description   String?
-  animation_url String?
-  image         String?
-  value         String?
-  traits        BigInt?
-}
-model token {
-  id     Int     @id @default(autoincrement())
-  address       String  @chain_tracing.Char(42)
-  chain_id   String
-  label           String
-  name            String?
-  symbol         String?
-  website        String?
-  image String?
+  chain Chain @relation(fields: [chain_id], references: [chain_id])
+
+  Transaction Transaction[]
+
+  @@index([chain_id], map: "Token_chain_id_fkey")
 }
 
 model Smartcontract {
-  contract_id Int      @id @default(autoincrement())
-  address     String   @chain_tracing.Char(42)
-  source_code String   @chain_tracing.MediumText
-  is_verified Boolean?
-  type        String   @chain_tracing.Text
-  chain_hash  String
-  name_tag    String?
-  label_source   label_source @default(ethereum)
-  logo        String?
-  abi         String?          @chain_tracing.Text
-  chain       Chain    @relation(fields: [chain_hash], references: [hash])
+  contract_id       Int                 @id @default(autoincrement())
+  address           String              @chain_tracing.Char(42)
+  source_code       String              @chain_tracing.MediumText
+  is_verified       Boolean?
+  type              String              @chain_tracing.Text
+  chain_id          Int
+  name_tag          String?
+  logo              String?
+  label_source      label_source        @default(ethereum)
+  abi               String?             @chain_tracing.Text
+  chain             Chain               @relation(fields: [chain_id], references: [chain_id])
+  
+  @@index([chain_id], map: "Smartcontract_chain_id_fkey")
 }
 
-model Transaction {
-  transaction_id   Int                @id @default(autoincrement())
-  hash             String             @chain_tracing.Char(66)
-  block_hash       String             @chain_tracing.Char(66)
-  from_address     String             @chain_tracing.Char(42)
-  to_address       String             @chain_tracing.Char(42)
-  asset_id         Int? // Removed foreign key constraint for flexibility
-  chain_hash       String
-  story_transaction Story_Transaction[]
-  chain          Chain   @relation(fields: [chain_hash], references: [hash])
 
+model Transaction {
+  transaction_id Int    @id @default(autoincrement())
+  hash           String @chain_tracing.Char(66)
+  block_hash     String @chain_tracing.Char(66)
+  from_address   String @chain_tracing.Char(42)
+  to_address     String @chain_tracing.Char(42)
+  amount         BigInt
+  token_id       Int?
+  chain_id       Int
+  summary        String
+
+  token              Token?               @relation(fields: [token_id], references: [id])
+  chain              Chain               @relation(fields: [chain_id], references: [chain_id])
+  graph_transactions Graph_Transaction[] // Added for Graph_Transaction relation
+
+  @@index([chain_id], map: "Transaction_chain_id_fkey")
+}
+
+model TornadoWithdrawTransaction {
+  transaction_id    Int      @id @default(autoincrement())
+  hash              String   @chain_tracing.Char(66)
+  from_address      String   @chain_tracing.Char(42)
+  recipient_address String   @chain_tracing.Char(42)
+  to_address        String   @chain_tracing.Char(42)
+  from_proxy        Boolean?
+  contract_address  String   @chain_tracing.Char(42)
+  timestamp         BigInt
+  value             BigInt
+}
+
+model TornadoDepositTransaction {
+  transaction_id   Int    @id @default(autoincrement())
+  hash             String @chain_tracing.Char(66)
+  from_address     String @chain_tracing.Char(42)
+  to_address       String @chain_tracing.Char(42)
+  contract_address String @chain_tracing.Char(42)
+  timestamp        BigInt
+  value            String
 }
 
 model Eoa {
-  eoa_id         Int     @id @default(autoincrement())
+  eoa_id         Int          @id @default(autoincrement())
   native_balance BigInt
-  score          Int
   name_tag       String?
   label          String?
-  label_source   label_source @default(ethereum)
   hash           String
-  chain_hash     String
+  chain_id       Int
   logo           String?
-  chain          Chain   @relation(fields: [chain_hash], references: [hash])
-  @@index (fields: [name_tag])
+  label_source   label_source @default(ethereum)
+  chain          Chain        @relation(fields: [chain_id], references: [chain_id])
 }
 
-model Story_Transaction {
-  story_transaction_id Int    @id @default(autoincrement())
-  story_id             Int
+model Graph_Transaction {
+  graph_transaction_id Int         @id @default(autoincrement())
+  graph_id             Int
   transaction_id       Int
   sequence_number      BigInt
+  graph                Graph       @relation(fields: [graph_id], references: [graph_id])
+  transaction          Transaction @relation(fields: [transaction_id], references: [transaction_id])
 
-  story       Story       @relation(fields: [story_id], references: [story_id])
-  transaction Transaction @relation(fields: [transaction_id], references: [transaction_id])
+  @@index([graph_id], map: "Graph_Transaction_graph_id_fkey")
+  @@index([transaction_id], map: "Graph_Transaction_transaction_id_fkey")
 }
 
 model Chain {
-  hash           String @id
-  name           String
-  rpc_url        String?
-  smartcontract  Smartcontract[]
-  transaction    Transaction[]
-  eoa            Eoa[]
+  chain_id      Int             @id
+  hash          String
+  name          String
+  // Relations
+  eoa           Eoa[]
+  token         Token[]
+  smartContract Smartcontract[]
+  transaction   Transaction[]
+}
+
+model User {
+  id       Int      @id @default(autoincrement())
+  name     String
+  password String
+
+  reports Report[]  // 👈 1 user has many reports
+}
+
+model Report {
+  report_id        Int     @id @default(autoincrement())
+  user_id          Int     // 👈 Add this line for the foreign key
+  graph_id         Int?
+  title            String  @chain_tracing.VarChar(255)
+  amount           BigInt
+  transaction_hash String
+  description      String
+  timestamp        BigInt
+  category         String
+  address          String
+  url              String?
+  ip               String?
+
+  user  User   @relation(fields: [user_id], references: [id]) // 👈 define relation
+  graph Graph? @relation(fields: [graph_id], references: [graph_id])
 }
 
 enum label_source {

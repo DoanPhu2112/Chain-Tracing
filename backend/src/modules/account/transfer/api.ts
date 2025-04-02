@@ -31,7 +31,6 @@ import { Entity } from '../types/entity';
 import { AccountType } from '~/models/account.model';
 import { getTokenByAddress } from '~/modules/token/token.dao';
 import { MORALIS_URLS } from '~/utils/API';
-import { logger } from 'ethers';
 import { transferableAbortController } from 'util';
 import { ERC20Amount, ERC20Token, NativeAmount, NativeToken, NFTAmount, NFTToken } from '../types/token';
 import { processAirdropTransfers, processReceiveTransfers, processSentTransfers, processSignTransfers } from './processTxn';
@@ -123,7 +122,8 @@ async function buildParams(
   address: string,
   order: 'ASC' | 'DESC' | undefined,
   cursor: string | null,
-  toBlock: number | undefined
+  toBlock: number | undefined,
+  limit: number | undefined
 ) {
   if (startBlock) {
     const startBlockParam = startBlock || (await timestampToBlock(startTimestamp, chainID));
@@ -137,7 +137,7 @@ async function buildParams(
       includeInternalTransactions: false,
       nftMetadata: true,
       order,
-      limit: DEFAULT_MAX_TRANSACTION_REQUEST,
+      limit: limit|| DEFAULT_MAX_TRANSACTION_REQUEST,
       ...(cursor && { cursor })
     };
   } else {
@@ -152,11 +152,12 @@ async function buildParams(
       includeInternalTransactions: true,
       nftMetadata: true,
       order,
-      limit: DEFAULT_MAX_TRANSACTION_REQUEST,
+      limit: limit|| DEFAULT_MAX_TRANSACTION_REQUEST,
       ...(cursor && { cursor })
     };
   }
 }
+
 async function fetchAccountTransactionWithRetry(
   address: string,
   chainID: string,
@@ -164,7 +165,9 @@ async function fetchAccountTransactionWithRetry(
   endTimestamp: number | undefined,
   startBlock: number | undefined,
   toBlock: number | undefined,
-  order: 'ASC' | 'DESC' | undefined
+  order: 'ASC' | 'DESC' | undefined,
+  limit?: number | undefined,
+
 ) {
   async function fetchAccountTransaction(
     address: string,
@@ -173,7 +176,8 @@ async function fetchAccountTransactionWithRetry(
     endTimestamp: number | undefined,
     startBlock: number | undefined,
     toBlock: number | undefined,
-    order: 'ASC' | 'DESC' | undefined
+    order: 'ASC' | 'DESC' | undefined,
+    limit?: number,
   ): Promise<TransactionAPIReturn> {
     let cursor: string | null = '';
 
@@ -187,16 +191,16 @@ async function fetchAccountTransactionWithRetry(
     };
     while (cursor != null) {
       await wait(1000);
-      // if (result.size >= DEFAULT_MAX_TRANSACTION_REQUEST) break;
+      if (result.size >= (limit || DEFAULT_MAX_TRANSACTION_REQUEST)) break;
 
-      const params = await buildParams(startBlock, startTimestamp, endTimestamp, chainID, address, order, cursor, toBlock);
-      const pageResult = await Moralis.EvmApi.wallets.getWalletHistory(params!);
+      const params = await buildParams(startBlock, startTimestamp, endTimestamp, chainID, address, order, cursor, toBlock, limit);
+      const pageResult = await Moralis.EvmApi.wallets.getWalletHistory(params);
 
       cursor = pageResult.hasNext() ? pageResult.response.cursor : null;
 
       const transactions = pageResult.result
       //.filter(txn => extractTxnType(txn.summary) !== TransactionType.Sign);
-
+      console.log("Transactions: ", transactions)
       const transactionPromise = transactions.map(async (transaction) => {
         let transactionReturn: Transaction;
 
@@ -211,10 +215,17 @@ async function fetchAccountTransactionWithRetry(
         let intermediaryEntities: Entity[] = [];
 
         if (!transaction.toAddress) {
-          throw new Error('Unhandled case toaddress is null, transaction: \n' + transaction);
+          return undefined
+          // throw new Error('Unhandled case toaddress is null, transaction: \n' + transaction);
         }
 
         const txnType = extractTxnType(transaction.summary);
+        if (txnType === undefined) {
+          return undefined;
+        }
+        if (txnType === TransactionType.Unknown) {
+          return undefined
+        }
         if (txnType === TransactionType.Sent) {
           const [from, to, v] = await processSentTransfers(transaction, chainID)
           fromEntity = from
@@ -246,6 +257,13 @@ async function fetchAccountTransactionWithRetry(
          * `to_address` in approve is seen as Token contract instead of the one who was approved
          */
         if (txnType === TransactionType.Approve) {
+          fromEntity = await getEntity(
+            chainID,
+            transaction.fromAddress.lowercase,
+            transaction.fromAddressLabel,
+            transaction.fromAddressEntity,
+            transaction.fromAddressEntityLogo
+          );
           const intermediaryEntity = await getEntity(
             chainID,
             transaction.toAddress.lowercase,
@@ -257,7 +275,8 @@ async function fetchAccountTransactionWithRetry(
 
           const toAddresses = transaction.contractInteractions?.approvals;
           if (!toAddresses) {
-            throw new Error('Approval summary but got no approval interaction');
+            // throw new Error('Approval summary but got no approval interaction');
+            return undefined
           }
           if (toAddresses.length > 1) {
             throw new Error('Unhandled case approve many users ');
@@ -389,13 +408,20 @@ async function fetchAccountTransactionWithRetry(
           console.log("value", value);
           throw new Error('Unhandled case parsing txn for txn: ' + JSON.stringify(transaction));
         }
-        if (fromEntity.address === address) {
+        let check = false
+        if (fromEntity.address?.toLowerCase() === address.toLowerCase()) {
+          check = true
           fromEntity.type.push(AccountType.TARGET);
         }
 
-        if (toEntity.address === address) {
+        if (toEntity.address?.toLowerCase() === address.toLowerCase()) {
+          check = true
           toEntity.type.push(AccountType.TARGET);
         }
+        if (!check) {
+          return undefined
+        }
+        
 
         transactionReturn = {
           chainId: chainID,
@@ -405,7 +431,7 @@ async function fetchAccountTransactionWithRetry(
           to: toEntity,
           value: value,
           date: new Date(transaction.blockTimestamp),
-          type: extractTxnType(transaction.summary)
+          type: txnType
         };
         return transactionReturn;
       });
@@ -424,7 +450,7 @@ async function fetchAccountTransactionWithRetry(
   }
   let attempts = 0;
   let accountTxn = undefined;
-  while (attempts < 3) {
+  while (attempts < 1) {
     try {
       accountTxn = await fetchAccountTransaction(
         address,
@@ -433,7 +459,8 @@ async function fetchAccountTransactionWithRetry(
         endTimestamp,
         startBlock,
         toBlock,
-        order
+        order,
+        limit
       );
       return accountTxn;
     } catch (err) {
@@ -447,7 +474,7 @@ async function fetchAccountTransactionWithRetry(
 }
 
 
-function extractTxnType(summary: string): TransactionType {
+function extractTxnType(summary: string): TransactionType | undefined {
   if (summary.startsWith('Approved')) {
     return TransactionType.Approve;
   }
@@ -466,7 +493,13 @@ function extractTxnType(summary: string): TransactionType {
   if (summary.startsWith('Airdrop')) {
     return TransactionType.Airdrop;
   }
-
-  throw Error('Unknown summary + ' + summary);
+  if (summary.startsWith('Unknown')) {
+    return TransactionType.Unknown
+  }
+  if (summary.startsWith('Revoked')) {
+    return TransactionType.Revoked
+  }
+  return undefined;
+  // throw Error('Unknown summary + ' + summary);
 }
 export { fetchAccountTransactionWithRetry };

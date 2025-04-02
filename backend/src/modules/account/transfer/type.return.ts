@@ -9,7 +9,9 @@ export enum TransactionType {
   Swap = 'Swapped',
   Sent = 'Sent',
   Sign = 'Sign',
-  Airdrop = 'Airdrop'
+  Airdrop = 'Airdrop',
+  Unknown = 'Unknown',
+  Revoked = 'Revoked',
 }
 
 export type TransactionAPIReturn = {
@@ -37,35 +39,14 @@ export type Transaction = {
   to: Entity;
   type: TransactionType | string;
   summary: string;
-  value: { sent: (ERC20Amount | NFTAmount | NativeAmount)[], receive: (ERC20Amount | NFTAmount | NativeAmount)[]};
+  value: Value;
   date: Date;
 };
+
+export type Value = { sent: Amount[], receive:Amount[]};
+export type Amount = ERC20Amount | NFTAmount | NativeAmount
 
 export type TokenAmount = {
   name: string;
   amount: string;
 }
-
-// export function transformTransactionApiResponse(
-//   apiResponse: TransactionAPIReturn
-// ): TransactionResponse {
-//   const txnPairRecord: Record<string, Transaction[]> = {};
-
-//   for (const transaction of apiResponse.transactions) {
-//     const addresses = [transaction.from.address, transaction.to.address].sort();
-//     const key = addresses.join('-')
-//     if (!txnPairRecord[key]) {
-//       txnPairRecord[key] = [];
-//     }
-//     txnPairRecord[key].push(transaction);
-//   }
-
-//   return {
-//     size: apiResponse.size,
-//     startTimestamp: apiResponse.startTimestamp,
-//     endTimestamp: apiResponse.endTimestamp,
-//     startBlock: apiResponse.startBlock,
-//     endBlock: apiResponse.endBlock,
-//     txnPairRecord: txnPairRecord,
-//   };
-// }

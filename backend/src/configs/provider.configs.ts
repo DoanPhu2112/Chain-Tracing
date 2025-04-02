@@ -7,11 +7,11 @@ import { randomIntFromInterval } from "~/utils/randomAPI";
 
 //ALCHEMY, RPC, BITQUERY, MORALIS, ETHEREUM
 const API_current = [0, 0, 0, 2, 0]
+let number = API_current[0]
 
 function round_robin_API(URL: string[], startIndex: number): string {
   const API_LENGTH = URL.length - 1
 
-  let number = API_current[startIndex]
   if (number >= API_LENGTH) {
     number = 0;
   }
@@ -29,6 +29,11 @@ export function getDrpcAPI(): JsonRpcProvider {
   return provider;
 }
 
+export function getDrpcURLs(): string {
+  const key: string = round_robin_API(RPC_URLs, 0);
+  return key;
+}
+
 export function getAlchemyAPI(): Alchemy {
   const config = {
     apiKey: round_robin_API(ALCHEMY_URLs, 0),
@@ -43,13 +48,13 @@ export function getBitQueryAPI() {
   return apiKey;
 }
 export function getMoralisAPI() {
-  const apiKey = round_robin_API(MORALIS_URLS, 3);
+  const num = randomIntFromInterval(0, MORALIS_URLS.length - 1);
+  const apiKey = MORALIS_URLS[num]
   return apiKey;
 }
 
 export function getEtherscanAPI() {
   const apiKey = round_robin_API(ETHEREUM_URLS, 4);
-  console.log(apiKey)
   return apiKey;
 }
 

@@ -20,7 +20,12 @@ app.use(camelCaseReq);
 app.use(omitReq);
 // app.use(snakecaseRes());
 app.use(express.static(path.join(__dirname, '..', 'public')));
-
+app.use((req, res, next) => {
+  console.log('---- FULL REQUEST ----')
+  console.log('Headers:', req.headers)
+  console.log('Body:', req.body)
+  next()
+})
 routes(app)
 app.use(errorHandler);
 

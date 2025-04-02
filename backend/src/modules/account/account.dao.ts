@@ -33,11 +33,10 @@ export async function createEOA(props: EOAProps) {
   const eoa = await prisma.eoa.create({
     data: {
       native_balance: props.nativeBalance || DEFAULT_NATIVE_BALANCE,
-      score: props.score || DEFAULT_SCORE,
       name_tag: props.nameTag,
       label: props.label,
       hash: props.hash,
-      chain_hash: props.chainHash,
+      chain_id: 1,
       logo: props.logo,
       label_source: props.labelSource
     }
@@ -64,9 +63,9 @@ export async function createContract(props: ContractProps) {
       address: props.address,
       is_verified: props.isVerified,
       type: props.type,
-      chain_hash: props.chainHash,
       name_tag: props.nameTag,
       logo: props.logo,
+      chain_id: 1,
       label_source: props.labelSource,
       abi: props.abi,
       source_code: props.sourceCode || '',

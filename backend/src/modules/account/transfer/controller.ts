@@ -31,24 +31,18 @@ async function GetWalletTransactionHistory(req: Request, res: Response) {
 
   const startBlockNumber = typeof startBlock === 'number' ? startBlock : 0;
   const endBlockNumber = typeof endBlock === 'number' ? endBlock : 0;
-  const startTimestampNumber = typeof startTimestamp === 'string' ? parseInt(startTimestamp) : undefined;
-  const endTimestampNumber = typeof endTimestamp === 'string' ? parseInt(endTimestamp) : undefined;
+  const startTimestampNumber = typeof startTimestamp === 'string' ? parseInt(startTimestamp) : 0;
+  const endTimestampNumber = typeof endTimestamp === 'string' ? parseInt(endTimestamp) : 0;
 
-  if (!startTimestampNumber) {
-    return res.status(codes.BAD_REQUEST).json({ message: 'Invalid startTimestamp' });
-  }
-  const startDatetimeDate = timestampToDateTime(startTimestampNumber);
-  const startDatetime = toVNDateTime(startDatetimeDate);
+  // const startDatetimeDate = timestampToDateTime(parseInt(startTimestamp as string));
+  // const startDatetime = toVNDateTime(startDatetimeDate);
 
-  if (!endTimestamp) {
-    return res.status(codes.BAD_REQUEST).json({ message: 'Invalid endTimestamp' });
-  }
-  const endDatetimeDate = timestampToDateTime(endTimestampNumber!);
-  const endDatetime = toVNDateTime(endDatetimeDate);
+  // const endDatetimeDate = timestampToDateTime(parseInt(endTimestamp as string ) );
+  // const endDatetime = toVNDateTime(endDatetimeDate);
 
   const orderString: SortOrder = order === 'ASC' || order === 'DESC' ? order : 'DESC';
 
-  console.log('GetWalletTransactionHistory Params', { address, chainId, startTimestamp, endTimestamp, startBlock, endBlock, order, include_erc20_transactions_triggered, include_nft_transactions_triggered, include_native_transactions_triggered, page, pageSize });
+  console.log('GetWalletTransactionHistory Params', { address, chainId, startTimestampNumber, endTimestampNumber, startBlockNumber, endBlockNumber, order, include_erc20_transactions_triggered, include_nft_transactions_triggered, include_native_transactions_triggered, page, pageSize });
   const response = await getAccountTransaction(
     addressLowercase,
     chainId!.toString(),
@@ -56,9 +50,9 @@ async function GetWalletTransactionHistory(req: Request, res: Response) {
     endTimestampNumber,
     startBlockNumber,
     endBlockNumber,
-    orderString
+    orderString,
+    pageSizeNumber
   );
-  console.log("response", JSON.stringify(response))
   const result = response.transactions
   return res.status(codes.SUCCESS).json(result);
 }

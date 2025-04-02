@@ -8,7 +8,7 @@ import { wait } from '../wait';
 import { createToken } from '~/modules/token/token.dao';
 export type TokenLabel = {
     address: string,
-    chainId: string | number,
+    chain_id: string | number,
     label: string,
     name: string;
     symbol: string;
@@ -19,7 +19,7 @@ const accountPath = path.join(__dirname, './tokens.csv');
 
 const mockTokenLabel: TokenLabel = {
     address: "0xe41d2489571d322189246dafa5ebde1f4699f498",
-    chainId: "0x1",
+    chain_id: 1,
     label: "0x-protocol",
     name: "ZRX",
     symbol: "ZRX",
@@ -41,12 +41,12 @@ export async function getABI(address: string): Promise<object[]> {
 
 }
 function extractTokenLabel(accountLabel: TokenLabel) {
-  const { address, chainId, label, name, symbol, website, image } = accountLabel;
+  const { address, chain_id, label, name, symbol, website, image } = accountLabel;
   return {
     address,
-    chainId: chainId === 1 ? '0x1' : DEFAULT_CHAIN_ID,
+    chain_id: chain_id === 1 ? '0x1' : DEFAULT_CHAIN_ID,
     label,
-    name,
+    name: name,
     symbol,
     website,
     image

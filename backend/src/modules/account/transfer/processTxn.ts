@@ -25,7 +25,6 @@ export async function processSentTransfers(
     sent: [],
     receive: []
   };
-  console.log("transaction", transaction.toAddress.lowercase)
   fromEntity = await getEntity(
     chainID,
     transaction.fromAddress.lowercase,
@@ -115,6 +114,7 @@ export async function processReceiveTransfers(
     }
   ]
 > {
+  console.log("Receive")
   let fromEntity: Entity;
   let toEntity: Entity;
   let intermediaryEntities: Entity[] = [];
@@ -241,7 +241,8 @@ export async function processReceiveTransfers(
       }
     }
   }
-
+  console.log( "From :", fromEntity)
+  console.log( "To :", toEntity)
   return [fromEntity, toEntity, intermediaryEntities, value];
 }
 

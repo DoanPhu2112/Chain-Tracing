@@ -43,7 +43,7 @@ async function parseCSV(): Promise<AccountLabel[]> {
       .on('error', reject);
   });
 }
-let count = 6501;
+let count = 0;
 const RETRY_DELAY = 1000; // 1 second
 
 async function main() {
@@ -69,44 +69,44 @@ async function main() {
   }
   // await writeChain()
 }
-async function writeChain() {
-  await prisma.chain.create({
-    data: {
-      hash: "0x1",
-      name: "ethereum",
-      rpc_url: "https://eth-mainnet.g.alchemy.com/v2/demo"
-    }
-  })
-}
+// async function writeChain() {
+//   await prisma.chain.create({
+//     data: {
+//       hash: "0x1",
+//       name: "ethereum",
+//     }
+//   })
+// }
 async function writeAddress(accountLabel: AccountLabel) {
   const { address, chainId, label, nameTag } = accountLabel;
   const isEoaAccount = await is_eoa(address);
-  if (isEoaAccount) {
-    await createEOA({
-      nameTag: nameTag ? nameTag : label,
-      chainHash: chainId,
-      logo: '',
-      hash: address,
-      score: DEFAULT_SCORE,
-      nativeBalance: 0,
-      label: label
-    });
-  }
-  if (!isEoaAccount) {
-    const sourceCode = await get_contract_functions(address);
-    const verified =
-      sourceCode.result[0].ABI === 'Contract source code not verified' ? false : true;
+  console.log('address', isEoaAccount);
+  // if (isEoaAccount) {
+  //   await createEOA({
+  //     nameTag: nameTag ? nameTag : label,
+  //     chainHash: chainId,
+  //     logo: '',
+  //     hash: address,
+  //     score: DEFAULT_SCORE,
+  //     nativeBalance: 0,
+  //     label: label
+  //   });
+  // }
+  // if (!isEoaAccount) {
+  //   const sourceCode = await get_contract_functions(address);
+  //   const verified =
+  //     sourceCode.result[0].ABI === 'Contract source code not verified' ? false : true;
 
-    await createContract({
-      address: address,
-      chainHash: chainId,
-      isVerified: verified,
-      logo: '',
-      nameTag: nameTag ? nameTag : label,
-      sourceCode: sourceCode.result[0].SourceCode,
-      type: 'ERC20',
-      abi: sourceCode.result[0].ABI
-    });
-  }
+  //   await createContract({
+  //     address: address,
+  //     chainHash: chainId,
+  //     isVerified: verified,
+  //     logo: '',
+  //     nameTag: nameTag ? nameTag : label,
+  //     sourceCode: sourceCode.result[0].SourceCode,
+  //     type: 'ERC20',
+  //     abi: sourceCode.result[0].ABI
+  //   });
+  // }
 }
 main();

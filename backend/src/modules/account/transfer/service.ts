@@ -12,7 +12,8 @@ async function getAccountTransaction(
   endTimestamp: number | undefined,
   startBlock: number,
   endBlock: number,
-  order: 'ASC' | 'DESC' | undefined
+  order: 'ASC' | 'DESC' | undefined,
+  limit: number,
 ): Promise<TransactionAPIReturn> {
   // TODO: CHECK IF DB exist address data
 
@@ -24,7 +25,8 @@ async function getAccountTransaction(
     endTimestamp,
     startBlock,
     endBlock,
-    order
+    order,
+    limit
   );
   //TODO: STORE TO DB
   return txnAPIReturn;
@@ -38,6 +40,7 @@ async function getAccountFollowupTransaction(
   const blockNumber: number = await fetchBlockNumberFromTransaction(transactionHash);
   // TODO: CHECK IF DB exist address data
   // ELSE:
+  console.log(" getAccountFollowupTransaction")
   let txnAPIReturn: TransactionAPIReturn = await fetchAccountTransactionWithRetry(
     address,
     chainID,
@@ -47,7 +50,7 @@ async function getAccountFollowupTransaction(
     undefined,
     'ASC'
   );
-
+  console.log("Txn API return: ", txnAPIReturn)
   //TODO: STORE TO DB
   return txnAPIReturn;
 }

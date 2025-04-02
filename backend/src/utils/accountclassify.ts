@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import { parse } from '@solidity-parser/parser';
 
-import { getAlchemyAPI, getEtherscanAPI } from 'src/configs/provider.configs';
+import { getAlchemyAPI, getDrpcAPI, getDrpcURLs, getEtherscanAPI } from 'src/configs/provider.configs';
 import { AccountType } from 'src/models/account.model';
 import axios from 'axios';
 
@@ -34,11 +34,11 @@ export async function getAddressType(address: string| undefined): Promise<Accoun
       if (await is_eoa_exchange(address)) {
         accountType.push(AccountType.EOA_EXCHANGE);
       }
-      if (await is_eoa_active(address)) {
-        accountType.push(AccountType.EOA_ACTIVE);
-      } else {
-        accountType.push(AccountType.EOA_INACTIVE);
-      }
+      // if (await is_eoa_active(address)) {
+      //   accountType.push(AccountType.EOA_ACTIVE);
+      // } else {
+      //   accountType.push(AccountType.EOA_INACTIVE);
+      // }
     } else {
         accountType.push(AccountType.CONTRACT_NORMAL);
       }
@@ -51,18 +51,33 @@ export async function getAddressType(address: string| undefined): Promise<Accoun
 }
 //NOTE: Done
 export async function is_eoa(address: string): Promise<boolean> {
-  try {
-    const alchemy = getAlchemyAPI();
-
-    const checkEOA: boolean = await alchemy.core.isContractAddress(address);
-    if (checkEOA) {
-      return false;
+  // try {
+  const url = getDrpcURLs();
+  const data = {
+    method: "eth_getCode",
+    params: [address, "latest"],
+    id: 1,
+    jsonrpc: "2.0"
+  };
+  
+  let response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  })
+  const code = await response.json();
+  console.log("code", code)
+    if (code === '0x') {
+      return true;
     }
-    return true;
-  } catch (err) {
-    console.log(err);
     return false;
-  }
+  // } catch (err) {
+  //   console.log("In is_eoa function")
+  //   console.log(err);
+  //   return false;
+  // }
 }
 export async function is_contract(address: string): Promise<boolean> {
   try {

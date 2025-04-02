@@ -17,7 +17,6 @@ const API = {
 }
 
 const moralisAPI = getMoralisAPI();
-console.log("Moralis Api", moralisAPI)
 Moralis.start({
   apiKey: moralisAPI,
 });
@@ -44,7 +43,8 @@ async function fetchERC20Balance(
   tokenAddresses: string[],
   endTimestamp: number
 ): Promise<ERC20APIBalanceReturn> {
-  let cursor: string | null = "";
+  console.log("Called Fetch erc20")
+  let cursor: string | null = '';
 
   let toBlock = await timestampToBlock(endTimestamp, chainID);
 
@@ -56,8 +56,10 @@ async function fetchERC20Balance(
   };
 
   while (cursor != null) {
+    console.log("SIZE: ", result.tokens)
+
     await wait(1000);
-    if (result.size > DEFAULT_MAX_RESULT_COUNT) {
+    if (result.size > 5) {
       break;
     }
     // if (cursor === "") cursor = null;
@@ -70,11 +72,12 @@ async function fetchERC20Balance(
       excludeNative: false,
       excludeSpam: true,
       order: "DESC" as "ASC" | "DESC" | undefined,
-
+      endTimestamp,
       excludeUnverifiedContracts: false,
-      toBlock: toBlock !== undefined ? toBlock : undefined,
-      // ...(cursor && { cursor })
+      toBlock,
+      ...(cursor && { cursor })
     };
+    console.log("Params Balance: ", params)
     let pageResult;
     try {
       pageResult = await Moralis.EvmApi.wallets.getWalletTokenBalancesPrice(params);
@@ -85,13 +88,13 @@ async function fetchERC20Balance(
       throw new CustomError(codes.EXTERNAL_API_ERROR, `External API error ${e}`)
     }
 
-    cursor = pageResult.hasNext() ? pageResult.response.cursor! : null;
+    cursor = pageResult.response.cursor ?? null;
 
     // const page_size: number = pageResult.response.pageSize || 0;
     // result.size += page_size;
     // console.log("size", result.size)
     const tokensReturn = pageResult.response.result;
-
+    console.log("Token Return: ", tokensReturn)
     const token = tokensReturn.map((asset): ERC20Balance => {
       return NewERC20Balance(
         asset.tokenAddress?.checksum || DEFAULT_TOKEN_ADDRESS,
@@ -115,7 +118,6 @@ async function fetchERC20Balance(
 
     result.tokens = result.tokens!.concat(token);
   }
-  console.log(JSON.stringify(result))
   result.toBlock = toBlock;
   result.toTimestamp = endTimestamp;
   return result;
