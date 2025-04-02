@@ -71,7 +71,6 @@ export default function MultiDirectionalEdges({
   const edgeIndex = allEdgesBetweenNodes.findIndex((e) => e.id === id) // Find this edge's index
 
   const numEdges = allEdgesBetweenNodes.length
-  const offsetStep = 20 // Adjust spacing between edges
 
   const edgePathParams = {
     sourceX,
@@ -86,13 +85,10 @@ export default function MultiDirectionalEdges({
   let labelX, labelY
   const marker = `url(#marker-end-${source}-${target})`
 
-  if (numEdges > 1) {    console.log("0---------------")
+  if (numEdges > 1) {
     const smallerAddress = [source, target].sort()[0]
     const isSourceToTarget = allEdgesBetweenNodes[edgeIndex].source === smallerAddress; // Check edge direction
-    console.log("allEdgesBetweenNodes[edgeIndex].source", allEdgesBetweenNodes[edgeIndex].source)
-    console.log("source", source)
 
-    console.log("isSourceToTarget", isSourceToTarget)
     const offsetDirection = isSourceToTarget ? -1 : 1; // -1 for above, 1 for below
     const baseOffset = 10; // Adjust base offset
     const offsetStep = 10; // Adjust spacing between edges.
@@ -106,6 +102,7 @@ export default function MultiDirectionalEdges({
 
   return (
     <>
+    
       <svg style={{ position: 'absolute', top: 0, left: 0 }}>
         <defs>
           <marker
@@ -133,7 +130,7 @@ export default function MultiDirectionalEdges({
         </defs>
       </svg>
       <BaseEdge id={`e${source}-${target}`} path={path} markerEnd={marker} />
-      <EdgeLabelRenderer>
+      <EdgeLabelRenderer pointer-events-auto>
         <div
           className="button-edge__label nodrag nopan "
           style={{
@@ -145,6 +142,7 @@ export default function MultiDirectionalEdges({
           <Badge variant="outline">{label}</Badge>
         </div>
       </EdgeLabelRenderer>
+      
     </>
   )
 }

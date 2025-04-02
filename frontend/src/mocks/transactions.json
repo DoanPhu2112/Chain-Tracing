@@ -10,14 +10,27 @@
             "address_entity": "address_entity1",
             "address_entity_label": "address_entity1: Transfer",
             "logo": null,
-            "type": "eoa"
+            "type": [
+                "EOA_ACTIVE"
+            ]
         },
         "to": {
             "address": "0xD1E2F3G4H5I60708090A0B0C0D0E0F0G0H0I0J0K0",
             "address_entity": "address_entity2",
             "address_entity_label": "address_entity2: Receive",
             "logo": null,
-            "type": "eoa"
+            "type": [
+                "EOA_ACTIVE"
+            ]
+        },
+        "value": {
+            "sent": [
+                {
+                    "value": "0.00000033",
+                    "symbol": "ETH"
+                }
+            ],
+            "received": []
         },
         "summary": "Airdrop from Null Address: 0x000...000",
         "chainId": "0x1",
@@ -34,14 +47,27 @@
             "address_entity": "address_entity3",
             "address_address_entity_label": "address_entity3: Transfer",
             "logo": null,
-            "type": "eoa"
+            "type": [
+                "EOA_ACTIVE"
+            ]
         },
         "to": {
             "address": "0xE1F2G3H4I5J60708090A0B0C0D0E0F0G0H0I0J0K1",
             "address_entity": "address_entity4",
             "address_address_entity_label": "address_entity4: Receive",
             "logo": null,
-            "type": "eoa"
+            "type": [
+                "EOA_ACTIVE"
+            ]
+        },
+        "value": {
+            "sent": [
+                {
+                    "value": "0.00000033",
+                    "symbol": "ETH"
+                }
+            ],
+            "received": []
         },
         "summary": "Sent 990,000,000 RISHINU to 0x0c...53c5",
         "chainId": "0x1",
@@ -65,7 +91,18 @@
             "address_entity": "address_entity6",
             "address_address_entity_label": "address_entity6: Receive",
             "logo": null,
-            "type": "eoa"
+            "type": [
+                "EOA_ACTIVE"
+            ]
+        },
+        "value": {
+            "sent": [
+                {
+                    "value": "0.00000033",
+                    "symbol": "ETH"
+                }
+            ],
+            "received": []
         },
         "summary": "Sent 240,000,000 FREELON to 0x03...188e",
         "chainId": "0x1",
@@ -82,14 +119,27 @@
             "address_entity": "address_entity7",
             "address_address_entity_label": "address_entity7: Transfer",
             "logo": null,
-            "type": "eoa"
+            "type": [
+                "EOA_ACTIVE"
+            ]
         },
         "to": {
             "address": "0xG1H2I3J4K5L60708090A0B0C0D0E0F0G0H0I0J0K3",
             "address_entity": "address_entity8",
             "address_address_entity_label": "address_entity8: Receive",
             "logo": null,
-            "type": "eoa"
+            "type": [
+                "EOA_ACTIVE"
+            ]
+        },
+        "value": {
+            "sent": [
+                {
+                    "value": "0.00000033",
+                    "symbol": "ETH"
+                }
+            ],
+            "received": []
         },
         "summary": "Sent 100,000,000,000,000 RISHINU to 0x0c...53c5",
         "chainId": "0x1",
@@ -106,14 +156,27 @@
             "address_entity": "address_entity9",
             "address_address_entity_label": "address_entity9: Transfer",
             "logo": null,
-            "type": "eoa"
+            "type": [
+                "EOA_ACTIVE"
+            ]
         },
         "to": {
             "address": "0xH1I2J3K4L5M60708090A0B0C0D0E0F0G0H0I0J0K4",
             "address_entity": "address_entity10",
             "address_address_entity_label": "address_entity10: Receive",
             "logo": null,
-            "type": "eoa"
+            "type": [
+                "EOA_ACTIVE"
+            ]
+        },
+        "value": {
+            "sent": [
+                {
+                    "value": "0.00000033",
+                    "symbol": "ETH"
+                }
+            ],
+            "received": []
         },
         "summary": "Airdrop from Null Address: 0x000...000",
         "chainId": "0x1",
@@ -130,14 +193,29 @@
             "address_entity": "address_entity11",
             "address_address_entity_label": "address_entity11: Transfer",
             "logo": null,
-            "type": "eoa"
+            "type": [
+                "EOA_ACTIVE",
+                "TARGET"
+            ]
         },
         "to": {
             "address": "0xI1J2K3L4M5N60708090A0B0C0D0E0F0G0H0I0J0K5",
             "address_entity": "address_entity12",
             "address_address_entity_label": "address_entity12: Receive",
             "logo": null,
-            "type": "eoa"
+            "type": [
+                "EOA_ACTIVE",
+                "TARGET"
+            ]
+        },
+        "value": {
+            "sent": [
+                {
+                    "value": "0.00000033",
+                    "symbol": "ETH"
+                }
+            ],
+            "received": []
         },
         "summary": "Sent 240,000,000 FREELON to 0x03...188e",
         "chainId": "0x1",

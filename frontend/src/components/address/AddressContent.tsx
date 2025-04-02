@@ -5,12 +5,12 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 
 import InputCard from '../card/InputCard'
-import AddressInfoCard from './AddressInfoCard'
+import OverallInfoCard from './OverallInfoCard'
 import TabCard from './TabCard'
 import { PortfolioBalance } from '@/types/wallet.interface'
 import { getAddressBalance, getAddressTransactions } from '@/services/address'
 import { useToast } from '@/hooks/use-toast'
-import { AddressTxByMonth } from '../chart/AddressTxByMonth'
+import { TornadoAnalytics } from '../chart/AddressTxByMonth'
 import { Transaction } from '@/types/transaction.interface'
 const initialBalance = [
   {
@@ -63,7 +63,6 @@ const AddressContent = () => {
   const params = useParams<{ address: string }>()
   //@ts-ignore
   const address = params.address
-  console.log('TEST address: ', address)
   const [balance, setBalance] = useState<PortfolioBalance[]>()
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState<boolean>(false)
@@ -96,7 +95,6 @@ const AddressContent = () => {
         setLoading(false) // Stop loading if no valid address is present
       }
     }
-    console.log('NODE INFO:', address)
     address && fetchWalletData()
   }, [address]) // Re-fetch if the address changes
 
@@ -105,13 +103,13 @@ const AddressContent = () => {
   return (
     <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
       <div>
-        <AddressInfoCard balance={0} address={address} />
+        <OverallInfoCard balance={0} address={address} loading />
         {/* <AddressTxByMonth /> */}
       </div>
       <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
         {/* <TabCard portfolio={balance!} transactions={transactions} /> */}
         {!loading && balance && transactions ? (
-          <TabCard portfolio={balance} transactions={transactions} />
+          <TabCard portfolio={balance} transactions={transactions} loading />
         ) : (
           <p>Loading data...</p> // Optional loading message
         )}

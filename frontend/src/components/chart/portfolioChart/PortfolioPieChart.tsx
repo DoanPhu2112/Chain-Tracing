@@ -2,8 +2,7 @@
 
 import * as React from 'react'
 import { TrendingUp } from 'lucide-react'
-import { Label, Pie, PieChart } from 'recharts'
-import { PortfolioBalance } from '@/types/TODO: remove wallet.interface'
+import { Label, Pie, PieChart, Legend } from 'recharts'
 
 import {
   Card,
@@ -19,20 +18,27 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
+import { PortfolioBalance } from '@/types/wallet.interface'
+import { CustomLegend } from './CustomLegend'
 
 export const description = 'A donut chart with text'
 interface chartAsset {
-  asset: string,
-  amount: number,
-  fill: string,
+  asset: string
+  amount: number
+  fill: string
 }
 const colorList = [
-  'var(--color-solana)',
-  'var(--color-ethereum)',
-
-  'var(--color-polygon)',
-  'var(--color-bitcoin)',
-  'var(--color-other)'
+  "#89AAFF",
+  "#B2B0E6",
+  "#ADD7D8",
+  "#C4E1BC",
+  "#F5C398",
+  "#FFEB69",
+  "#FFD7EF",
+  "#B1C5FF",
+  "#86C3C4",
+  "#DE5F51",
+  "#D2D2D2",
 ]
 const chartDataMock = [
   {
@@ -88,8 +94,8 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function PortfolioPieChart({chartData}: { chartData: PortfolioBalance[]}) {
-  chartData = chartData.slice(0,5);
+export function PortfolioPieChart({ chartData }: { chartData: PortfolioBalance[] }) {
+  chartData = chartData.slice(0, 5)
   const chartDataWithColor = chartData.map((data, index) => {
     return {
       fill: colorList[index],
@@ -98,21 +104,24 @@ export function PortfolioPieChart({chartData}: { chartData: PortfolioBalance[]})
     }
   })
   const totalAmount = React.useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + Number(curr.value), 0)
+    return chartData.reduce((acc, curr) => acc + (Number(curr.value) || 0), 0)
   }, [])
-  console.log("chartData", chartDataWithColor)
+  const topAsset = chartDataWithColor.reduce((prev, curr) =>
+    curr.value > prev.value ? curr : prev
+  )
+
   return (
     <Card className="h-full">
       <CardHeader className="items-center pb-0">
         <CardTitle>Asset Allocation</CardTitle>
-        <CardDescription>Asset Allocation info</CardDescription>
+        {/* <CardDescription>Asset Allocation info</CardDescription> */}
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[250px]"
+          className="mx-auto"
         >
-          <PieChart>
+          <PieChart className='aspect-square max-h-[250px]'>
             <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
             <Pie
               data={chartDataWithColor}
@@ -151,14 +160,25 @@ export function PortfolioPieChart({chartData}: { chartData: PortfolioBalance[]})
                 }}
               />
             </Pie>
+            <Legend
+            content={<CustomLegend/>}
+              layout="vertical" 
+              align="right" 
+              verticalAlign="middle"
+              // formatter={(value) => (
+              //   <span className="text-sm text-muted-foreground">{value}</span>
+              // )}
+            />
           </PieChart>
         </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 font-medium leading-none">
-          TODO: Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+          Top Asset: <span className="text-primary">{topAsset.token}</span>{' '}
         </div>
-        <div className="leading-none text-muted-foreground">Assets</div>
+        <div className="leading-none text-muted-foreground">
+          Leading in portfolio weight
+        </div>
       </CardFooter>
     </Card>
   )

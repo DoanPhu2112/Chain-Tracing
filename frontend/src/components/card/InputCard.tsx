@@ -77,16 +77,17 @@ const globalBuddhistLocale: typeof enUS = {
   },
 }
 
-const defaultFromValue = dayjs().startOf('day').subtract(1, 'day');
-const defaultToValue = dayjs().endOf('day')
+const defaultFromValue = dayjs().startOf('day').subtract(1, 'month')
+const defaultToValue = dayjs().subtract(1, 'hour')
 
 type InputCardProps = {
   setIsLoading: (arg0: boolean) => void
 }
-const InputCard = ({setIsLoading}: InputCardProps) => {
+const InputCard = ({ setIsLoading }: InputCardProps) => {
   const dispatch = useDispatch()
 
   const [input, setInput] = React.useState<string>('')
+  const [limit, setLimit] = React.useState<string>('10')
   const [chain, setChain] = React.useState<string>('')
   const [startDate, setStartDate] = React.useState<Date>(dayjs(defaultFromValue).toDate())
   const [endDate, setEndDate] = React.useState<Date>(dayjs(defaultToValue).toDate())
@@ -94,7 +95,7 @@ const InputCard = ({setIsLoading}: InputCardProps) => {
   const handleTrackAddress = async () => {
     if (input.length === 42) {
       setIsLoading(true)
-      const transactions = await getAddressTxnsByRange(input, startDate, endDate)
+      const transactions = await getAddressTxnsByRange(input, startDate, endDate, limit)
       console.log('Input Card Transactions', transactions)
       dispatch(setTransactions(transactions))
       setIsLoading(false)
@@ -104,7 +105,6 @@ const InputCard = ({setIsLoading}: InputCardProps) => {
     alert('Input length must equal 42')
   }
 
-
   function onOpenChange(open) {
     console.log('onOpenChange', open)
   }
@@ -113,6 +113,13 @@ const InputCard = ({setIsLoading}: InputCardProps) => {
     setStartDate(new Date(dates[0].$d))
     setEndDate(new Date(dates[1].$d))
   }
+
+  useEffect(() => {
+    localStorage.setItem('limit', String(limit))
+    localStorage.setItem('startDate', String(startDate.getTime()))
+    localStorage.setItem('endDate', String(endDate.getTime()))
+  }, [startDate, endDate, limit])
+
   return (
     <Card className="overflow-hidden" x-chunk="dashboard-05-chunk-0">
       <CardHeader className="px-7">
@@ -130,34 +137,39 @@ const InputCard = ({setIsLoading}: InputCardProps) => {
         </div>
         <div className="flex mt-2 justify-end">
           <div className="flex gap-2 items-center">
-          <Select onValueChange={(value) => setChain(value)}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Ethereum" defaultValue="ethereum" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Chain</SelectLabel>
-                <SelectItem value="ethereum">
-                  <EthereumCircleColorful className="mr-2" />
-                  Ethereum
-                </SelectItem>
-                <SelectItem value="bnb-smartchain">
-                  <BnbCircleColorful className="mr-2" />
-                  BNB Smartchain
-                </SelectItem>
-                <SelectItem value="polygon">
-                  <PolygonCircleColorful className="mr-2" />
-                  Polygon
-                </SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          Limit: <Input
+            className='max-w-16'
+              type="number"
+              placeholder={limit}
+              value={limit}
+              onChange={(e) => setLimit(e.target.value)}
+            />
+
+            <Select onValueChange={(value) => setChain(value)}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Ethereum" defaultValue="ethereum" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Chain</SelectLabel>
+                  <SelectItem value="ethereum">
+                    <EthereumCircleColorful className="mr-2" />
+                    Ethereum
+                  </SelectItem>
+                  <SelectItem value="bnb-smartchain">
+                    <BnbCircleColorful className="mr-2" />
+                    BNB Smartchain
+                  </SelectItem>
+                  <SelectItem value="polygon">
+                    <PolygonCircleColorful className="mr-2" />
+                    Polygon
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
             {/* START DATE */}
             <RangePicker
-              defaultValue={[
-                defaultFromValue,
-                defaultToValue,
-              ]}
+              defaultValue={[defaultFromValue, defaultToValue]}
               format={dateFormat}
               onOpenChange={onOpenChange}
               onCalendarChange={onCalendarChange}

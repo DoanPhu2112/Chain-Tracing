@@ -1,3 +1,5 @@
+import { SquareMenu } from 'lucide-react';
+
 export enum TransactionType {
   Approve = 'Approved',
   Receive = 'Received',
@@ -5,6 +7,26 @@ export enum TransactionType {
   Sent = 'Sent',
   Sign = 'Sign',
   Airdrop = 'Airdrop'
+}
+export interface TornadoStatResponse {
+  deposit: {
+    hash: string;
+    from_address: string;
+    to_address: string;
+    timestamp: Date;
+  }[];
+  withdraw: {
+    hash: string;
+    from_address: string;
+    to_address: string;
+    amount: number;
+    timestamp: Date;
+  }[];
+  linkedTxns: {
+    address: string;
+    count: number;
+  }[];
+  multiDenom: string[];
 }
 
 export type BackendTransaction = {
@@ -29,11 +51,15 @@ export type Transaction = {
   txnHash: string;
   from: Entity;
   to: Entity;
-  type: TransactionType | string;
+  type: TransactionType;
   summary: string;
-  value: { sent: (ERC20Amount | NFTAmount | NativeAmount)[], receive: (ERC20Amount | NFTAmount | NativeAmount)[]};
+  value: Value;
   date: Date;
 };
+
+export type Value = { sent: Amount[], receive:Amount[]};
+export type Amount = ERC20Amount | NFTAmount | NativeAmount
+
 
 export enum AccountType {
   MINER = "MINER",
@@ -69,8 +95,8 @@ export type ERC20Token = {
 
 export type NativeAmount = NativeToken & {value: string}
 export type NativeToken = {
-  symbol?: string,
-  logo?: string,
+  symbol: string,
+  logo: string,
 }
 
 export type NFTAmount = NFTToken & {value: string}

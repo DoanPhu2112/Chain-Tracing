@@ -41,16 +41,17 @@ const transformTransaction = (txn: Transaction): Event => {
           : 'Unknown Address' // Fallback value if all are undefined
           console.log("To address name ", toAddressName)
   // Assuming we want to process multiple ERC20 transfers
+  const value = txn.value.receive[0] ? txn.value.receive[0].value : txn.value.sent[0].value
   const fromWallet = [
     {
-      asset: txn.amount,
+      asset: value,
       type: 'debit',
     },
   ]
 
   const toWallet = [
     {
-      asset: txn.amount,
+      asset: value,
       type: 'credit',
     },
   ]

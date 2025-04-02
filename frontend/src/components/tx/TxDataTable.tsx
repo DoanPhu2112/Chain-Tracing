@@ -88,10 +88,10 @@ interface ReportData {
   suspiciousAddress: string
   transactionHash: string
 }
-function timeAgo(timestampStr: string) {
+export function timeAgo(timestampStr: string) {
   const timestamp = new Date(timestampStr);
   const now = new Date();
-  const diffInMs = now - timestamp;
+  const diffInMs = now.getTime() - timestamp.getTime();
 
   const secondsAgo = Math.floor(diffInMs / 1000);
   const minutesAgo = Math.floor(secondsAgo / 60);

@@ -1,11 +1,13 @@
 import { Node, Edge } from '@xyflow/react'
-import { Entity, TokenAmount, Transaction, TransactionType } from './transaction.interface';
+import { AccountType, Entity, TokenAmount, Transaction, } from './transaction.interface';
 
 export interface NodeData extends Node {
   details: Account
   data: {
     addressHash: string
-    label?: string
+    label?: string,
+    type: AccountType[],
+    callBack: (node: NodeData) => void
   }
 }
 

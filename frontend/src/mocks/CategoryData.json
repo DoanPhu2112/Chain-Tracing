@@ -1,0 +1,41 @@
+[
+    {
+        "category": "Contract Exploit Scam",
+        "description": "As responded and described to MetaMask Support:\n\nDid I ever…\n1. Access a website from a social media app such as X (Twitter), Discord, or Telegram?  \n- I only have Telegram. I have not been on Telegram lately. If I am, I do use links to websites. I would only be checking updates on chosen channels or messages.\n\n2. Try to manually verify your wallet using the Secret Recovery Phrase?\n- NO. I have not had to use my Secret Recovery Phrase. I cannot recall ever doing that or when I last did, if ever.\n\n3. Interact with someone claiming to be a support representative?\n- NO. This is the first time contacting Support at Metamask. ONLY Support lately has been Coinbase.\n\n4. Use your 12-word secret recovery phrase on your device?  \n- NO. Same as #2.\n\n5. Install a new application or extension on your device?  \n- NO. Actually I deleted about 11 unused apps in the last 2 days.\n\nHow your Secret Recovery Phrase is backed up.\n- Backed up and stored on Encrypted Storage Vault (C2 Password by Synology)\n\nThe estimated USD value that was lost.  $4300.  I received $4321.82 USDT amount in Metamask wallet (0x9a77…eeaa) from Coinbase Wallet (0xd5f1…17d5) on Feb 28, 2025 1:21 PM PT.  Within 5 minutes of receiving, I swapped Max amount of USDT in wallet to ETH.  I noticed an unusual ETH transaction simultaneous to the Swap. I suspected that was to pay for the transaction.",
+        "reporter": "chainabuse-guest",
+        "reportedAddresses": [
+            "0x9a77D53e42cf6f8f51840Cd756BF5E18AFeeEEAA"
+        ],
+        "reportedDomain": []
+    },
+    {
+        "category": "Exchange Scam",
+        "description": "I deposited money into app-coin.com, but when I tried to withdraw, they blocked my funds. Their KYC process is also failing, showing an error message: {0} contains prohibited characters or is not the right size. This suggests they are intentionally preventing withdrawals. The website might be fraudulent, and I want to warn others.\n\nAmount lost: 1411.23 USD",
+        "reporter": "chainabuse-guest",
+        "reportedAddresses": [
+            "0x77ebdef9dc7161a4a706cd387153b35c38527400",
+            "6TFv5atgoCaPaFXxFip6SFgBL2BJEhUhP4fv4CL5dsS8"
+        ],
+        "reportedDomain": [
+            "https://app-coin.com/"
+        ]
+    },
+    {
+        "category": "Pigbutchering Scam",
+        "description": "I was connected through LinkedIn in January 2023 by a Chinese lady who went by the name Di (Peihan) Chen. She claimed to live in Beverly Hills, CA. This person had a LinkedIn profile under the name Di Chen and later contacted me on WhatsApp using her first phone number 412-886-7024 in late February 2023. I looked up her phone number on 02/15/2023 and found it listed at the address 110 Munsey Ave, Pittsburgh, PA 15227, dating back to March 2009. She claimed to have lived and worked there before moving to Beverly Hills, CA. She also provided me with additional phone numbers (213-877-2071 and 213-877-2808), which were registered with T-Mobile. Given this verification, I did not initially suspect she was part of the coinhekooll scammers network.\n\nAfter losing $1,800,455.00 USD to the coinhekooll scammers network, I contacted Claim Justice to trace crypto transactions from my Coinbase, Crypto.com, Kraken, and coinhekooll wallet addresses. I spoke with a person named Refael Mirozov through WhatsApp. Refael’s email was linked to the website www.claim-justice.com. He claimed his team could trace my crypto transactions and provide a report for law enforcement and banks. He requested a $25,000.00 fee, which I paid via credit card for his team to conduct the tracing.\n\nI also contacted the Meghan_Tech scammers network ('Dark Web Group') that claimed to recover my lost funds. However, I was revictimized, making over $65,000.00 in BTC payments to them.\n\nAmount lost: 1,800,455.00 USD",
+        "reporter": "peternguyen3338",
+        "reportedAddresses": [
+            "3CNuWS9NxHkxuQEhkBAuwMo33AwuCFZvec",
+            "0x90eb586e1c5b03c1ee9dac87dd10712163cd3226",
+            "0x8eed869396d83f5b79360b079e5da92c17a912e4",
+            "0xe45ea7b2f414bf3fa181f033337df094c55b3fab",
+            "0xb0dba4e60705d40ae12dca00e2a3b596fd7a8a03",
+            "bc1qphmn2mpde6h0rp7nj9etcryfevhrcur5zf37v3",
+            "bc1qa4rt8m6077cs93pazu9n7k4mzw6vwemc0t4pxn"
+        ],
+        "reportedDomain": [
+            "https://coinhekooll.com/h5#",
+            "www.claimjustice.com"
+        ]
+    }
+]

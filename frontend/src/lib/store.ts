@@ -1,10 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit'
 import transactionsReducer from '@/lib/features/transactions/transactionsSlice';
+import nodeReducer from "@/lib/features/node/nodeSlice"; // Import the slice
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
         transactions: transactionsReducer,
+        node: nodeReducer,
       },
   })
 }

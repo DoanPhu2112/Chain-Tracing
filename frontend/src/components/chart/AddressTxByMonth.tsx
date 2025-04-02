@@ -41,12 +41,18 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function AddressTxByMonth() {
+type Props = {
+  deposit: number,
+  withdraw:number,
+  multiDenom: any[],
+  linkedAddress: any[]
+}
+export function AddressTxByMonth({deposit, withdraw, multiDenom, linkedAddress}: Props) {
   return (
     <Card className="">
       <CardHeader>
-        <CardTitle>Tornado Cash Transactions Count</CardTitle>
-        <CardDescription>Count number of deposit / withdraw to Tornado Cash</CardDescription>
+        <CardTitle>Tornado Cash Statistics</CardTitle>
+        <CardDescription>Show Tornado Cash transactions by your input address</CardDescription>
       </CardHeader>
       <CardContent>
       <div className="grid gap-3">
@@ -56,35 +62,35 @@ export function AddressTxByMonth() {
             <li className="flex items-center">
               <span className="text-muted-foreground w-1/3 ">Deposit:</span>
               <span className="flex gap-1">
-                <span>{12} txs</span>
+                <span>{deposit} txs</span>
                 {/* {addressEther && <span>{addressEther.value} $</span>} */}
               </span>
             </li>
             <li className="flex items-center">
               <span className="text-muted-foreground w-1/3 ">Withdraw:</span>
               <span className="flex gap-1">
-                <span>{11} txs</span>
+                <span>{withdraw} txs</span>
                 {/* {addressEther && <span>{addressEther.value} $</span>} */}
               </span>
             </li>
-            <li className="flex items-center">
+            {/* <li className="flex items-center">
               <span className="text-muted-foreground w-1/3 ">Address match reveals:</span>
               <span className="flex gap-1">
                 <span>{3} addresses </span>
                 {/* {addressEther && <span>{addressEther.value} $</span>} */}
-              </span>
-            </li>
+              {/* </span>
+            </li> */}
             <li className="flex items-center">
               <span className="text-muted-foreground w-1/3 ">Multi-denom reveals:</span>
               <span className="flex gap-1">
-                <span>{1} address</span>
+                <span>{multiDenom.length} address</span>
                 {/* {addressEther && <span>{addressEther.value} $</span>} */}
               </span>
             </li>
             <li className="flex items-center">
               <span className="text-muted-foreground w-1/3 ">Linked Address Reveals:</span>
               <span className="flex gap-1">
-                <span>{2} addresses</span>
+                <span>{linkedAddress.length} addresses</span>
                 {/* {addressEther && <span>{addressEther.value} $</span>} */}
               </span>
             </li>

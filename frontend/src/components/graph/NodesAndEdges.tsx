@@ -53,7 +53,10 @@ export function mapNodeType(nodeType: AccountType[] | undefined): string {
   } else return 'normalAddress'
 }
 
-export function mapTransactionToNodeData(transactions: Transaction[]): NodeData[] {
+export function mapTransactionToNodeData(
+  transactions: Transaction[],
+  onAddressClick: (node: NodeData) => void
+): NodeData[] {
   const nodesMap: Record<string, NodeData> = {}
   const levelMap: Record<string, number> = {}
   const levelPositions: Record<number, number> = {} // Tracks the y position for each level
@@ -68,31 +71,28 @@ export function mapTransactionToNodeData(transactions: Transaction[]): NodeData[
     const toNodeClassify = mapNodeType(transaction.to.type || 'eoa')
 
     const isToTarget = transaction.to.type?.includes(AccountType.TARGET) || false
-    const isFromTarget =
-      transaction.from.type?.includes(AccountType.TARGET) || false
+    const isFromTarget = transaction.from.type?.includes(AccountType.TARGET) || false
     // Determine levels
-    if (isToTarget && levelMap[toNodeId] === undefined) levelMap[toNodeId] = 0;
-    if (isFromTarget && levelMap[fromNodeId] === undefined) levelMap[fromNodeId] = 0;
+    if (isToTarget && levelMap[toNodeId] === undefined) levelMap[toNodeId] = 0
+    if (isFromTarget && levelMap[fromNodeId] === undefined) levelMap[fromNodeId] = 0
 
     if (transaction.type === TransactionType.Receive) {
       if (isFromTarget) {
         if (levelMap[toNodeId] === undefined) {
           levelMap[toNodeId] = levelMap[fromNodeId] - 1
         }
-      }
-      else if (isToTarget) {
+      } else if (isToTarget) {
         if (levelMap[fromNodeId] === undefined) {
           levelMap[fromNodeId] = levelMap[toNodeId] - 1
         }
       } else {
-        throw new Error("Non is Target Address")
+        throw new Error('Non is Target Address')
       }
     } else {
       if (levelMap[toNodeId] === undefined) {
         levelMap[toNodeId] = levelMap[fromNodeId] + 1
       }
     }
-
 
     // Calculate positions based on level
     if (!levelPositions[levelMap[fromNodeId]]) {
@@ -103,8 +103,10 @@ export function mapTransactionToNodeData(transactions: Transaction[]): NodeData[
       nodesMap[fromNodeId] = {
         id: fromNodeId,
         data: {
-          addressHash: isFromTarget ? AccountType.TARGET : fromNodeId,
+          addressHash: fromNodeId,
           label: transaction.from.address_entity_label || transaction.from.address_entity,
+          type: transaction.from.type,
+          callBack: onAddressClick,
         },
         type: fromNodeClassify,
         details: {
@@ -127,8 +129,11 @@ export function mapTransactionToNodeData(transactions: Transaction[]): NodeData[
       nodesMap[toNodeId] = {
         id: toNodeId,
         data: {
-          addressHash: isToTarget ? AccountType.TARGET : toNodeId,
+          addressHash: toNodeId,
           label: transaction.to.address_entity_label || transaction.to.address_entity,
+          type: transaction.to.type,
+          callBack: onAddressClick,
+
         },
         type: toNodeClassify,
         details: {
@@ -178,19 +183,17 @@ export function mapTransactionFields(
     for (const transaction of transactionList) {
       const { txnHash, type, value: tokenAmount, from, to, ...otherDetails } = transaction
 
-      const edgeType = 'multiDirectional' 
+      const edgeType = 'multiDirectional'
 
       let srcNode, targetNode
-      let srcHandle, targetHandle;
+      let srcHandle, targetHandle
       // ;[srcHandle, targetHandle] = ['right', 'left']
-      let tokenAmounts;
+      let tokenAmounts
       if (type === TransactionType.Receive) {
         ;[srcHandle, targetHandle] = ['right-source', 'left-target']
-
         ;[srcNode, targetNode] = from.type.includes(AccountType.TARGET)
           ? [to.address, from.address]
           : [from.address, to.address]
-
 
         tokenAmounts = tokenAmount.receive
           .map((token) => {
@@ -202,46 +205,52 @@ export function mapTransactionFields(
           })
           .join('\n ')
       } else {
-        ;[srcHandle, targetHandle] = from.type.includes(AccountType.TARGET) 
-        ? ['right-source', 'left-target']
-        : ['left-source', 'right-target']  
-  
+        ;[srcHandle, targetHandle] = from.type.includes(AccountType.TARGET)
+          ? ['right-source', 'left-target']
+          : ['left-source', 'right-target']
         ;[srcNode, targetNode] = [from.address, to.address]
-        if (tokenAmount.sent) {
+
+        if (tokenAmount.sent.length > 0) {
           tokenAmounts = tokenAmount.sent
-          .map((token) => {
-            if (`name` in token) {
-              return `${shortenValue(token.value)} ${token.name}`
-            } else {
-              return `${shortenValue(token.value)} ${token.symbol}`
-            }
-          })
-          .join('\n ')  
+            .map((token) => {
+              if (`name` in token) {
+                return `${shortenValue(token.value)} ${token.name}`
+              } else {
+                return `${shortenValue(token.value)} ${token.symbol}`
+              }
+            })
+            .join('\n ')
         } else {
           tokenAmounts = tokenAmount.receive
-          .map((token) => {
-            if (`name` in token) {
-              return `${token.value} ${token.name}`
-            } else {
-              return `${token.value} ${token.symbol}`
-            }
-          })
-          .join('\n ')  
+            .map((token) => {
+              if (`name` in token) {
+                console.log('token with name: ', token)
+                return `${token.value} ${token.name}`
+              } else {
+                console.log('token with symbol: ', token)
+
+                return `${token.value} ${token.symbol}`
+              }
+            })
+            .join('\n ')
         }
       }
-    
+      console.log('Token Amount: ', tokenAmounts)
+      console.log('Node: ', srcNode)
+      console.log('Type: ', type)
       edges.push({
         ...edgeDefaults,
         id: txnHash || '0x0',
         source: srcNode,
         sourceHandle: srcHandle,
+        animated: true,
         targetHandle: targetHandle,
         target: targetNode,
         label: tokenAmounts,
         details: {
           ...otherDetails,
         },
-        
+
         type: edgeType,
       } as EdgeData)
     }

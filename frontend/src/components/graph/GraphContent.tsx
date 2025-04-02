@@ -9,14 +9,19 @@ import { Alert, Spin, Typography } from 'antd'
 import { Empty } from 'antd'
 
 import { EdgeData, NodeData } from '@/types/graph.interface'
-import { getAddressBalance, getAddressTransactions } from '@/services/address'
-import { Transaction } from '@/types/transaction.interface'
+import {
+  getAddressBalance,
+  getAddressTransactions,
+  getAddressTxnsByRange,
+} from '@/services/address'
+import { Amount, Transaction } from '@/types/transaction.interface'
 import InputCard from '../card/InputCard'
 
 import { useToast } from '@/hooks/use-toast'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/lib/store'
-import { setTransactions } from '@/lib/features/transactions/transactionsSlice'
+import { addTransaction, addTransactions, setTransactions } from '@/lib/features/transactions/transactionsSlice'
+import { PortfolioBalance } from '@/types/wallet.interface'
 
 const GraphContent = () => {
   const dispatch = useDispatch()
@@ -29,7 +34,7 @@ const GraphContent = () => {
   const [isEmpty, setIsEmpty] = useState<boolean>(false)
   const [showError, setShowError] = useState<string | null>(null)
 
-  const [balance, setBalance] = useState<number>()
+  const [balances, setBalances] = useState<PortfolioBalance[]>()
   // const [transactions, setTransactions] = useState<Transaction[]>([])
   const [lastUpdated, setLastUpdated] = useState<'node' | 'edge' | null>(null)
   const { toast } = useToast()
@@ -51,6 +56,7 @@ const GraphContent = () => {
   }
 
   useEffect(() => {
+    console.log("Node INFO Change")
     const fetchWalletData = async () => {
       if (nodeInfo?.details?.address) {
         try {
@@ -61,15 +67,43 @@ const GraphContent = () => {
           })
           setLoading(true) // Start loading when fetching begins
 
-          const balanceData = await getAddressBalance(nodeInfo.details.address)
-          const transactionsData = await getAddressTransactions(nodeInfo.details.address)
+          //TODO: handle fetch address balance
+          const limit = localStorage.getItem('limit') || '10'
+          const startTimestamp = Number(localStorage.getItem('startDate') || '0')
+          const endTimestamp = Number(
+            localStorage.getItem('endDate') || new Date().getTime()
+          )
+          const startDate = new Date(startTimestamp)
+          const endDate = new Date(endTimestamp)
+
+          if (Number.isNaN(startTimestamp)) {
+            alert('Cannot parse start date data')
+            return
+          }
+          if (Number.isNaN(endTimestamp)) {
+            alert('Cannot parse end date data')
+            return
+          }
+
+          const balanceData: PortfolioBalance[] = await getAddressBalance(
+            nodeInfo.details.address
+          )
+
+          const transactionsData = await getAddressTxnsByRange(
+            nodeInfo.details.address,
+            startDate,
+            endDate,
+            limit
+          )
           console.log('🚀 ~ fetchWalletData ~ transactionsData:', transactionsData)
           console.log('🚀 ~ fetchWalletData ~ balanceData:', balanceData)
 
           // NOTE: Temp only, modify in the future
-          setBalance(balanceData[0].amount) // Set the fetched balance
+          setBalances(balanceData) // Set the fetched balance
 
-          dispatch(setTransactions(transactionsData)) // Set the fetched transactions
+          const allSentTransaction = transactionsData.filter(txn => txn.value.sent.length > 0);
+          console.log("All Sent Transactions: ", allSentTransaction)
+          dispatch(addTransactions(allSentTransaction)) // Set the fetched transactions
         } catch (error) {
           console.error('Error fetching wallet data:', error)
         } finally {
@@ -136,11 +170,7 @@ const GraphContent = () => {
           {isEmpty && (
             <Empty
               image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description={
-                <Typography.Text>
-                  No transaction found during selected range
-                </Typography.Text>
-              }
+              description={<div className='text-xl-regular text-black' >No transaction found during selected range</div>}
             />
           )}
           {nodeInfo && (
@@ -156,12 +186,12 @@ const GraphContent = () => {
       </div>
       <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-1 ">
         {edgeInfo && <TxInfoCard edgeData={edgeInfo} />}
+        <InputCard setIsLoading={setLoading} />
         {nodeInfo && (
           <>
-            <AddressInfoCard nodeData={nodeInfo} balance={balance} loading={loading} />
+            <AddressInfoCard nodeData={nodeInfo} balances={balances} loading={loading} />
           </>
         )}
-        <InputCard setIsLoading={setLoading} />
       </div>
     </main>
   )

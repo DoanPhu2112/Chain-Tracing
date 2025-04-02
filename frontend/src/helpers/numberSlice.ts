@@ -1,7 +1,7 @@
-export function cropNumber(num: number, numAfter: number = 3) {
+export function cropNumber(num: number, numAfter: number = 3, symbol: string = '') {
   // Convert to string to handle large numbers
-  if (num == 0) return "<0.0001"
-  if (num < 0.01 && numAfter <= 3) return "<0.01";
+  if (num == 0) return "<0.0001" + symbol;
+  if (num < 0.01 && numAfter <= 3) return "<0.01" + symbol;
   
   let strNum = num.toString();
   
@@ -21,11 +21,10 @@ export function cropNumber(num: number, numAfter: number = 3) {
 
       // If the decimal part becomes empty after removing zeros, return just the integer part
       if (decPart === '') {
-          return intPart;
+          return intPart + symbol;
       }
 
-      return `${intPart}.${decPart}`;
+      return `${intPart},${decPart}${symbol}`;
   }
-
-  return intPart;
+  return Number.isNaN(Number(num)) ? "Unavailable" : (intPart  + symbol);
 }
