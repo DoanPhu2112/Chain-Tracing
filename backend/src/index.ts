@@ -1,5 +1,5 @@
 import express from 'express';
-import cors from 'cors'
+import cors from 'cors';
 const path = require('path');
 
 import routes from './routes';
@@ -18,10 +18,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(camelCaseReq);
 app.use(omitReq);
-// app.use(snakecaseRes());
 app.use(express.static(path.join(__dirname, '..', 'public')));
-
-routes(app)
+app.use((req, res, next) => {
+  console.log('---- FULL REQUEST ----');
+  console.log('Body:', req.body);
+  next();
+});
+routes(app);
 app.use(errorHandler);
 
 app.listen(port, () => {

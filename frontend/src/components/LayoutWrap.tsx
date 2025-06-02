@@ -1,20 +1,20 @@
-import React from 'react';
-import Header from './Header';
-import Footer from './Footer';
-import Sidebar from './Sidebar';
-import Breadcrumb from './CustomBreadcrumb';
-import { Breadcrumb as bb, Layout, Menu, Space, theme } from 'antd';
-const { Content, Sider } = Layout;
+import React from 'react'
+import Header from './Header'
+import Footer from './Footer'
+import Sidebar from './Sidebar'
+import Breadcrumb from './CustomBreadcrumb'
+import { Breadcrumb as bb, Layout, Menu, Space, theme } from 'antd'
+const { Content, Sider } = Layout
 
 type Props = {
-  auth?: boolean;
-  children?: JSX.Element | JSX.Element[];
-};
+  auth?: boolean
+  children?: JSX.Element | JSX.Element[]
+}
 
 const LayoutWrap = ({ auth, children }: Props) => {
   const {
     token: { colorBgContainer, borderRadiusLG },
-  } = theme.useToken();
+  } = theme.useToken()
   return (
     <Layout>
       <Sidebar />
@@ -23,7 +23,7 @@ const LayoutWrap = ({ auth, children }: Props) => {
           padding: '0 24px 24px',
         }}
       >
-        <Header />
+        {/* <Header /> */}
         <Breadcrumb />
         <Content
           style={{
@@ -40,6 +40,6 @@ const LayoutWrap = ({ auth, children }: Props) => {
         <Footer />
       </Layout>
     </Layout>
-  );
-};
-export default LayoutWrap;
+  )
+}
+export default LayoutWrap

@@ -1,5 +1,5 @@
 import React from 'react'
-import AddressInfo from '@/components/address/AddressInfo'
+import AddressInfo from './_component/AddressInfo'
 
 const page = () => {
   return <AddressInfo />

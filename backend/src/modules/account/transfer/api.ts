@@ -1,40 +1,21 @@
 import { wait } from '~/utils/wait';
-import {
-  TokenAmount,
-  Transaction,
-  TransactionAPIReturn,
-  TransactionType,
-  Direction
-} from './type.return';
+import { Transaction, TransactionAPIReturn, TransactionType } from './type.return';
 import Moralis from 'moralis';
-import { Erc20Transfer } from './type.erc20';
-import { NFTTransfer } from './type.nft';
-import { NativeTransfer } from './type.native';
-import {
-  DEFAULT_ADDRESS,
-  DEFAULT_LABEL,
-  DEFAULT_MAX_TRANSACTION_REQUEST,
-  DEFAULT_SCORE
-} from '~/constants/defaultvalue';
+import { DEFAULT_MAX_TRANSACTION_REQUEST } from '~/constants/defaultvalue';
 import { timestampToBlock } from '~/utils/time';
 
-import { getAlchemyAPI } from '~/configs/provider.configs';
 import { get_contract_functions, getAddressType, is_eoa } from '~/utils/accountclassify';
-import {
-  createContract,
-  createEOA,
-  getContractByHash,
-  getEOAByHash,
-  updateEOALabel
-} from '../account.dao';
+import { createContract, createEOA, getEOAByHash } from '../account.dao';
 import { Entity } from '../types/entity';
 import { AccountType } from '~/models/account.model';
 import { getTokenByAddress } from '~/modules/token/token.dao';
-import { MORALIS_URLS } from '~/utils/API';
-import { logger } from 'ethers';
-import { transferableAbortController } from 'util';
-import { ERC20Amount, ERC20Token, NativeAmount, NativeToken, NFTAmount, NFTToken } from '../types/token';
-import { processAirdropTransfers, processReceiveTransfers, processSentTransfers, processSignTransfers } from './processTxn';
+import { ERC20Amount, NativeAmount, NFTAmount } from '../types/token';
+import {
+  processAirdropTransfers,
+  processReceiveTransfers,
+  processSentTransfers,
+  processSignTransfers
+} from './processTxn';
 
 export async function getEntity(
   chainId: string,
@@ -43,7 +24,7 @@ export async function getEntity(
   txAddressEntity?: string | undefined,
   txAddressEntityLogo?: string | undefined
 ): Promise<Entity> {
-  let entity: Entity | undefined = undefined
+  let entity: Entity | undefined = undefined;
   let addressType = await getAddressType(addressHash);
 
   // check if from address is EOA
@@ -111,7 +92,7 @@ export async function getEntity(
     };
   }
   if (entity === undefined) {
-    throw new Error("Cannot workaround to find entity: " + addressHash)
+    throw new Error('Cannot workaround to find entity: ' + addressHash);
   }
   return entity;
 }
@@ -123,7 +104,8 @@ async function buildParams(
   address: string,
   order: 'ASC' | 'DESC' | undefined,
   cursor: string | null,
-  toBlock: number | undefined
+  toBlock: number | undefined,
+  limit: number | undefined
 ) {
   if (startBlock) {
     const startBlockParam = startBlock || (await timestampToBlock(startTimestamp, chainID));
@@ -137,12 +119,12 @@ async function buildParams(
       includeInternalTransactions: false,
       nftMetadata: true,
       order,
-      limit: DEFAULT_MAX_TRANSACTION_REQUEST,
+      limit: limit || DEFAULT_MAX_TRANSACTION_REQUEST,
       ...(cursor && { cursor })
     };
   } else {
     const startDateTime = new Date(startTimestamp!);
-    const endDateTime = new Date(endTimestamp!);
+    const endDateTime = endTimestamp ? new Date(endTimestamp) : new Date();
 
     return {
       address,
@@ -152,11 +134,12 @@ async function buildParams(
       includeInternalTransactions: true,
       nftMetadata: true,
       order,
-      limit: DEFAULT_MAX_TRANSACTION_REQUEST,
+      limit: limit || DEFAULT_MAX_TRANSACTION_REQUEST,
       ...(cursor && { cursor })
     };
   }
 }
+
 async function fetchAccountTransactionWithRetry(
   address: string,
   chainID: string,
@@ -164,7 +147,8 @@ async function fetchAccountTransactionWithRetry(
   endTimestamp: number | undefined,
   startBlock: number | undefined,
   toBlock: number | undefined,
-  order: 'ASC' | 'DESC' | undefined
+  order: 'ASC' | 'DESC' | undefined,
+  limit?: number | undefined
 ) {
   async function fetchAccountTransaction(
     address: string,
@@ -173,7 +157,8 @@ async function fetchAccountTransactionWithRetry(
     endTimestamp: number | undefined,
     startBlock: number | undefined,
     toBlock: number | undefined,
-    order: 'ASC' | 'DESC' | undefined
+    order: 'ASC' | 'DESC' | undefined,
+    limit?: number
   ): Promise<TransactionAPIReturn> {
     let cursor: string | null = '';
 
@@ -187,16 +172,27 @@ async function fetchAccountTransactionWithRetry(
     };
     while (cursor != null) {
       await wait(1000);
-      // if (result.size >= DEFAULT_MAX_TRANSACTION_REQUEST) break;
+      if (result.size >= (limit || DEFAULT_MAX_TRANSACTION_REQUEST)) break;
 
-      const params = await buildParams(startBlock, startTimestamp, endTimestamp, chainID, address, order, cursor, toBlock);
-      const pageResult = await Moralis.EvmApi.wallets.getWalletHistory(params!);
+      const params = await buildParams(
+        startBlock,
+        startTimestamp,
+        endTimestamp,
+        chainID,
+        address,
+        order,
+        cursor,
+        toBlock,
+        limit
+      );
+      console.log('params', params);
+
+      const pageResult = await Moralis.EvmApi.wallets.getWalletHistory(params);
 
       cursor = pageResult.hasNext() ? pageResult.response.cursor : null;
 
-      const transactions = pageResult.result
+      const transactions = pageResult.result;
       //.filter(txn => extractTxnType(txn.summary) !== TransactionType.Sign);
-
       const transactionPromise = transactions.map(async (transaction) => {
         let transactionReturn: Transaction;
 
@@ -211,17 +207,24 @@ async function fetchAccountTransactionWithRetry(
         let intermediaryEntities: Entity[] = [];
 
         if (!transaction.toAddress) {
-          throw new Error('Unhandled case toaddress is null, transaction: \n' + transaction);
+          return undefined;
+          // throw new Error('Unhandled case toaddress is null, transaction: \n' + transaction);
         }
 
         const txnType = extractTxnType(transaction.summary);
+        if (txnType === undefined) {
+          return undefined;
+        }
+        if (txnType === TransactionType.Unknown) {
+          return undefined;
+        }
         if (txnType === TransactionType.Sent) {
-          const [from, to, v] = await processSentTransfers(transaction, chainID)
-          fromEntity = from
-          toEntity = to
+          const [from, to, v] = await processSentTransfers(transaction, chainID);
+          fromEntity = from;
+          toEntity = to;
           value = v;
         }
-        
+
         /**
          * In case is Receive txn,
          * from -> to (to may not be the txn we want)
@@ -229,16 +232,16 @@ async function fetchAccountTransactionWithRetry(
          * => from -> inter -> to
          */
         if (txnType === TransactionType.Receive) {
-          const [from, to, inter, v] = await processReceiveTransfers(address, transaction, chainID)
-          fromEntity = from
-          toEntity = to
-          intermediaryEntities = inter
+          const [from, to, inter, v] = await processReceiveTransfers(address, transaction, chainID);
+          fromEntity = from;
+          toEntity = to;
+          intermediaryEntities = inter;
           value = v;
         }
         if (txnType === TransactionType.Sign) {
-          const [from, to, v] = await processSignTransfers(transaction, chainID)
-          fromEntity = from
-          toEntity = to
+          const [from, to, v] = await processSignTransfers(transaction, chainID);
+          fromEntity = from;
+          toEntity = to;
           value = v;
         }
         /**
@@ -246,6 +249,13 @@ async function fetchAccountTransactionWithRetry(
          * `to_address` in approve is seen as Token contract instead of the one who was approved
          */
         if (txnType === TransactionType.Approve) {
+          fromEntity = await getEntity(
+            chainID,
+            transaction.fromAddress.lowercase,
+            transaction.fromAddressLabel,
+            transaction.fromAddressEntity,
+            transaction.fromAddressEntityLogo
+          );
           const intermediaryEntity = await getEntity(
             chainID,
             transaction.toAddress.lowercase,
@@ -257,7 +267,8 @@ async function fetchAccountTransactionWithRetry(
 
           const toAddresses = transaction.contractInteractions?.approvals;
           if (!toAddresses) {
-            throw new Error('Approval summary but got no approval interaction');
+            // throw new Error('Approval summary but got no approval interaction');
+            return undefined;
           }
           if (toAddresses.length > 1) {
             throw new Error('Unhandled case approve many users ');
@@ -375,26 +386,27 @@ async function fetchAccountTransactionWithRetry(
         }
 
         if (txnType === TransactionType.Airdrop) {
-          const [from, to, v] = await processAirdropTransfers(transaction, chainID)
-          fromEntity = from
-          toEntity = to
+          const [from, to, v] = await processAirdropTransfers(transaction, chainID);
+          fromEntity = from;
+          toEntity = to;
           value = v;
         }
-        if (value.receive.length === 0 && value.sent.length === 0) {
-          return undefined
-        }
+
         if (!fromEntity || !toEntity) {
-          console.log("fromEntity", fromEntity);
-          console.log("toEntity", toEntity);
-          console.log("value", value);
           throw new Error('Unhandled case parsing txn for txn: ' + JSON.stringify(transaction));
         }
-        if (fromEntity.address === address) {
+        let check = false;
+        if (fromEntity.address?.toLowerCase() === address.toLowerCase()) {
+          check = true;
           fromEntity.type.push(AccountType.TARGET);
         }
 
-        if (toEntity.address === address) {
+        if (toEntity.address?.toLowerCase() === address.toLowerCase()) {
+          check = true;
           toEntity.type.push(AccountType.TARGET);
+        }
+        if (!check) {
+          return undefined;
         }
 
         transactionReturn = {
@@ -405,14 +417,14 @@ async function fetchAccountTransactionWithRetry(
           to: toEntity,
           value: value,
           date: new Date(transaction.blockTimestamp),
-          type: extractTxnType(transaction.summary)
+          type: txnType
         };
         return transactionReturn;
       });
 
       result.size += pageResult.response.pageSize;
 
-      const resolvedTransactions = (await Promise.all(transactionPromise)).filter(txn => !!txn);
+      const resolvedTransactions = (await Promise.all(transactionPromise)).filter((txn) => !!txn);
       result.transactions = result.transactions.concat(resolvedTransactions);
 
       await wait(1000);
@@ -424,7 +436,7 @@ async function fetchAccountTransactionWithRetry(
   }
   let attempts = 0;
   let accountTxn = undefined;
-  while (attempts < 3) {
+  while (attempts < 1) {
     try {
       accountTxn = await fetchAccountTransaction(
         address,
@@ -433,12 +445,12 @@ async function fetchAccountTransactionWithRetry(
         endTimestamp,
         startBlock,
         toBlock,
-        order
+        order,
+        limit
       );
       return accountTxn;
     } catch (err) {
-      console.log('ATTEMPTS:', attempts);
-      console.log('err:', err);
+      console.log('Error fetching account transaction: ', err);
       attempts++;
       await wait(1000);
     }
@@ -446,8 +458,7 @@ async function fetchAccountTransactionWithRetry(
   throw new Error('Failed to fetch account transaction');
 }
 
-
-function extractTxnType(summary: string): TransactionType {
+function extractTxnType(summary: string): TransactionType | undefined {
   if (summary.startsWith('Approved')) {
     return TransactionType.Approve;
   }
@@ -466,7 +477,13 @@ function extractTxnType(summary: string): TransactionType {
   if (summary.startsWith('Airdrop')) {
     return TransactionType.Airdrop;
   }
-
-  throw Error('Unknown summary + ' + summary);
+  if (summary.startsWith('Unknown')) {
+    return TransactionType.Unknown;
+  }
+  if (summary.startsWith('Revoked')) {
+    return TransactionType.Revoked;
+  }
+  return undefined;
+  // throw Error('Unknown summary + ' + summary);
 }
 export { fetchAccountTransactionWithRetry };

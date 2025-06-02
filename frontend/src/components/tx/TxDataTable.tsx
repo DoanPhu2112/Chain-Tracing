@@ -57,19 +57,13 @@ import { Select } from 'antd'
 import { DataTablePagination } from './DataTablePagination'
 import transactions_json from '@/mocks/transactions.json'
 import { Transaction, TransactionsList } from '@/types/transaction.interface'
-import {
-  getAddressTransactions,
-  getAddressTransactionsFollowup,
-} from '@/services/address'
 import { isEtherAddress, isEtherTransaction } from '@/helpers/addressValidation'
 const { Title } = Typography
 import { Spin } from 'antd'
 import { shortenAddress } from '@/util/address'
 import { cn } from '@/lib/utils'
+import { useAddressTransactionsFollowup } from '@/api/hooks/use-address-transactions-followup'
 
-const INPUT_ERROR = {
-  InvalidateAddress: 'Invalid address',
-}
 // Define a custom TableMeta type
 interface CustomTableMeta extends TableMeta<Transaction> {
   toggleAdd: (transaction: Transaction) => void
@@ -88,54 +82,59 @@ interface ReportData {
   suspiciousAddress: string
   transactionHash: string
 }
-function timeAgo(timestampStr: string) {
-  const timestamp = new Date(timestampStr);
-  const now = new Date();
-  const diffInMs = now - timestamp;
-
-  const secondsAgo = Math.floor(diffInMs / 1000);
-  const minutesAgo = Math.floor(secondsAgo / 60);
-  const hoursAgo = Math.floor(minutesAgo / 60);
-  const daysAgo = Math.floor(hoursAgo / 24);
+export function timeAgo(timestampStr: number) {
+  const timestamp = new Date(timestampStr)
+  const now = new Date()
+  const diffInMs = now.getTime() - timestamp.getTime()
+  const secondsAgo = Math.floor(diffInMs / 1000)
+  const minutesAgo = Math.floor(secondsAgo / 60)
+  const hoursAgo = Math.floor(minutesAgo / 60)
+  const daysAgo = Math.floor(hoursAgo / 24)
 
   if (daysAgo > 365) {
-    return `${Math.floor(daysAgo / 365)} years ago`;
-  }
-  else if (daysAgo > 0) {
-    return `${daysAgo} days ${hoursAgo % 24} hours ago`;
+    return `${Math.floor(daysAgo / 365)} years ago`
+  } else if (daysAgo > 0) {
+    return `${daysAgo} days ${hoursAgo % 24} hours ago`
   } else if (hoursAgo > 0) {
-    return `${hoursAgo} hours ${minutesAgo % 60} minutes ago`;
+    return `${hoursAgo} hours ${minutesAgo % 60} minutes ago`
   } else if (minutesAgo > 0) {
-    return `${minutesAgo} minutes ago`;
+    return `${minutesAgo} minutes ago`
   } else {
-    return `${secondsAgo} seconds ago`;
+    return `${secondsAgo} seconds ago`
   }
 }
 
-
 const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
   const { toast } = useToast()
+  const [limit, setLimit] = useState<string>('10')
 
-  const [isFormVisible, setIsFormVisible] = useState(true)
-
-  const [searchTransaction, setSearchTransaction] =
-    useState<Transaction[]>(initialTransactions)
-
-  const [sorting, setSorting] = useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = useState({})
-  const [isClient, setIsClient] = useState(false)
-
-  const [data, setData] = useState<TransactionsList>([])
-  const [isLoading, setIsLoading] = useState(false) //TODO: skeleton loading
-
-  const [search, setSearch] = useState('')
   const [reportData, setReportData] = useState<ReportData>({
     reportType: '',
     suspiciousAddress: '',
     transactionHash: '',
   })
+
+  const { data: transactionList, refetch } = useAddressTransactionsFollowup(
+    reportData.suspiciousAddress,
+    reportData.transactionHash,
+    limit
+  )
+
+  const [isFormVisible, setIsFormVisible] = useState(true)
+
+  const [searchTransaction, setSearchTransaction] = useState<Transaction[]>(
+    initialTransactions as unknown as Transaction[]
+  )
+
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [rowSelection, setRowSelection] = useState({})
+
+  const [data, setData] = useState<TransactionsList>([])
+  const [isLoading, setIsLoading] = useState(false) //TODO: skeleton loading
+
+  const [search, setSearch] = useState('')
   const debouncedSearch = useDebounce(search, 500) // Debounce the search
   const [totalCount, setTotalCount] = useState(0)
   const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
@@ -205,32 +204,46 @@ const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
         <Badge variant="outline">{row.getValue('chainId') as string}</Badge>
       ),
     },
-    // {  
+    // {
     {
-      accessorKey: "fromAddress",
-      header: "From Address",
-      cell: ({row}) => {
-        const { from: { address, address_entity_label } } = row.original;
-      
+      accessorKey: 'fromAddress',
+      header: 'From Address',
+      cell: ({ row }) => {
+        const {
+          from: { address, address_entity_label },
+        } = row.original
+
         return (
-          <div className={cn("truncate max-w-xs", address === reportData.suspiciousAddress && "underline")}>
+          <div
+            className={cn(
+              'truncate max-w-xs',
+              address === reportData.suspiciousAddress && 'underline'
+            )}
+          >
             {address_entity_label || shortenAddress(address!)}
           </div>
-        );
-      }
+        )
+      },
     },
     {
-      accessorKey: "toAddress",
-      header: "To Address",
-      cell: ({row}) => {
-        const { to: { address, address_entity_label } } = row.original;
-      
+      accessorKey: 'toAddress',
+      header: 'To Address',
+      cell: ({ row }) => {
+        const {
+          to: { address, address_entity_label },
+        } = row.original
+
         return (
-          <div className={cn("truncate max-w-xs", address === reportData.suspiciousAddress && "underline")}>
+          <div
+            className={cn(
+              'truncate max-w-xs',
+              address === reportData.suspiciousAddress && 'underline'
+            )}
+          >
             {address_entity_label || shortenAddress(address!)}
           </div>
-        );
-      }
+        )
+      },
     },
     {
       accessorKey: 'type',
@@ -243,9 +256,7 @@ const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
     {
       accessorKey: 'date',
       header: 'Date',
-      cell: ({ row }) => (
-        <div>{timeAgo(row.original.date)}</div>
-      )
+      cell: ({ row }) => <div>{timeAgo(row.original.date.getTime())}</div>,
     },
     {
       accessorKey: 'amount',
@@ -323,7 +334,7 @@ const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
     meta: {
       toggleAdd: (transaction: Transaction) => {
         setAddedTransactions((current) => {
-          console.log("Set Add Transaction Clicked")
+          console.log('Set Add Transaction Clicked')
           const exists = current.some((txn) => txn.txnHash === transaction.txnHash)
           if (exists) {
             // Remove the transaction if it exists
@@ -341,7 +352,7 @@ const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
     setIsFormVisible(true)
   }
 
-  const handleOk = (e) => {
+  const handleOk = () => {
     if (
       !isEtherAddress(reportData.suspiciousAddress) ||
       !isEtherTransaction(reportData.transactionHash)
@@ -360,23 +371,29 @@ const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
   const handleCancel = () => {
     setIsFormVisible(false)
   }
-  const handleChangeReportSusAddress = (e) => {
+  const handleChangeReportSusAddress = (e: { target: { value: any } }) => {
     setReportData({ ...reportData, suspiciousAddress: e.target.value })
   }
-  const handleChangeReportTxHash = (e) => {
+  const handleChangeReportTxHash = (e: { target: { value: any } }) => {
     setReportData({ ...reportData, transactionHash: e.target.value })
   }
-  const handleChangeReportCategory = (e) => {
-    console.log(e)
+  const handleChangeReportCategory = (e: any) => {
     setReportData({ ...reportData, reportType: e })
   }
+
   useEffect(() => {
-    setIsClient(true)
+    if (typeof window !== 'undefined') {
+      setLimit(localStorage.getItem('limit') || '10')
+    }
+  }, [])
+
+  useEffect(() => {
     setTotalCount(table.getFilteredRowModel().rows.length)
   }, [])
   useEffect(() => {
     onUpdate(addedTransactions)
   }, [addedTransactions])
+
   useEffect(() => {
     const params = new URLSearchParams({
       search: debouncedSearch,
@@ -407,15 +424,19 @@ const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
   }, [searchTransaction, debouncedSearch, sorting, pageIndex, pageSize])
 
   useEffect(() => {}, [reportData])
+
   async function handleFilterTransaction() {
     setIsLoading(true)
 
-    const transactionList = await getAddressTransactionsFollowup(
-      reportData.suspiciousAddress,
-      reportData.transactionHash
-    )
+    void refetch()
     setIsLoading(false)
-
+    if (!transactionList) {
+      toast({
+        title: 'No transaction found',
+        action: <ToastAction altText="Goto schedule to undo">Undo</ToastAction>,
+      })
+      return
+    }
     setSearchTransaction(transactionList)
     setData(transactionList)
 
@@ -429,15 +450,7 @@ const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
   //   //TODO: Check search is transaction or account address
   //   handleFilterTransaction()
   // }, [search])
-  const modalStyles = {
-    header: {
-      fontSize: 30,
-      titleFontSize: 30
-    },
-    content: {
-      borderRadius: 20,
-    },
-  };
+
   return (
     <div className="w-full">
       {isLoading && <Spin indicator={<LoadingOutlined spin />} size="large" />}
@@ -447,9 +460,9 @@ const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
         open={isFormVisible}
         onOk={handleOk}
         onCancel={handleCancel}
-        className='modalStyle'
+        className="modalStyle"
         style={{ fontSize: '11px' }} // Set font size for the entire Modal
-        >
+      >
         <div className="space-y-3">
           <Title level={5}>What happened?</Title>
           <Select
@@ -559,18 +572,6 @@ const TxDataTable: React.FC<TxDataTableProps> = ({ onUpdate }) => {
           <DataTablePagination table={table} totalCount={totalCount} />
         </div>
       </div>
-      {/* {isClient && (
-        <div>
-          <h2>Added Transactions</h2>
-          <ul>
-            {addedTransactions.map((txn) => (
-              <li key={txn.txnHash}>
-                {txn.txnHash} - {txn.type} - {txn.status} - {txn.date} - {txn.amount}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )} */}
     </div>
   )
 }

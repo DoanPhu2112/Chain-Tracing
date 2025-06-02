@@ -1,7 +1,15 @@
 'use client'
-import React, { memo } from 'react'
-import { Handle, useStore, Position, NodeProps } from '@xyflow/react'
-import { User } from 'lucide-react'
+import React, { memo, useEffect } from 'react'
+import {
+  Handle,
+  useStore,
+  Position,
+  Node,
+  NodeProps,
+  NodeToolbar,
+  NodeToolbarProps,
+} from '@xyflow/react'
+import { SquareMenu, User, UserSearch } from 'lucide-react'
 import { shortenAddress } from '@/util/address'
 import { Badge } from '@/components/ui/badge'
 import { AccountType } from '@/types/transaction.interface'
@@ -17,29 +25,57 @@ const addressStyle: React.CSSProperties = {
 }
 const labelStyle: React.CSSProperties = {
   position: 'absolute',
-  color: '#555',
+  color: '#fff',
   bottom: -35,
   fontSize: 8,
   alignContent: 'center',
   alignSelf: 'center',
+  fontWeight: 'bold', // ← add this line
 }
 
+export type TooltipNodeType = Node<{
+  label: string
+  tooltip?: {
+    label: string
+    position?: NodeToolbarProps['position']
+  }
+}>
+
 const RedNode: React.FC<NodeProps> = ({ data }) => {
+  let [over, setOver] = React.useState(false)
+  const addressTypeIcon =
+    (data.type as AccountType[]).includes(AccountType.CONTRACT_EXCHANGE) ||
+    (data.type as AccountType[]).includes(AccountType.CONTRACT_NORMAL) ||
+    (data.type as AccountType[]).includes(AccountType.CONTRACT_TOKEN) ? (
+      <SquareMenu color="white" />
+    ) : (
+      <UserSearch color="white" />
+    )
+
   return (
     <>
       <Handle type="target" position={Position.Left} id="left-target" />
       <Handle type="source" position={Position.Left} id="left-source" />
-      <div className="wrapper gradient gradient-red">
-        <div className="inner"></div>
+      <div
+        className="wrapper gradient gradient-red"
+        onClick={() => setOver((current) => !current)}
+      >
+        <div className="inner">{addressTypeIcon}</div>
       </div>
-      <div style={addressStyle}>
-        {data.addressHash === AccountType.TARGET
-          ? data.addressHash
-          : shortenAddress(data.addressHash as string)}
-      </div>
-      <Badge variant="gray" style={labelStyle}>
-        {data.label as string}
+
+      <div style={addressStyle}>{shortenAddress(data.addressHash as string)}</div>
+      <Badge
+        variant={
+          (data.type as string[]).includes(AccountType.TARGET) ? 'destructive' : 'gray'
+        }
+        style={labelStyle}
+      >
+        {(data.type as string[]).includes(AccountType.TARGET)
+          ? 'Target'
+          : (data.label as string)}
       </Badge>
+
+      <NodeToolbar isVisible={over} position={Position.Top}></NodeToolbar>
       <Handle type="target" position={Position.Right} id="right-target" />
       <Handle type="source" position={Position.Right} id="right-source" />
     </>

@@ -1,9 +1,6 @@
 import { fetchBlockNumberFromTransaction } from '~/utils/getBlockByTxnHash';
 import { fetchAccountTransactionWithRetry } from './api';
-import {
-  Transaction,
-  TransactionAPIReturn,
-} from './type.return';
+import { Transaction, TransactionAPIReturn } from './type.return';
 
 async function getAccountTransaction(
   address: string,
@@ -12,11 +9,9 @@ async function getAccountTransaction(
   endTimestamp: number | undefined,
   startBlock: number,
   endBlock: number,
-  order: 'ASC' | 'DESC' | undefined
+  order: 'ASC' | 'DESC' | undefined,
+  limit: number
 ): Promise<TransactionAPIReturn> {
-  // TODO: CHECK IF DB exist address data
-
-  // ELSE:
   let txnAPIReturn = await fetchAccountTransactionWithRetry(
     address,
     chainID,
@@ -24,32 +19,38 @@ async function getAccountTransaction(
     endTimestamp,
     startBlock,
     endBlock,
-    order
+    order,
+    limit
   );
-  //TODO: STORE TO DB
   return txnAPIReturn;
 }
 
 async function getAccountFollowupTransaction(
   address: string,
-  transactionHash: string,
-  chainID: string
+  chainID: string,
+  transactionHash?: string,
+  timestamp?: number,
+  limit?: number
 ): Promise<TransactionAPIReturn> {
-  const blockNumber: number = await fetchBlockNumberFromTransaction(transactionHash);
-  // TODO: CHECK IF DB exist address data
-  // ELSE:
-  let txnAPIReturn: TransactionAPIReturn = await fetchAccountTransactionWithRetry(
-    address,
-    chainID,
-    undefined,
-    undefined,
-    blockNumber,
-    undefined,
-    'ASC'
-  );
+  try {
+    const blockNumber: number | undefined = transactionHash
+      ? await fetchBlockNumberFromTransaction(transactionHash)
+      : undefined;
 
-  //TODO: STORE TO DB
-  return txnAPIReturn;
+    let txnAPIReturn: TransactionAPIReturn = await fetchAccountTransactionWithRetry(
+      address,
+      chainID,
+      timestamp,
+      undefined,
+      blockNumber,
+      undefined,
+      'ASC',
+      limit
+    );
+    return txnAPIReturn;
+  } catch (error) {
+    throw new Error((error as any).message);
+  }
 }
 
 export { getAccountTransaction, getAccountFollowupTransaction };

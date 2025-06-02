@@ -1,14 +1,11 @@
 'use client'
 
 import * as React from 'react'
-import { TrendingUp } from 'lucide-react'
-import { Label, Pie, PieChart } from 'recharts'
-import { PortfolioBalance } from '@/types/TODO: remove wallet.interface'
+import { Label, Pie, PieChart, Legend, Sector } from 'recharts'
 
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -19,48 +16,30 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
+import { PortfolioBalance } from '@/types/wallet.interface'
+import { CustomLegend } from './CustomLegend'
+import { PieSectorDataItem } from 'recharts/types/polar/Pie'
+import { cn } from '@/lib/utils'
 
 export const description = 'A donut chart with text'
-interface chartAsset {
-  asset: string,
-  amount: number,
-  fill: string,
-}
-const colorList = [
-  'var(--color-solana)',
-  'var(--color-ethereum)',
 
-  'var(--color-polygon)',
-  'var(--color-bitcoin)',
-  'var(--color-other)'
+const colorList = [
+  '#89AAFF',
+  '#B2B0E6',
+  '#ADD7D8',
+  '#C4E1BC',
+  '#F5C398',
+  '#FFEB69',
+  '#FFD7EF',
+  '#B1C5FF',
+  '#86C3C4',
+  '#DE5F51',
+  '#D2D2D2',
 ]
-const chartDataMock = [
-  {
-    asset: 'ABC',
-    amount: Math.random() * 1000,
-    fill: 'var(--color-ethereum)',
-  },
-  {
-    asset: 'Bitcoin',
-    amount: Math.random() * 100,
-    fill: 'var(--color-bitcoin)',
-  },
-  {
-    asset: 'Polygon',
-    amount: Math.random() * 100,
-    fill: 'var(--color-polygon)',
-  },
-  {
-    asset: 'Solana',
-    amount: Math.random() * 100,
-    fill: 'var(--color-solana)',
-  },
-  {
-    asset: 'Other',
-    amount: Math.random() * 100,
-    fill: 'var(--color-other)',
-  },
-]
+
+function SectorItem({ outerRadius = 0, ...props }: PieSectorDataItem) {
+  return <Sector {...props} outerRadius={outerRadius + 5} />
+}
 
 const chartConfig = {
   amount: {
@@ -88,38 +67,94 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function PortfolioPieChart({chartData}: { chartData: PortfolioBalance[]}) {
-  chartData = chartData.slice(0,5);
-  const chartDataWithColor = chartData.map((data, index) => {
-    return {
-      fill: colorList[index],
-      ...data,
-      value: Number(data.value),
-    }
-  })
+export function PortfolioPieChart({
+  chartData,
+  showLegend = true,
+}: {
+  chartData: PortfolioBalance[]
+  showLegend?: boolean
+}) {
+  chartData = chartData.slice(0, 5).map((data) => ({
+    ...data,
+    value: data.value === 0 ? 0.0001 : data.value,
+  }))
+
+  const [activeIndex, setActiveIndex] = React.useState<number>(-1)
+
+  const chartDataWithColor = chartData.length
+    ? chartData.map((data, index) => {
+      return {
+        fill: colorList[index],
+        ...data,
+        value: Number(data.value),
+      }
+    })
+    : [
+      {
+        value: 1,
+        token: 'ETH',
+        chain: '0x1',
+        price: 0,
+        amount: 0,
+        fill: '#D2D2D2',
+        logo: null,
+        portfolioPercentage: 99,
+      },
+      {
+        value: 0,
+        token: 'Other',
+        chain: 'N/A',
+        price: 0,
+        amount: 0,
+        fill: '#B2B0E6',
+        logo: null,
+        portfolioPercentage: 1,
+      },
+    ]
+
   const totalAmount = React.useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + Number(curr.value), 0)
+    return chartData.reduce((acc, curr) => acc + (Number(curr.value) || 0), 0)
   }, [])
-  console.log("chartData", chartDataWithColor)
+  const topAsset = chartDataWithColor.reduce((prev, curr) =>
+    curr.value > prev.value ? curr : prev
+  )
+
+  function handleMouseOut() {
+    setActiveIndex(-1)
+  }
+
+  function handleMouseOver(event: { payload: { token: string } }) {
+    const newActiveIndex = chartDataWithColor.findIndex(
+      (item) => item.token === event.payload.token
+    )
+    setActiveIndex(newActiveIndex)
+  }
+
   return (
     <Card className="h-full">
       <CardHeader className="items-center pb-0">
-        <CardTitle>Asset Allocation</CardTitle>
-        <CardDescription>Asset Allocation info</CardDescription>
+        <CardTitle className="font-sans text-label-lg-sec">Asset Allocation</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 pb-0">
-        <ChartContainer
-          config={chartConfig}
-          className="mx-auto aspect-square max-h-[250px]"
-        >
-          <PieChart>
-            <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+      <CardContent
+        className={cn('flex-1 pb-0 ', showLegend ? 'min-w-[550px]' : 'min-w-[450px]')}
+      >
+        <ChartContainer config={chartConfig} className="mx-auto">
+          <PieChart className=" aspect-square">
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent className="bg-white" hideLabel />}
+            />
             <Pie
               data={chartDataWithColor}
+              activeShape={SectorItem}
+              activeIndex={activeIndex}
               dataKey="value"
               nameKey="token"
-              innerRadius={60}
-              strokeWidth={5}
+              cornerRadius={15}
+              innerRadius={80}
+              strokeWidth={1}
+              onMouseOut={handleMouseOut}
+              onMouseOver={handleMouseOver}
             >
               <Label
                 content={({ viewBox }) => {
@@ -149,16 +184,27 @@ export function PortfolioPieChart({chartData}: { chartData: PortfolioBalance[]})
                     )
                   }
                 }}
+                className="bg-white"
               />
             </Pie>
+            {showLegend && (
+              <Legend
+                content={<CustomLegend />}
+                layout="vertical"
+                align="right"
+                verticalAlign="middle"
+              />
+            )}
           </PieChart>
         </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 font-medium leading-none">
-          TODO: Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+          Top Asset: <span className="text-primary">{topAsset.token}</span>{' '}
         </div>
-        <div className="leading-none text-muted-foreground">Assets</div>
+        <div className="leading-none text-muted-foreground">
+          Leading in portfolio weight
+        </div>
       </CardFooter>
     </Card>
   )

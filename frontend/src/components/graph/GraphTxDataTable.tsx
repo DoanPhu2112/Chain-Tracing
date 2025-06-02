@@ -46,12 +46,23 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { File, ListFilter } from 'lucide-react'
+import { File } from 'lucide-react'
 
 // Import the JSON data
 import { DataTablePagination } from '@/components/tx/DataTablePagination'
 import transactions_json from '@/mocks/transactions.json'
-import { Transaction } from '@/types/transaction.interface'
+import {
+  Entity,
+  ERC20Amount,
+  NativeAmount,
+  NFTAmount,
+  Transaction,
+  Value,
+} from '@/types/transaction.interface'
+import { shortenAddress, shortenValue } from '@/util/address'
+import { timeAgo } from '../tx/TxDataTable'
+import { useSelector } from 'react-redux'
+import { RootState } from '@/lib/store'
 
 const assetColorMapping: { [key: string]: string } = {
   ETH: '#627eea', // Ethereum - Iconic Blue
@@ -135,6 +146,7 @@ interface GraphTxDataTableProps {
 }
 
 const GraphTxDataTable: React.FC<GraphTxDataTableProps> = ({ txs, loading }) => {
+  const targetNode = useSelector((state: RootState) => state.address)
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -159,49 +171,11 @@ const GraphTxDataTable: React.FC<GraphTxDataTableProps> = ({ txs, loading }) => 
   )
   const columns: ColumnDef<Transaction>[] = [
     {
-      id: 'add',
-      enableHiding: false,
-      cell: ({ row, table }) => {
-        const transaction = row.original
-        const isAdded = addedTransactions.some(
-          (addedTxn: Transaction) => addedTxn.txnHash === transaction.txnHash
-        )
-
+      accessorKey: 'summary',
+      header: 'Summary',
+      cell: ({ row }) => {
         return (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div>
-                  {!isAdded ? (
-                    <Button
-                      className="w-10"
-                      variant="outline"
-                      onClick={() =>
-                        (table.options.meta as CustomTableMeta).toggleAdd(transaction)
-                      }
-                    >
-                      +
-                    </Button>
-                  ) : (
-                    <Button
-                      className="w-10"
-                      variant="default"
-                      onClick={() =>
-                        (table.options.meta as CustomTableMeta).toggleAdd(transaction)
-                      }
-                    >
-                      -
-                    </Button>
-                  )}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>
-                  {isAdded ? 'Remove transaction from graph' : 'Add transaction to graph'}
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Badge size={"md"} variant={"outline"} className="truncate max-w-xs">{row.original.summary}</Badge>
         )
       },
     },
@@ -209,70 +183,107 @@ const GraphTxDataTable: React.FC<GraphTxDataTableProps> = ({ txs, loading }) => 
       accessorKey: 'hash',
       header: 'Transaction Hash',
       cell: ({ row }) => {
-        const hash: string = row.getValue('hash') ? row.getValue('hash') :  '0xbc44d53298a03a181702194df3b768bcea05df2be01509c99de03d9f1e583fca'
-        // console.log("Hash", row.getValue('hash'))
-        // console.log("txnHash",row.getValue('txnHash'))
-        const shortenedHash = `${hash.slice(0, 6)}...${hash.slice(-6)}`
-        return <div className="truncate max-w-xs">{shortenedHash}</div>
+        return (
+          <div className="truncate max-w-xs">{shortenAddress(row.original.txnHash)}</div>
+        )
       },
     },
-    // {
-    //   accessorKey: 'from',
-    //   header: 'From',
-    //   cell: ({ row }) => <div>{row.getValue('from')}</div>,
-    // },
+
+    {
+      accessorKey: 'from',
+      header: 'From',
+      cell: ({ row }) => {
+        const entity: Entity = row.original.from
+        if (entity.address === targetNode) {
+          return (<Badge variant={"outline"} size={"lg"} >Target</Badge>)
+        }
+        const label = Array.isArray(entity.address_entity_label)
+          ? entity.address_entity_label
+          : Array.isArray(entity.address_entity)
+            ? entity.address_entity
+            : undefined
+        if (label && label?.length !== 0 && label[0] !== '') {
+          return <div className="text-blue-600 truncate max-w-xs">{label}</div>
+        }
+        const address = entity.address || '0x'
+        return (
+          <div className="text-blue-600 truncate max-w-xs">{shortenAddress(address)}</div>
+        )
+      },
+    },
     {
       accessorKey: 'to',
       header: 'To',
       cell: ({ row }) => {
-        const hash: string = row.getValue('to').address
-        console.log("Hash: ", hash)
-        const shortenedHash = `${hash.slice(0, 6)}...${hash.slice(-6)}`
-        return <div className="text-blue-600 truncate max-w-xs">{shortenedHash}</div>
+        const entity: Entity = row.original.to
+        if (entity.address === targetNode) {
+          return (<Badge variant={"outline"} size={"lg"} >Target</Badge>)
+        }
+        const label = Array.isArray(entity.address_entity_label)
+          ? entity.address_entity_label
+          : Array.isArray(entity.address_entity)
+            ? entity.address_entity
+            : undefined
+        if (label && label?.length !== 0 && label[0] !== '') {
+          return <div className="text-blue-600 truncate max-w-xs">{label}</div>
+        }
+        const address = entity.address || '0x'
+        return (
+          <div className="text-blue-600 truncate max-w-xs">{shortenAddress(address)}</div>
+        )
       },
     },
     {
       accessorKey: 'value',
       header: () => <div className="text-right">Value</div>,
       cell: ({ row }) => {
-        const value: string = row.getValue('value') ? row.getValue('value') : 13;
-        console.log("Value ", value)
-        const formattedValue = parseFloat(value).toFixed(5) // Ensure 5 decimal places
-        const valueString = value.toString() // Convert value to string for splitting
-        const hasMoreDecimals =
-          valueString.includes('.') && valueString.split('.')[1].length > 5
+        const value: Value = row.getValue('value')
+        let valueMoney: string = ''
+        if (value.sent.length > 0) valueMoney = value.sent[0].value
+        if (value.receive.length > 0) valueMoney = value.receive[0].value
 
-        return (
-          <div className="text-right font-medium">
-            {formattedValue}
-            {hasMoreDecimals && '..'}
-          </div>
-        )
+        return <div className="text-right font-medium">{shortenValue(valueMoney)}</div>
       },
     },
     {
       accessorKey: 'asset',
       header: 'Asset',
       cell: ({ row }) => {
-        const asset: string = row.getValue('asset')
+        const value: Value = row.getValue('value')
+
+        let asset: string = ''
+        let valueMoney: string = ''
+        if (value.sent.length > 0) {
+          if (value.sent[0])
+            if ('symbol' in value.sent[0] || 'logo' in value.sent[0]) {
+              asset = value.sent[0].symbol || 'ETH'
+            }
+        }
+        if (value.receive.length > 0) {
+          if (value.receive[0])
+            if ('symbol' in value.receive[0] || 'logo' in value.receive[0]) {
+              asset = value.receive[0].symbol || 'ETH'
+            } else if ('name' in value.receive[0]) {
+              asset = (value.receive[0] as NFTAmount).name || 'NFT'
+            }
+        }
         const color = assetColorMapping[asset] || '#000000' // Fallback to black if asset not found
 
         return (
-          <Badge variant="outline" style={{ borderColor: color }}>
+          <Badge variant="outline" style={{ borderColor: color }} size="md">
             {asset}
           </Badge>
         )
       },
     },
     {
-      accessorKey: 'category',
-      header: 'Category',
-      cell: ({ row }) => <Badge variant="outline">{row.getValue('category')}</Badge>,
-    },
-    {
-      accessorKey: 'blockNum',
-      header: 'Block Number',
-      cell: ({ row }) => <div>{row.getValue('blockNum')}</div>,
+      accessorKey: 'date',
+      header: 'Date',
+      cell: ({ row }) => (
+        <Badge variant="outline" size="md">
+          {timeAgo(row.getValue('date'))}
+        </Badge>
+      ),
     },
     {
       id: 'actions',
@@ -355,7 +366,7 @@ const GraphTxDataTable: React.FC<GraphTxDataTableProps> = ({ txs, loading }) => 
     setIsClient(true)
     setTotalCount(table.getFilteredRowModel().rows.length)
   }, [])
-  useEffect(() => {}, [addedTransactions, data])
+  useEffect(() => { }, [addedTransactions, data])
   useEffect(() => {
     const filteredData = txs
     const sortedData = filteredData
@@ -410,10 +421,6 @@ const GraphTxDataTable: React.FC<GraphTxDataTableProps> = ({ txs, loading }) => 
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="outline" className="gap-1 text-sm items-center">
-            <File className="h-3.5 w-3.5" />
-            <span className="sr-only sm:not-sr-only">Export</span>
-          </Button>
         </div>
       </div>
       <div className="rounded-md border">

@@ -5,9 +5,13 @@
         "txnHash": "0x09605bac70bf34d97eb20b6da9e74254796c70e7aa61b0024def618bc80e325a",
         "from": {
             "address": "0x5df324f1e0b5a3901109ba26527817dfa2a15f4a",
-            "address_entity": null,
+            "address_entity": [
+                "Random Label"
+            ],
             "address_entity_logo": null,
-            "address_entity_label": null,
+            "address_entity_label": [
+                "Random Label"
+            ],
             "type": [
                 "EOA_ACTIVE",
                 "TARGET"
@@ -15,9 +19,13 @@
         },
         "to": {
             "address": "0x3e8788f8cb2c922bc963c1decfc839f55b1abda9",
-            "address_entity": null,
+            "address_entity": [
+                "Random Label"
+            ],
             "address_entity_logo": null,
-            "address_entity_label": null,
+            "address_entity_label": [
+                "Random Label"
+            ],
             "type": [
                 "EOA_ACTIVE"
             ]
@@ -41,19 +49,26 @@
         "txnHash": "0x09605bac70bf34d97eb20b6da9e74254796c70e7aa61b0024def618bc80e325B",
         "from": {
             "address": "0x3e8788f8cb2c922bc963c1decfc839f55b1abda9",
-            "address_entity": null,
+            "address_entity": [
+                "Random Label"
+            ],
             "address_entity_logo": null,
-            "address_entity_label": null,
+            "address_entity_label": [
+                "Random Label"
+            ],
             "type": [
                 "EOA_ACTIVE"
             ]
-
         },
         "to": {
             "address": "0x5df324f1e0b5a3901109ba26527817dfa2a15f4a",
-            "address_entity": null,
+            "address_entity": [
+                "Random Label"
+            ],
             "address_entity_logo": null,
-            "address_entity_label": null,
+            "address_entity_label": [
+                "Random Label"
+            ],
             "type": [
                 "EOA_ACTIVE",
                 "TARGET"
@@ -78,19 +93,26 @@
         "txnHash": "0x09605bac70bf34d97eb20b6da9e74254796c70e7aa61b0024def618bc80e325C",
         "from": {
             "address": "0x3e8788f8cb2c922bc963c1decfc839f55b1abda9",
-            "address_entity": null,
+            "address_entity": [
+                "Random Label"
+            ],
             "address_entity_logo": null,
-            "address_entity_label": null,
+            "address_entity_label": [
+                "Random Label"
+            ],
             "type": [
                 "EOA_ACTIVE"
             ]
-
         },
         "to": {
             "address": "0x5df324f1e0b5a3901109ba26527817dfa2a15f4a",
-            "address_entity": null,
+            "address_entity": [
+                "Random Label"
+            ],
             "address_entity_logo": null,
-            "address_entity_label": null,
+            "address_entity_label": [
+                "Random Label"
+            ],
             "type": [
                 "EOA_ACTIVE",
                 "TARGET"
@@ -115,19 +137,26 @@
         "txnHash": "0x09605bac70bf34d97eb20b6da9e74254796c70e7aa61b0024def618bc80e325D",
         "from": {
             "address": "0x3e8788f8cb2c922bc963c1decfc839f55b1abda9",
-            "address_entity": null,
+            "address_entity": [
+                "Random Label"
+            ],
             "address_entity_logo": null,
-            "address_entity_label": null,
+            "address_entity_label": [
+                "Random Label"
+            ],
             "type": [
                 "EOA_ACTIVE"
             ]
-
         },
         "to": {
             "address": "0x5df324f1e0b5a3901109ba26527817dfa2a15f4a",
-            "address_entity": null,
+            "address_entity": [
+                "Random Label"
+            ],
             "address_entity_logo": null,
-            "address_entity_label": null,
+            "address_entity_label": [
+                "Random Label"
+            ],
             "type": [
                 "EOA_ACTIVE",
                 "TARGET"

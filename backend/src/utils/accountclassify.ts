@@ -1,7 +1,12 @@
 import { ethers } from 'ethers';
 import { parse } from '@solidity-parser/parser';
 
-import { getAlchemyAPI, getEtherscanAPI } from 'src/configs/provider.configs';
+import {
+  getAlchemyAPI,
+  getDrpcAPI,
+  getDrpcURLs,
+  getEtherscanAPI
+} from 'src/configs/provider.configs';
 import { AccountType } from 'src/models/account.model';
 import axios from 'axios';
 
@@ -19,30 +24,26 @@ const inactiveAddresses = ['0x0000000000000000000000000000000000000000'];
 
 const miner: string[] = [];
 
-export async function getAddressType(address: string| undefined): Promise<AccountType[]> {
+export async function getAddressType(address: string | undefined): Promise<AccountType[]> {
   const accountType: AccountType[] = [];
   try {
-
-    if ( !address || !is_valid_address(address) ) {
+    if (!address || !is_valid_address(address)) {
       accountType.push(AccountType.INVALID);
       return accountType;
     }
     if (await is_eoa(address)) {
-      if (is_miner(address)) {
-        accountType.push(AccountType.MINER);
-      }
       if (await is_eoa_exchange(address)) {
         accountType.push(AccountType.EOA_EXCHANGE);
       }
-      if (await is_eoa_active(address)) {
-        accountType.push(AccountType.EOA_ACTIVE);
-      } else {
-        accountType.push(AccountType.EOA_INACTIVE);
-      }
+      // if (await is_eoa_active(address)) {
+      //   accountType.push(AccountType.EOA_ACTIVE);
+      // } else {
+      //   accountType.push(AccountType.EOA_INACTIVE);
+      // }
     } else {
-        accountType.push(AccountType.CONTRACT_NORMAL);
-      }
-    
+      accountType.push(AccountType.CONTRACT_NORMAL);
+    }
+
     return accountType;
   } catch (err) {
     console.log(err);
@@ -51,18 +52,12 @@ export async function getAddressType(address: string| undefined): Promise<Accoun
 }
 //NOTE: Done
 export async function is_eoa(address: string): Promise<boolean> {
-  try {
-    const alchemy = getAlchemyAPI();
-
-    const checkEOA: boolean = await alchemy.core.isContractAddress(address);
-    if (checkEOA) {
-      return false;
-    }
+  const alchemy = getAlchemyAPI();
+  const code = await alchemy.core.getCode(address);
+  if (code === '0x') {
     return true;
-  } catch (err) {
-    console.log(err);
-    return false;
   }
+  return false;
 }
 export async function is_contract(address: string): Promise<boolean> {
   try {
@@ -123,19 +118,6 @@ async function is_eoa_exchange(address: string): Promise<boolean> {
     return false;
   } catch (error) {
     console.log('Error in check EOA exchange', error);
-    return false;
-  }
-}
-
-//TODO:
-function is_miner(address: string): boolean {
-  try {
-    if (address in miner) {
-      return true;
-    }
-    return false;
-  } catch (error) {
-    console.log('Error in check miner', error);
     return false;
   }
 }
@@ -310,9 +292,3 @@ async function get_contract_detection_fields(
 enum CONTRACT_FUNCTIONALITY {
   TOKEN = 'TOKEN'
 }
-// async function main() {
-//   const check = await get_contract_detection_fields('0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe');
-//   console.log('check', check)
-// }
-
-// main()

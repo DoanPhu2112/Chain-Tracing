@@ -60,6 +60,8 @@ export default function MultiDirectionalEdges({
   sourcePosition,
   targetPosition,
   label,
+  data,
+  ...others
 }: EdgeProps) {
   const allEdgesBetweenNodes = useStore((s: ReactFlowState) => {
     return s.edges.filter(
@@ -71,7 +73,6 @@ export default function MultiDirectionalEdges({
   const edgeIndex = allEdgesBetweenNodes.findIndex((e) => e.id === id) // Find this edge's index
 
   const numEdges = allEdgesBetweenNodes.length
-  const offsetStep = 20 // Adjust spacing between edges
 
   const edgePathParams = {
     sourceX,
@@ -86,20 +87,16 @@ export default function MultiDirectionalEdges({
   let labelX, labelY
   const marker = `url(#marker-end-${source}-${target})`
 
-  if (numEdges > 1) {    console.log("0---------------")
+  if (numEdges > 1) {
     const smallerAddress = [source, target].sort()[0]
-    const isSourceToTarget = allEdgesBetweenNodes[edgeIndex].source === smallerAddress; // Check edge direction
-    console.log("allEdgesBetweenNodes[edgeIndex].source", allEdgesBetweenNodes[edgeIndex].source)
-    console.log("source", source)
+    const isSourceToTarget = allEdgesBetweenNodes[edgeIndex].source === smallerAddress // Check edge direction
 
-    console.log("isSourceToTarget", isSourceToTarget)
-    const offsetDirection = isSourceToTarget ? -1 : 1; // -1 for above, 1 for below
-    const baseOffset = 10; // Adjust base offset
-    const offsetStep = 10; // Adjust spacing between edges.
+    const offsetDirection = isSourceToTarget ? 1 : -1 // -1 for above, 1 for below
+    const baseOffset = 10 // Adjust base offset
+    const offsetStep = 10 // Adjust spacing between edges.
     const currentOffset = offsetDirection * (baseOffset + edgeIndex * offsetStep)
 
-
-    ;[path, labelX, labelY] = getSpecialPath(edgePathParams, currentOffset);
+    ;[path, labelX, labelY] = getSpecialPath(edgePathParams, currentOffset)
   } else {
     ;[path, labelX, labelY] = getBezierPath(edgePathParams)
   }
@@ -133,7 +130,7 @@ export default function MultiDirectionalEdges({
         </defs>
       </svg>
       <BaseEdge id={`e${source}-${target}`} path={path} markerEnd={marker} />
-      <EdgeLabelRenderer>
+      <EdgeLabelRenderer pointer-events-auto>
         <div
           className="button-edge__label nodrag nopan "
           style={{
@@ -142,7 +139,9 @@ export default function MultiDirectionalEdges({
             transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
           }}
         >
-          <Badge variant="outline">{label}</Badge>
+          <Badge variant="outline" className="bg-gray-50">
+            {label}
+          </Badge>
         </div>
       </EdgeLabelRenderer>
     </>

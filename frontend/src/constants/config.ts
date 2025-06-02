@@ -1,0 +1,3 @@
+export const CONFIG = {
+  NEXT_PUBLIC_API_V1_ENDPOINT: process.env.NEXT_PUBLIC_API_V1_ENDPOINT,
+}

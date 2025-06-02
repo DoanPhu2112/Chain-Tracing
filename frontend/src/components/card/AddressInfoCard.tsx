@@ -1,15 +1,8 @@
 import React from 'react'
 import { NodeData } from '@/types/graph.interface'
-import { Copy, MoreVertical, Check } from 'lucide-react'
+import * as lucideReact from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import * as card from '@/components/ui/card'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,79 +10,115 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Skeleton } from 'antd' // Import Ant Design Skeleton component
 import { Badge } from '@/components/ui/badge'
+import { PortfolioBalance } from '@/types/wallet.interface'
+import { PortfolioPieChart } from '../chart/portfolioChart/PortfolioPieChart'
+import { ReportPortfolioPieChart } from '../chart/portfolioChart/ReportPieChart'
+import { toast } from '@/hooks/use-toast'
 
 const AddressInfoCard = ({
   nodeData,
-  balance,
+  balances,
+  label,
   loading,
+  inReport = false,
 }: {
   nodeData: NodeData
-  balance: number | undefined
+  balances: PortfolioBalance[] | undefined
+  label?: string[]
   loading: boolean // Add loading state as a prop
+  inReport?: boolean
 }) => {
   const AddressData = nodeData.details
+  const handleCopyAddress = () => {
+    // Copy the address to the clipboard
+    navigator.clipboard
+      .writeText(AddressData.address)
+      .then(() => {
+        toast({
+          title: 'Address copied',
+          description: 'The address has been successfully copied to the clipboard.',
+          duration: 2000,
+        })
+      })
+      .catch((err) => {
+        console.error('Failed to copy: ', err)
+      })
+  }
+
+  const handleViewOnEtherscan = () => {
+    const etherscanUrl = `https://etherscan.io/address/${AddressData.address}`
+    window.open(etherscanUrl, '_blank')
+  }
+
   return (
-    <Card className="overflow-hidden shadow-md w-full" x-chunk="dashboard-05-chunk-4">
-      <CardHeader className="flex flex-row items-start bg-muted/50">
+    <card.Card
+      className="overflow-hidden shadow-md w-full"
+      x-chunk="dashboard-05-chunk-4"
+    >
+      <card.CardHeader className="flex flex-col items-start bg-muted/50">
         <div className="grid gap-0.5">
-          <CardTitle className="group flex items-center gap-2 text-lg">
-            {'Address ' + AddressData.address + "'s Info"}
-          </CardTitle>
-          <CardDescription className="break-all pr-6">
-            {AddressData.address}
-          </CardDescription>
+          <card.CardTitle className="group flex items-center gap-2 text-lg">
+            {'Address ' + AddressData.address + ' Info'}
+          </card.CardTitle>
         </div>
         <div className="ml-auto flex items-center gap-1">
-          <Button size="sm" variant="outline" className="h-8 gap-1">
-            <Copy className="h-3.5 w-3.5" />
+          <Button size="sm" variant="outline" className="h-8 gap-1" onClick={() => handleCopyAddress()}>
+            <lucideReact.Copy className="h-3.5 w-3.5" />
           </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button size="icon" variant="outline" className="h-8 w-8">
-                <MoreVertical className="h-3.5 w-3.5" />
-                <span className="sr-only">More</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>View on Etherscan</DropdownMenuItem>
-              <DropdownMenuItem>Export</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Trash</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Button size="sm" variant="outline" className="h-8 gap-1" onClick={handleViewOnEtherscan}>
+            <lucideReact.ExternalLink className="h-3.5 w-3.5" />
+          </Button>
         </div>
-      </CardHeader>
+      </card.CardHeader>
 
-      <CardContent className="p-6 text-sm">
-        <div className="grid gap-3">
-          <div className="font-semibold">Account Details</div>
-          <ul className="grid gap-3">
-            <li className="flex items-center">
-              <span className="text-muted-foreground w-1/4 ">Balance:</span>
-              <span className="flex gap-1">
-                {/* Skeleton loader for the balance */}
-                {loading ? (
-                  <Skeleton.Input active size="small" style={{ height: 12, width: 60 }} />
-                ) : (
-                  <>
-                    <span>{balance}</span>
-                    <span>ETH</span>
-                  </>
-                )}
-              </span>
-            </li>
-          </ul>
+      <card.CardContent className=" text-sm">
+        <div className="flex  gap-2 items-center justify-center">
+          {label && label.length > 0 ? (
+            label.map((lbl, idx) => (
+              <Badge key={idx} variant="outline" size="lg">
+                {lbl}
+              </Badge>
+            ))
+          ) : undefined}
         </div>
-      </CardContent>
 
-      <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3 m-w-full">
+        {balances ? (
+          <div className="flex flex-col items-start min-h-[300px]">
+            <ReportPortfolioPieChart chartData={balances} showLegend={!inReport} />
+            {/* <div className="flex flex-col gap-2 items-start w-3/4">
+                {balances !== undefined &&
+                  balances.map((balance, idx) => {
+                    const value = balance.value
+                    const symbol = balance.token
+                    return (
+                      <Badge key={idx} variant="outline" size="lg" className="flex gap-1">
+                        {loading ? (
+                          <Skeleton.Input
+                            active
+                            size="small"
+                            style={{ height: 12, width: 60 }}
+                          />
+                        ) : (
+                          <>
+                            <span>{value}</span>
+                            <span>{symbol}</span>
+                          </>
+                        )}
+                      </Badge>
+                    )
+                  })}
+              </div> */}
+          </div>
+        ) : null}
+      </card.CardContent>
+
+      <card.CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3 m-w-full">
         <div className="text-xs text-muted-foreground">
-          Updated <time dateTime="2023-11-23">2024</time>
+          Updated <time dateTime="2023-11-23">{new Date().toString()}</time>
         </div>
-      </CardFooter>
-    </Card>
+      </card.CardFooter>
+    </card.Card>
   )
 }
 

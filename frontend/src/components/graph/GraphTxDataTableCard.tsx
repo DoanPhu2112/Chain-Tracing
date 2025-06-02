@@ -1,24 +1,15 @@
 import React from 'react'
-import { NodeData } from '@/types/graph.interface'
 import GraphTxDataTable from '@/components/graph/GraphTxDataTable'
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Transaction } from '@/types/transaction.interface'
 
 interface TxDataVisualizeCardProps {
-  nodeData: NodeData
   txs: Transaction[]
   loading: boolean
 }
 
 const GraphTxDataTableCard: React.FC<TxDataVisualizeCardProps> = ({
-  nodeData,
   txs,
   loading,
 }) => {
@@ -26,8 +17,7 @@ const GraphTxDataTableCard: React.FC<TxDataVisualizeCardProps> = ({
     <>
       <Card className="shadow-md" x-chunk="dashboard-05-chunk-3">
         <CardHeader className="px-7">
-          <CardTitle>{`Address ${nodeData.details.address}'s recent transactions`}</CardTitle>
-          <CardDescription>Recent transactions</CardDescription>
+          <CardTitle>{`Transaction List`}</CardTitle>
         </CardHeader>
         <CardContent>
           <GraphTxDataTable txs={txs} loading={loading} />

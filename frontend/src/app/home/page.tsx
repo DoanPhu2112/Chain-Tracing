@@ -1,6 +1,5 @@
 import React from 'react'
 import Image from 'next/image'
-import InvestigateContent from '@/components/investigate/InvestigateContent'
 
 const page = () => {
   return (

@@ -1,0 +1,14 @@
+{
+    "cSpell.words": [
+        "autoincrement",
+        "smartcontract"
+    ],
+    "tailwindCSS.experimental.classRegex": [
+        "cva\\(([^)]*)\\)",
+        "[\"'`]([^\"'`]*).*?[\"'`]",
+        [
+          "cx\\(([^)]*)\\)",
+          "(?:'|\"|`)([^']*)(?:'|\"|`)"
+        ]
+      ],
+}

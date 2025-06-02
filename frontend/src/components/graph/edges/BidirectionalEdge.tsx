@@ -31,7 +31,7 @@ export default function SmartBidirectionalEdge({
   targetY,
   sourcePosition,
   targetPosition,
-  label
+  label,
 }: EdgeProps) {
   const edgePathParams = {
     id,
@@ -103,7 +103,7 @@ export default function SmartBidirectionalEdge({
               transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
             }}
           >
-            <Badge variant='outline' >{label}</Badge>
+            <Badge variant="outline">{label}</Badge>
           </div>
         </EdgeLabelRenderer>
       </>
@@ -129,7 +129,6 @@ export default function SmartBidirectionalEdge({
         requiredExtensions="http://www.w3.org/1999/xhtml"
       >
         <Badge variant="gray">{label}</Badge>
-
       </foreignObject>
     </>
   )

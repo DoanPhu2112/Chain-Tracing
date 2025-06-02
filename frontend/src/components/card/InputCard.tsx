@@ -1,24 +1,16 @@
 'use client'
 
-import React, { useEffect } from 'react'
-import { ConfigProvider, DatePicker, TimePicker, Typography } from 'antd'
-import type { DatePickerProps } from 'antd'
+import React, { use, useEffect } from 'react'
+import { DatePicker } from '@/components/datepicker/index'
 import en from 'antd/es/date-picker/locale/en_US'
 import enUS from 'antd/es/locale/en_US'
 import dayjs from 'dayjs'
 import buddhistEra from 'dayjs/plugin/buddhistEra'
 
 // ICONS
-import { FileSearchIcon, ArrowRight } from 'lucide-react'
-import { CalendarIcon } from '@radix-ui/react-icons'
-import {
-  EthereumCircleColorful,
-  BnbCircleColorful,
-  PolygonCircleColorful,
-} from '@ant-design/web3-icons'
+import { FileSearchIcon } from 'lucide-react'
 // COMPONENTS
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import {
   Card,
   CardContent,
@@ -27,33 +19,19 @@ import {
   CardTitle,
   CardFooter,
 } from '@/components/ui/card'
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { format } from 'date-fns'
-import { cn } from '@/lib/utils'
-import { Calendar } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Separator } from '../ui/separator'
 import { useDispatch, useSelector } from 'react-redux'
-import { RootState } from '@/lib/store'
+import { getAddressTxnsByRange } from '@/services/address/address'
 import {
-  getAddressBalance,
-  getAddressTransactions,
-  getAddressTxnsByRange,
-} from '@/services/address'
-import { setTransactions } from '@/lib/features/transactions/transactionsSlice'
-import heu_4 from '@/mocks/heu_4.json'
+  addTransactions,
+  setTransactions,
+} from '@/lib/features/transactions/transactionsSlice'
+import { TextField } from '../textfield'
+import { RootState } from '@/lib/store'
+import { setStartTime } from '@/lib/features/start-time/startTimeSlice'
+import { toast } from '@/hooks/use-toast'
 dayjs.extend(buddhistEra)
 
-const { RangePicker } = DatePicker
-const dateFormatList = ['DD/MM/YYYY', 'DD/MM/YY', 'DD-MM-YYYY', 'DD-MM-YY']
 const dateFormat = 'DD/MM/YYYY'
 
 // Component level locale
@@ -77,90 +55,131 @@ const globalBuddhistLocale: typeof enUS = {
   },
 }
 
-const defaultFromValue = dayjs().startOf('day').subtract(1, 'day');
-const defaultToValue = dayjs().endOf('day')
+const defaultToValue = dayjs().subtract(1, 'hour')
 
 type InputCardProps = {
   setIsLoading: (arg0: boolean) => void
 }
-const InputCard = ({setIsLoading}: InputCardProps) => {
+const InputCard = ({ setIsLoading }: InputCardProps) => {
   const dispatch = useDispatch()
 
+  const targetNodeInfo = useSelector((state: RootState) => state.node)
+  const localStartTime = useSelector((state: RootState) => state.startTime)
+
+  const targetNode = targetNodeInfo.clickedNode
+  const startTime = targetNodeInfo.occurredTime ?? localStartTime
+
   const [input, setInput] = React.useState<string>('')
-  const [chain, setChain] = React.useState<string>('')
-  const [startDate, setStartDate] = React.useState<Date>(dayjs(defaultFromValue).toDate())
+  const [limit, setLimit] = React.useState('10')
   const [endDate, setEndDate] = React.useState<Date>(dayjs(defaultToValue).toDate())
 
   const handleTrackAddress = async () => {
-    if (input.length === 42) {
+    if (targetNode?.data.addressHash.length === 42) {
       setIsLoading(true)
-      const transactions = await getAddressTxnsByRange(input, startDate, endDate)
-      console.log('Input Card Transactions', transactions)
-      dispatch(setTransactions(transactions))
+      const transactions = await getAddressTxnsByRange(
+        targetNode?.data.addressHash,
+        new Date(startTime),
+        endDate,
+        limit
+      )
+      dispatch(addTransactions(transactions))
       setIsLoading(false)
 
       return
     }
-    alert('Input length must equal 42')
+    toast({
+      title: 'Please enter a valid address',
+      description: 'Address must be 42 characters long',
+    })
   }
 
-
-  function onOpenChange(open) {
-    console.log('onOpenChange', open)
+  function onStartDateChange(date: Date | undefined) {
+    if (!date) {
+      dispatch(setStartTime(startTime + 1))
+      return
+    }
+    if (date.getTime() > startTime) {
+      dispatch(setStartTime(date))
+    } else {
+      toast({
+        title: 'Start tracing date must be after the incident occur',
+      })
+    }
   }
 
-  function onCalendarChange(dates) {
-    setStartDate(new Date(dates[0].$d))
-    setEndDate(new Date(dates[1].$d))
+  function onEndDateChange(date: Date | undefined) {
+    if (!date) {
+      setEndDate(new Date())
+      return
+    }
+    setEndDate(new Date(date))
   }
+
+  useEffect(() => {
+    localStorage.setItem('limit', String(limit))
+  }, [limit])
+
   return (
     <Card className="overflow-hidden" x-chunk="dashboard-05-chunk-0">
       <CardHeader className="px-7">
-        <CardTitle>Investigate by TxHash / Address</CardTitle>
-        <CardDescription>Recent orders from your store.</CardDescription>
+        <CardTitle>Investigate by Address</CardTitle>
+        <CardDescription>Enter address and start date here</CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="gap-2 flex">
-          <Input
-            type="text"
+      <CardContent className="gap-5 flex flex-col">
+        <div className="flex gap-3">
+          <TextField
+            label={`Target address`}
+            value={targetNode?.data.addressHash ?? input}
+            isDisabled={!!targetNode?.data.addressHash}
+            required={true}
+            cls={{ label: 'text-label-sm-pri' }}
             placeholder="Input target address hash"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={setInput}
+          />
+          <TextField
+            size="sm"
+            label={`Limit`}
+            value={limit}
+            cls={{ label: 'text-label-sm-pri', wrapper: 'w-28' }}
+            placeholder="Enter limit"
+            onChange={setLimit}
           />
         </div>
-        <div className="flex mt-2 justify-end">
-          <div className="flex gap-2 items-center">
-          <Select onValueChange={(value) => setChain(value)}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Ethereum" defaultValue="ethereum" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Chain</SelectLabel>
-                <SelectItem value="ethereum">
-                  <EthereumCircleColorful className="mr-2" />
-                  Ethereum
-                </SelectItem>
-                <SelectItem value="bnb-smartchain">
-                  <BnbCircleColorful className="mr-2" />
-                  BNB Smartchain
-                </SelectItem>
-                <SelectItem value="polygon">
-                  <PolygonCircleColorful className="mr-2" />
-                  Polygon
-                </SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-            {/* START DATE */}
-            <RangePicker
-              defaultValue={[
-                defaultFromValue,
-                defaultToValue,
-              ]}
-              format={dateFormat}
-              onOpenChange={onOpenChange}
-              onCalendarChange={onCalendarChange}
+        <div className="flex gap-3 w-full">
+          <div className="space-y-1 w-1/2">
+            <div className="text-label-sm-sec">
+              <span>Start date</span>
+              &nbsp;
+              <span className="text-p-sm text-itr-dg-df">*</span>
+            </div>
+            <DatePicker
+              cls={{
+                trigger: 'px-3 py-2 hover:px-[11px] hover:py-[7px]',
+                triggerOpen: 'px-[11px] py-[7px]',
+                text: 'text-p-sm',
+              }}
+              onChange={(date) => {
+                onStartDateChange(date)
+              }}
+              value={new Date(startTime).toISOString().split('T')[0]}
+            />
+          </div>
+          <div className="space-y-1 w-1/2">
+            <div className="text-label-sm-sec">
+              <span>End date</span>
+              &nbsp;
+              <span className="text-p-sm text-itr-dg-df">*</span>
+            </div>
+            <DatePicker
+              cls={{
+                trigger: 'px-3 py-2 hover:px-[11px] hover:py-[7px]',
+                triggerOpen: 'px-[11px] py-[7px]',
+                text: 'text-p-sm',
+              }}
+              onChange={(date) => {
+                onEndDateChange(date)
+              }}
+              value={endDate.toISOString().split('T')[0]}
             />
           </div>
         </div>

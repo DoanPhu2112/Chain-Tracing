@@ -1,9 +1,9 @@
-"use client";
-import React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+'use client'
+import React from 'react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
-import { Home } from "lucide-react";
+import { Home } from 'lucide-react'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,14 +11,13 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+} from '@/components/ui/breadcrumb'
 
 // type HeadBreadcrumbProps = {};
 
 const HeadBreadcrumb = () => {
-  const paths = usePathname();
-  const pathNames = paths.split("/").filter((path) => path);
-  console.log(paths);
+  const paths = usePathname()
+  const pathNames = paths?.split('/').filter((path) => path)
   return (
     <Breadcrumb className="hidden md:flex">
       <BreadcrumbList>
@@ -29,12 +28,13 @@ const HeadBreadcrumb = () => {
             </Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
-        {pathNames.length > 0 &&
+        {pathNames &&
+          pathNames.length > 0 &&
           pathNames.map((name: string, index: number) => {
-            const isLast = index === pathNames.length - 1;
-            const href = `/${pathNames.slice(0, index + 1).join("/")}`;
-            name = name[0].toUpperCase() + name.substring(1);
-            if (name === "Home") return null;
+            const isLast = index === pathNames.length - 1
+            const href = `/${pathNames.slice(0, index + 1).join('/')}`
+            name = name[0].toUpperCase() + name.substring(1)
+            if (name === 'Home') return null
 
             return (
               <React.Fragment key={name}>
@@ -49,11 +49,11 @@ const HeadBreadcrumb = () => {
                   )}
                 </BreadcrumbItem>
               </React.Fragment>
-            );
+            )
           })}
       </BreadcrumbList>
     </Breadcrumb>
-  );
-};
+  )
+}
 
-export default HeadBreadcrumb;
+export default HeadBreadcrumb

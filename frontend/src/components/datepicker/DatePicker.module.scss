@@ -1,0 +1,35 @@
+.cell {
+  &[aria-disabled='true'] {
+    cursor: default;
+    color: var(--itr-tentPri-dis);
+    &:hover {
+      background-color: var(--base-empty);
+    }
+  }
+  &[data-today] {
+    background-color: var(--itr-tone-sub);
+    color: var(--itr-tone-tent);
+    &[data-in-range]:not([data-selected]):not([data-focused]) {
+      background-color: var(--sf-pri-hv);
+      color: var(--itr-tentPri-df);
+    }
+  }
+  &[data-in-range] {
+    background-color: var(--sf-pri-hv);
+  }
+  &[data-focused] {
+    background-color: var(--itr-tone-pri);
+    color: var(--itr-tentPri-df);
+    &:not([data-in-range]):not([data-selected]) {
+      background-color: var(--base-empty);
+      &[data-today] {
+        background-color: var(--itr-tone-sub);
+        color: var(--itr-tone-tent);
+      } 
+    }
+  }
+  &[data-selected] {
+    background-color: var(--itr-tone-pri);
+    color: var(--itr-tentPri-df);
+  }
+}

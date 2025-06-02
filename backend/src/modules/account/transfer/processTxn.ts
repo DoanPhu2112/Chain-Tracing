@@ -25,7 +25,6 @@ export async function processSentTransfers(
     sent: [],
     receive: []
   };
-  console.log("transaction", transaction.toAddress.lowercase)
   fromEntity = await getEntity(
     chainID,
     transaction.fromAddress.lowercase,
@@ -241,7 +240,6 @@ export async function processReceiveTransfers(
       }
     }
   }
-
   return [fromEntity, toEntity, intermediaryEntities, value];
 }
 
@@ -414,7 +412,7 @@ export async function processAirdropTransfers(
     );
   }
   if (!toEntity) {
-    throw new Error("Airdrop with no receiver")
+    throw new Error('Airdrop with no receiver');
   }
   return [fromEntity, toEntity, value];
 }

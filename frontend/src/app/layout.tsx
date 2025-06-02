@@ -7,6 +7,11 @@ import { createTheme, MantineProvider } from '@mantine/core'
 import { Toaster } from '@/components/ui/toaster'
 import StoreProvider from '@/app/StoreProvider'
 import './globals.css'
+import { GeistSans } from 'geist/font/sans'
+import { GeistMono } from 'geist/font/mono'
+import { QueryProvider } from './_providers/query-provider'
+import Sidebar from '@/components/core/Sidebar'
+import Header from '@/components/core/Header'
 
 const theme = createTheme({
   /** Your theme override here */
@@ -25,55 +30,64 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="en" className={`${GeistSans.className} ${GeistMono.variable}`}>
+      <body>
         <StoreProvider>
-          <MantineProvider theme={theme} defaultColorScheme="light">
-            <ConfigProvider
-              theme={{
-                components: {
-                  Alert: {
-                    zIndexBase: 1001,
-                    zIndexPopupBase: 1001,
+          <QueryProvider>
+            <MantineProvider theme={theme} defaultColorScheme="light">
+              <ConfigProvider
+                theme={{
+                  components: {
+                    Alert: {
+                      zIndexBase: 1001,
+                      zIndexPopupBase: 1001,
+                    },
+                    Modal: {
+                      zIndexBase: 49,
+                      zIndexPopupBase: 49,
+                      titleFontSize: 30,
+                    },
+                    DatePicker: {
+                      // colorPrimary: 'black',
+                      colorPrimary: 'grey',
+                      hoverBorderColor: 'black',
+                      activeBorderColor: 'black',
+                      cellRangeBorderColor: 'black',
+                      cellHoverWithRangeBg: 'black',
+                      cellActiveWithRangeBg: 'black',
+                      algorithm: true, // Enable algorithm
+                    },
+                    Button: {
+                      colorPrimary: '#1677ff', // Brand color
+                      colorPrimaryHover: '#4096ff', // Hover state color
+                      colorPrimaryActive: '#0958d9', // Active state color
+                      colorPrimaryBorder: '#91caff', // Border color
+                      colorLink: '#1677ff', // Link color
+                      colorLinkHover: '#69b1ff', // Link hover color
+                      colorLinkActive: '#0958d9', // Link active color
+                      defaultActiveColor: 'black', // Add this if needed, otherwise remove
+                      defaultActiveBorderColor: 'black', // Add this if needed, otherwise remove
+                      defaultHoverBorderColor: 'black', // Add this if needed, otherwise remove
+                      defaultHoverColor: 'black', // Add this if needed, otherwise remove
+                    },
                   },
-                  Modal: {
-                    zIndexBase: 49,
-                    zIndexPopupBase: 49,
-                    titleFontSize: 30,
-
-                  },
-                  DatePicker: {
-                    // colorPrimary: 'black',
-                    colorPrimary: 'grey',
-                    hoverBorderColor: 'black',
-                    activeBorderColor: 'black',
-                    cellRangeBorderColor: 'black',
-                    cellHoverWithRangeBg: 'black',
-                    cellActiveWithRangeBg: 'black',
-                    algorithm: true, // Enable algorithm
-                  },
-                  Button: {
-                    colorPrimary: '#1677ff', // Brand color
-                    colorPrimaryHover: '#4096ff', // Hover state color
-                    colorPrimaryActive: '#0958d9', // Active state color
-                    colorPrimaryBorder: '#91caff', // Border color
-                    colorLink: '#1677ff', // Link color
-                    colorLinkHover: '#69b1ff', // Link hover color
-                    colorLinkActive: '#0958d9', // Link active color
-                    defaultActiveColor: 'black', // Add this if needed, otherwise remove
-                    defaultActiveBorderColor: 'black', // Add this if needed, otherwise remove
-                    defaultHoverBorderColor: 'black', // Add this if needed, otherwise remove
-                    defaultHoverColor: 'black', // Add this if needed, otherwise remove
-                  },
-                },
-              }}
-            >
-              <AntdRegistry>
-                <TooltipProvider>{children}</TooltipProvider>
-                <Toaster />
-              </AntdRegistry>
-            </ConfigProvider>
-          </MantineProvider>
+                }}
+              >
+                <AntdRegistry>
+                  <TooltipProvider>
+                    <div className="flex min-h-screen w-full flex-col bg-muted/40">
+                      <Sidebar />
+                      <div className="flex flex-col sm:gap-4 sm:pb-4 sm:pl-14">
+                        <Header />
+                        {children}
+                      </div>
+                    </div>
+                  </TooltipProvider>
+                  <Toaster />
+                </AntdRegistry>
+              </ConfigProvider>
+            </MantineProvider>
+          </QueryProvider>
         </StoreProvider>
       </body>
     </html>

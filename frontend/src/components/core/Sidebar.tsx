@@ -12,11 +12,10 @@ import {
   ScrollText,
   UserRound,
 } from 'lucide-react'
-// import './Sidebar.css'
+import './Sidebar.css'
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-
-const selected = ''
+import { MdCreateNewFolder, MdGraphicEq } from 'react-icons/md'
 
 const Sidebar: React.FC = () => {
   const paths = usePathname()
@@ -24,7 +23,7 @@ const Sidebar: React.FC = () => {
   const isActive: any = (href: string) => '/' + pathNames[0] === href
   return (
     <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
-      <nav className="flex flex-col items-center gap-4 px-2 sm:py-4">
+      <nav className="flex flex-col items-center gap-4 px-2 sm:py-16">
         {/* <Link
           href="#"
           className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
@@ -35,12 +34,11 @@ const Sidebar: React.FC = () => {
         <Tooltip>
           <TooltipTrigger asChild>
             <Link
-              href="/home"
-              className={`group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full text-lg font-semibold md:h-8 md:w-8 md:text-base ${
-                isActive('/home')
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground'
-              }`}
+              href="/"
+              className={`group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full text-lg font-semibold md:h-8 md:w-8 md:text-base ${isActive('/')
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground'
+                }`}
             >
               <Home className="h-5 w-5" />
               <span className="sr-only">Home</span>
@@ -51,76 +49,27 @@ const Sidebar: React.FC = () => {
         <Tooltip>
           <TooltipTrigger asChild>
             <Link
-              href="/investigate"
-              className={`group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full text-lg font-semibold md:h-8 md:w-8 md:text-base ${
-                isActive('/investigate')
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground'
-              }`}
+              href="/report"
+              className={`group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full text-lg font-semibold md:h-8 md:w-8 md:text-base ${isActive('/report')
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground'
+                }`}
             >
               <ScanSearch className="h-5 w-5" />
-              <span className="sr-only">Investigate</span>
+              <span className="sr-only">Report</span>
             </Link>
           </TooltipTrigger>
-          <TooltipContent side="right">Investigate</TooltipContent>
+          <TooltipContent side="right">Report</TooltipContent>
         </Tooltip>
+
         <Tooltip>
           <TooltipTrigger asChild>
             <Link
-              href="/graph"
-              className={`group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full text-lg font-semibold md:h-8 md:w-8 md:text-base ${
-                isActive('/graph')
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground'
-              }`}
-            >
-              <ChartNetwork className="h-5 w-5" />
-              <span className="sr-only">Graph</span>
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent side="right">Graph</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Link
-              href="/stories"
-              className={`group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full text-lg font-semibold md:h-8 md:w-8 md:text-base ${
-                isActive('/stories')
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground'
-              }`}
-            >
-              <ScrollText className="h-5 w-5" />
-              <span className="sr-only">Stories</span>
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent side="right">Stories</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Link
-              href="/chart"
-              className={`group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full text-lg font-semibold md:h-8 md:w-8 md:text-base ${
-                isActive('/chart')
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground'
-              }`}
-            >
-              <ChartPie className="h-5 w-5" />
-              <span className="sr-only">Chart</span>
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent side="right">Chart</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Link
-              href="/address"
-              className={`group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full text-lg font-semibold md:h-8 md:w-8 md:text-base ${
-                isActive('/address')
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground'
-              }`}
+              href="/address/0x51103b5ecd2df0d8ad1ba3ea2cc6a677daab16b2"
+              className={`group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full text-lg font-semibold md:h-8 md:w-8 md:text-base ${isActive('/address')
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground'
+                }`}
             >
               <UserRound className="h-5 w-5" />
               <span className="sr-only">Address</span>
